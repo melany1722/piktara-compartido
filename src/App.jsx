@@ -4,8 +4,12 @@ import StatusKevin from './Components/StatusKevin'
 
 const App = () => {
   return (
+    <>
     <StatusJuan/>
     <StatusKevin/>
+
+</>
+
   )
 }
 
