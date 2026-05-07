@@ -7,9 +7,13 @@ const StatusKevin = () => {
 
     const res = await fetch("https://rickandmortyapi.com/api/character")
     const data = await res.json()
+    const [personajes, setPersonajes] = useState([])
 
 
-    console.log(data)
+
+  setPersonajes(data.results)
+    console.log(data);
+   
   }
 
 useEffect(() => {
@@ -28,6 +32,16 @@ useEffect(() => {
 </div>
 
 
+
+
+
+<h1>Personajes Rick And Morty (Kevin)</h1>
+{
+ personajes.map((per, index) => (
+  <li key={index}>{per.name} </li>
+ ))
+
+}
 
 
 
