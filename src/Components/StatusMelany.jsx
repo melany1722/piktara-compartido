@@ -7,7 +7,8 @@ const StatusMelany = () => {
 
   return (
     <>
-    <div className='gemas'>     
+    <div className='gemas'>
+        <h1>Gemas: {gemas}</h1>     
         <button onClick={ () => { setGemas( (prev) => {prev + 2} ) } }>Gemas Azules</button>
         <button onClick={ () => { setGemas( () => {} ) } }>Gemas Verdes</button>        
         <button onClick={ () => { setGemas( () => {} ) } }>Gemas Gris</button>
