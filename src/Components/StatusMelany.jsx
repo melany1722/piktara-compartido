@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
 
 const StatusMelany = () => {
-    const [gemas, setGemas] = useState(0)  
+    const [gemas, setGemas] = useState(0) 
+    const [personajes, setpersonajes] = useState([]) 
     
     const getCharacters= async()=>{
         const res= await fetch("https://rickandmortyapi.com/api/character")
@@ -27,8 +28,13 @@ const StatusMelany = () => {
         <button onClick={ () => {setGemas ( () => {} ) } }>Gemas Rojas</button>
 </div>
 
+<h1>personajes Rick and Morty (Melany)</h1>
+{
+  personajes.map((per, index) => (
+    <li key={index}>{per.name}</li>
+  ))
 
-
+}
 
 
 
