@@ -1,7 +1,21 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 const StatusJuan = () => {
   const [corazon, setcorazon] = useState(0)  
+
+  const getCharacters = async () => {
+
+    const res = await fetch('https://rickandmortyapi.com/api/character')
+    const data = await res.json()
+
+    console.log(data)
+   
+  }
+
+  useEffect(() => {
+    getCharacters()
+  }, [])
+
   return (
     <>
     <div className='gemas'>  
