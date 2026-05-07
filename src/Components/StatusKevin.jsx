@@ -10,15 +10,12 @@ const StatusKevin = () => {
 
 
     console.log(data)
-
-
   }
 
 useEffect(() => {
   getCharacters();
 
 }, [])
-
 
   return (
     <>
