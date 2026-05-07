@@ -2,14 +2,16 @@ import React, { useEffect, useState } from 'react'
 
 const StatusJuan = () => {
   const [corazon, setcorazon] = useState(0)  
+  const [personajes, setpersonajes] = useState([])
 
   const getCharacters = async () => {
 
     const res = await fetch('https://rickandmortyapi.com/api/character')
     const data = await res.json()
 
+    setpersonajes(data.results)
     console.log(data)
-   
+    
   }
 
   useEffect(() => {
@@ -27,11 +29,13 @@ const StatusJuan = () => {
 </div>
 
 
+<h1>personajes Rick and Morty (Juan)</h1>
+{
+  personajes.map((per, index) => (
+    <li key={index}>{per.name}</li>
+  ))
 
-
-
-
-
+}
 
 
 
