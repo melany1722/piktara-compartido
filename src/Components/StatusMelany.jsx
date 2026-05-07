@@ -1,7 +1,19 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 const StatusMelany = () => {
-    const [gemas, setGemas] = useState(0)      
+    const [gemas, setGemas] = useState(0)  
+    
+    const getCharacters= async()=>{
+        const res= await fetch("https://rickandmortyapi.com/api/character")
+        const data = await res.json()
+        console.log( data )
+    }
+
+    useEffect(() => {
+
+   getCharacters()
+
+    }, [])
 
 
 
