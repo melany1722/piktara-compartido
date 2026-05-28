@@ -6,11 +6,9 @@ const StatusJuan = () => {
 
   const getCharacters = async () => {
 
-    const res = await fetch('https://rickandmortyapi.com/api/character')
-    const data = await res.json()
 
     setpersonajes(data.results)
-    console.log(data)
+    /* console.log(data) */
     
   }
 
