@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const tabs = {
   proyecto: {
@@ -42,7 +43,7 @@ export default function NuestroComic() {
         <div className="collapse navbar-collapse justify-content-center" id="menu">
           <ul className="navbar-nav gap-5">
             <li className="nav-item">
-              <a className="nav-link" href="#" style={{ fontFamily: f, fontSize: "0.75rem", letterSpacing: "0.15em", color: "#2a2a2a", textTransform: "uppercase" }}>Sobre Piktara</a>
+              <Link to="/sobre-piktara" className="nav-link" style={{ fontFamily: f, fontSize: "0.75rem", letterSpacing: "0.15em", color: "#2a2a2a", textTransform: "uppercase" }}>Sobre Piktara</Link>
             </li>
             <li className="nav-item">
               <a className="nav-link" href="#" style={{ fontFamily: f, fontSize: "0.75rem", letterSpacing: "0.15em", color: "#2a2a2a", textTransform: "uppercase", borderBottom: "2px solid #2a2a2a", paddingBottom: "2px" }}>Nuestro Cómic</a>
@@ -58,10 +59,14 @@ export default function NuestroComic() {
      {/* TABS PRINCIPALES */}
 <div className="d-flex justify-content-around" style={{ background: "#3a3a3a" }}>
   {["Sobre el Proyecto", "Sobre el Cómic"].map((label, i) => (
-    <span key={i} className="px-5 py-3" style={{ fontFamily: f, fontSize: "0.75rem", letterSpacing: "0.18em", color: i === 0 ? "#fff" : "#aaa", textTransform: "uppercase", borderBottom: i === 0 ? "3px solid #fff" : "3px solid transparent", cursor: "pointer" }}>
-      {label}
-    </span>
-  ))}
+  i === 1
+    ? <Link key={i} to="/nuestro-comic" className="px-5 py-3 text-decoration-none" style={{ fontFamily: f, fontSize: "0.75rem", letterSpacing: "0.18em", color: "#aaa", textTransform: "uppercase", borderBottom: "3px solid transparent" }}>
+        {label}
+      </Link>
+    : <span key={i} className="px-5 py-3" style={{ fontFamily: f, fontSize: "0.75rem", letterSpacing: "0.18em", color: "#fff", textTransform: "uppercase", borderBottom: "3px solid #fff" }}>
+        {label}
+      </span>
+))}
 </div>
 
       {/* HERO */}
