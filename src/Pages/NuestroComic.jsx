@@ -30,9 +30,8 @@ export default function NuestroComic() {
 
   return (
     <>
-     
 
-      {/* NAVBAR */}
+      {/* HEADER */}
       <nav className="navbar navbar-expand-lg px-5" style={{ background: "#c8a870" }}>
         <a className="navbar-brand me-5" href="#">
           <img src="/logo-piktara.png" alt="Piktara" style={{ height: "55px" }} />
@@ -43,10 +42,14 @@ export default function NuestroComic() {
         <div className="collapse navbar-collapse justify-content-center" id="menu">
           <ul className="navbar-nav gap-5">
             <li className="nav-item">
-              <Link to="/sobre-piktara" className="nav-link" style={{ fontFamily: f, fontSize: "0.75rem", letterSpacing: "0.15em", color: "#2a2a2a", textTransform: "uppercase" }}>Sobre Piktara</Link>
+              <Link to="/sobre-piktara" className="nav-link" style={{ fontFamily: f, fontSize: "0.75rem", letterSpacing: "0.15em", color: "#2a2a2a", textTransform: "uppercase" }}>
+                Sobre Piktara
+              </Link>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="#" style={{ fontFamily: f, fontSize: "0.75rem", letterSpacing: "0.15em", color: "#2a2a2a", textTransform: "uppercase", borderBottom: "2px solid #2a2a2a", paddingBottom: "2px" }}>Nuestro Cómic</a>
+              <a className="nav-link" href="#" style={{ fontFamily: f, fontSize: "0.75rem", letterSpacing: "0.15em", color: "#2a2a2a", textTransform: "uppercase", borderBottom: "2px solid #2a2a2a", paddingBottom: "2px" }}>
+                Nuestro Cómic
+              </a>
             </li>
           </ul>
         </div>
@@ -56,20 +59,22 @@ export default function NuestroComic() {
         </div>
       </nav>
 
-     {/* TABS PRINCIPALES */}
-<div className="d-flex justify-content-around" style={{ background: "#3a3a3a" }}>
-  {["Sobre el Proyecto", "Sobre el Cómic"].map((label, i) => (
-  i === 1
-    ? <Link key={i} to="/nuestro-comic" className="px-5 py-3 text-decoration-none" style={{ fontFamily: f, fontSize: "0.75rem", letterSpacing: "0.18em", color: "#aaa", textTransform: "uppercase", borderBottom: "3px solid transparent" }}>
-        {label}
-      </Link>
-    : <span key={i} className="px-5 py-3" style={{ fontFamily: f, fontSize: "0.75rem", letterSpacing: "0.18em", color: "#fff", textTransform: "uppercase", borderBottom: "3px solid #fff" }}>
-        {label}
-      </span>
-))}
-</div>
+      {/* BOTONESLINEA1 */}
+      <div className="d-flex justify-content-around" style={{ background: "#3a3a3a" }}>
+        {["Sobre el Proyecto", "Sobre el Cómic"].map((label, i) =>
+          i === 1 ? (
+            <Link key={i} to="/nuestro-comic" className="text-decoration-none" style={{ fontFamily: f, fontSize: "0.75rem", letterSpacing: "0.18em", textTransform: "uppercase", padding: "0.75rem 3rem", color: "#aaa", borderBottom: "3px solid transparent" }}>
+              {label}
+            </Link>
+          ) : (
+            <span key={i} style={{ fontFamily: f, fontSize: "0.75rem", letterSpacing: "0.18em", textTransform: "uppercase", padding: "0.75rem 3rem", color: "#fff", borderBottom: "3px solid #fff" }}>
+              {label}
+            </span>
+          )
+        )}
+      </div>
 
-      {/* HERO */}
+      {/* CARRUSEL */}
       <div className="position-relative overflow-hidden" style={{ minHeight: "400px" }}>
         <div className="position-absolute top-0 start-0 w-100 h-100" style={{ backgroundImage: `url('${c.bg}')`, backgroundSize: "cover", backgroundPosition: "center", zIndex: 0 }} />
         {c.rust && (
@@ -99,43 +104,54 @@ export default function NuestroComic() {
         )}
       </div>
 
-     {/* SUBTABS */}
-<div className="d-flex justify-content-center" style={{ background: "#2a2a2a" }}>
-  {[
-    { key: "proyecto", label: "Sobre el Proyecto" },
-    { key: "funciona", label: "¿Cómo Funciona?" },
-    { key: "objetivo", label: "Objetivo del Proyecto" }
-  ].map(({ key, label }) => (
-    <span key={key} onClick={() => setTab(key)} className="px-5 py-3" style={{ fontFamily: f, fontSize: "0.72rem", letterSpacing: "0.12em", color: tab === key ? "#fff" : "#aaa", textTransform: "uppercase", borderBottom: tab === key ? "3px solid #c8a870" : "3px solid transparent", cursor: "pointer" }}>
-      {label}
-    </span>
-  ))}
-</div>
+      {/* BOTONESLINEA2 */}
+      <div className="d-flex justify-content-center" style={{ background: "#2a2a2a" }}>
+        {[
+          { key: "proyecto", label: "Sobre el Proyecto" },
+          { key: "funciona", label: "¿Cómo Funciona?" },
+          { key: "objetivo", label: "Objetivo del Proyecto" },
+        ].map(({ key, label }) => (
+          <span key={key} onClick={() => setTab(key)} style={{ fontFamily: f, fontSize: "0.72rem", letterSpacing: "0.12em", textTransform: "uppercase", padding: "0.75rem 3rem", cursor: "pointer", color: tab === key ? "#fff" : "#aaa", borderBottom: tab === key ? "3px solid #c8a870" : "3px solid transparent" }}>
+            {label}
+          </span>
+        ))}
+      </div>
 
-      {/* SOBRE EL COMIC */}
+      {/* IMGS6 */}
       <section className="py-5" style={{ background: "#f0ebe0" }}>
         <h2 className="text-center mb-4" style={{ fontFamily: f, fontSize: "1.3rem", letterSpacing: "0.22em", color: "#2a2a2a" }}>
           SOBRE EL COMIC
         </h2>
         <div className="container">
           <div className="row g-3 justify-content-center mb-3">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="col-4 col-md-3">
-                <div className="rounded-3" style={{ background: "#f0a830", aspectRatio: "3/4" }} />
-              </div>
-            ))}
+            <div className="col-4 col-md-3">
+              <img src="/fondo_9.png" alt="Desierto con oasis" className="rounded-3" style={{ aspectRatio: "3/4", width: "100%", objectFit: "cover" }} />
+            </div>
+            <div className="col-4 col-md-3">
+              <img src="/fondo_10.png" alt="Sala con columnas" className="rounded-3" style={{ aspectRatio: "3/4", width: "100%", objectFit: "cover" }} />
+            </div>
+            <div className="col-4 col-md-3">
+              <img src="/fondo_11.png" alt="Ruinas antiguas" className="rounded-3" style={{ aspectRatio: "3/4", width: "100%", objectFit: "cover" }} />
+            </div>
           </div>
           <div className="row g-3 justify-content-center mb-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="col-4 col-md-3">
-                <div className="rounded-3" style={{ background: "#f0a830", aspectRatio: "3/4" }} />
-              </div>
-            ))}
+            <div className="col-4 col-md-3">
+              <img src="/fondo_12.png" alt="Paisaje con sol" className="rounded-3" style={{ aspectRatio: "3/4", width: "100%", objectFit: "cover" }} />
+            </div>
+            <div className="col-4 col-md-3">
+              <img src="/fondo_7.png" alt="Templo con antorchas" className="rounded-3" style={{ aspectRatio: "3/4", width: "100%", objectFit: "cover" }} />
+            </div>
+            <div className="col-4 col-md-3">
+              <img src="/Fondo_8.png" alt="Mercado antiguo" className="rounded-3" style={{ aspectRatio: "3/4", width: "100%", objectFit: "cover" }} />
+            </div>
           </div>
           <div className="row justify-content-center">
             <div className="col-md-7">
               <div className="p-4 rounded-2" style={{ fontFamily: f, background: "#7a6a5a", color: "#f5f0e8", fontSize: "0.82rem", lineHeight: 1.75 }}>
-                Nuestro cómic habla de las primeras civilizaciones y la invención de la escritura, que hace énfasis a las primeras ciudades y pueblos: Mesopotamia, Egipto, etc. Este tema marca el inicio de lo que llamamos Historia. Antes de eso, los pueblos transmitían sus conocimientos solo de forma oral, lo que podía olvidarse fácilmente.
+                Nuestro cómic habla de las primeras civilizaciones y la invención de la escritura,
+                que hace énfasis a las primeras ciudades y pueblos: Mesopotamia, Egipto, etc. Este
+                tema marca el inicio de lo que llamamos Historia. Antes de eso, los pueblos
+                transmitían sus conocimientos solo de forma oral, lo que podía olvidarse fácilmente.
               </div>
             </div>
           </div>
@@ -161,7 +177,7 @@ export default function NuestroComic() {
                 <a href="#" target="_blank" rel="noreferrer">
                   <i className="bi bi-facebook" style={{ fontSize: "2.5rem", color: "#2a2a2a" }}></i>
                 </a>
-                <a href="https://www.instagram.com/____sanchez_10?igsh=NHE0dTltcDU5MDFy&utm_source=qr" target="_blank" rel="noreferrer">
+                <a href="https://www.instagram.com/____sanchez_10" target="_blank" rel="noreferrer">
                   <i className="bi bi-instagram" style={{ fontSize: "2.5rem", color: "#2a2a2a" }}></i>
                 </a>
                 <a href="https://wa.me/573125965458" target="_blank" rel="noreferrer">
@@ -172,6 +188,7 @@ export default function NuestroComic() {
           </div>
         </div>
       </footer>
+
     </>
   );
 }

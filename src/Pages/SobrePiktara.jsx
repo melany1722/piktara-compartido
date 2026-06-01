@@ -5,9 +5,9 @@ const f = "Arial, sans-serif";
 
 const equipo = [
   {
-    nombre: "KEVIN PULGARIN",
+    nombre: "KEVIN RESTREPO",
     img: null,
-    desc: "tengo 18 años, soy un chico muy social e amigable, y me gusta mucho los libros..",
+    desc: "tengo 18 años, me gusta mucho el arte y la historia, soy muy creativo y me gusta mucho el diseño gráfico.",
   },
   {
     nombre: "MELANY BELTRAN",
