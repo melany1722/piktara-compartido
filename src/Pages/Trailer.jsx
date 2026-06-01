@@ -26,7 +26,6 @@ export default function Trailer() {
         <div className="d-flex gap-3 ms-auto" style={{ fontSize: "1.2rem", color: "#2a2a2a" }}>
           <i className="bi bi-search" style={{ cursor: "pointer" }}></i>
           <i className="bi bi-person" style={{ cursor: "pointer" }}></i>
-          <i className="bi bi-bag" style={{ cursor: "pointer" }}></i>
         </div>
       </nav>
 
