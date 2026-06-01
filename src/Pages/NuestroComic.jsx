@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import Buscar from "./Buscar";
 
 const tabs = {
   proyecto: {
@@ -53,11 +54,20 @@ export default function NuestroComic() {
             </li>
           </ul>
         </div>
-        <div className="d-flex gap-3 ms-auto" style={{ fontSize: "1.2rem", color: "#2a2a2a" }}>
-          <i className="bi bi-search" style={{ cursor: "pointer" }}></i>
+        <div className="d-flex gap-3 ms-auto align-items-center" style={{ fontSize: "1.2rem", color: "#2a2a2a" }}>
+          {/* LUPA — abre el panel offcanvas */}
+          <i
+            className="bi bi-search"
+            style={{ cursor: "pointer" }}
+            data-bs-toggle="offcanvas"
+            data-bs-target="#panelBuscar"
+          />
           <i className="bi bi-person" style={{ cursor: "pointer" }}></i>
         </div>
       </nav>
+
+      {/* PANEL BUSCAR */}
+      <Buscar />
 
       {/* BOTONESLINEA1 */}
       <div className="d-flex justify-content-around" style={{ background: "#3a3a3a" }}>
