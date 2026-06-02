@@ -1,15 +1,16 @@
 import { Link } from "react-router-dom";
+import Buscar from "./Buscar";
+import IniciarSeccion from "./IniciarSeccion";
 
 const f = "Arial, sans-serif";
 
 export default function Trailer() {
   return (
     <>
-      {/* NAVBAR */}
       <nav className="navbar navbar-expand-lg px-5" style={{ background: "#c8a870" }}>
-        <a className="navbar-brand me-5" href="#">
+        <Link to="/" className="navbar-brand me-5">
           <img src="/logo-piktara.png" alt="Piktara" style={{ height: "55px" }} />
-        </a>
+        </Link>
         <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu2">
           <span className="navbar-toggler-icon"></span>
         </button>
@@ -23,21 +24,24 @@ export default function Trailer() {
             </li>
           </ul>
         </div>
-        <div className="d-flex gap-3 ms-auto" style={{ fontSize: "1.2rem", color: "#2a2a2a" }}>
-          <i className="bi bi-search" style={{ cursor: "pointer" }}></i>
-          <i className="bi bi-person" style={{ cursor: "pointer" }}></i>
+        <div className="d-flex gap-3 ms-auto align-items-center" style={{ fontSize: "1.2rem", color: "#2a2a2a" }}>
+          <i className="bi bi-search" style={{ cursor: "pointer" }} data-bs-toggle="offcanvas" data-bs-target="#panelBuscar" />
+          <i className="bi bi-person" style={{ cursor: "pointer" }} data-bs-toggle="offcanvas" data-bs-target="#panelLogin" />
         </div>
       </nav>
 
+      <Buscar />
+      <IniciarSeccion />
+
       {/* TABS */}
-<div className="d-flex justify-content-around" style={{ background: "#3a3a3a" }}>
-  <span onClick={() => window.location.href = "/"} className="px-5 py-3" style={{ fontFamily: f, fontSize: "0.75rem", letterSpacing: "0.18em", color: "#aaa", textTransform: "uppercase", borderBottom: "3px solid transparent", cursor: "pointer" }}>
-    Sobre el Proyecto
-  </span>
-  <span className="px-5 py-3" style={{ fontFamily: f, fontSize: "0.75rem", letterSpacing: "0.18em", color: "#fff", textTransform: "uppercase", borderBottom: "3px solid #fff", cursor: "pointer" }}>
-    Sobre el Cómic
-  </span>
-</div>
+      <div className="d-flex justify-content-around" style={{ background: "#3a3a3a" }}>
+        <Link to="/sobre-el-proyecto" className="px-5 py-3 text-decoration-none" style={{ fontFamily: f, fontSize: "0.75rem", letterSpacing: "0.18em", color: "#aaa", textTransform: "uppercase", borderBottom: "3px solid transparent" }}>
+          Sobre el Proyecto
+        </Link>
+        <span className="px-5 py-3" style={{ fontFamily: f, fontSize: "0.75rem", letterSpacing: "0.18em", color: "#fff", textTransform: "uppercase", borderBottom: "3px solid #fff", cursor: "pointer" }}>
+          Sobre el Cómic
+        </span>
+      </div>
 
       {/* TRAILER LABEL */}
       <div className="text-center py-3" style={{ background: "#f0ebe0" }}>
@@ -78,7 +82,7 @@ export default function Trailer() {
         <div className="container">
           <div className="row align-items-center justify-content-between">
             <div className="col-auto d-flex flex-column align-items-center gap-2">
-              <img src="/logo-piktara.png" alt="Piktara" style={{ width: "130px" }} />
+              <Link to="/"><img src="/logo-piktara.png" alt="Piktara" style={{ width: "130px" }} /></Link>
               <span style={{ fontFamily: f, fontWeight: 700, letterSpacing: "0.4em", color: "#2a2a2a", fontSize: "1.1rem" }}>P I K T A R A</span>
             </div>
             <div className="col-auto text-center">
@@ -89,15 +93,9 @@ export default function Trailer() {
             <div className="col-auto text-center">
               <p className="mb-4" style={{ fontFamily: f, fontSize: "0.9rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#2a2a2a", fontWeight: 700 }}>Redes Sociales</p>
               <div className="d-flex gap-4 align-items-center justify-content-center">
-                <a href="#" target="_blank" rel="noreferrer">
-                  <i className="bi bi-facebook" style={{ fontSize: "2.5rem", color: "#2a2a2a" }}></i>
-                </a>
-                <a href="https://www.instagram.com/____sanchez_10?igsh=NHE0dTltcDU5MDFy&utm_source=qr" target="_blank" rel="noreferrer">
-                  <i className="bi bi-instagram" style={{ fontSize: "2.5rem", color: "#2a2a2a" }}></i>
-                </a>
-                <a href="https://wa.me/573125965458" target="_blank" rel="noreferrer">
-                  <i className="bi bi-whatsapp" style={{ fontSize: "2.5rem", color: "#2a2a2a" }}></i>
-                </a>
+                <a href="#" target="_blank" rel="noreferrer"><i className="bi bi-facebook" style={{ fontSize: "2.5rem", color: "#2a2a2a" }}></i></a>
+                <a href="https://www.instagram.com/____sanchez_10?igsh=NHE0dTltcDU5MDFy&utm_source=qr" target="_blank" rel="noreferrer"><i className="bi bi-instagram" style={{ fontSize: "2.5rem", color: "#2a2a2a" }}></i></a>
+                <a href="https://wa.me/573125965458" target="_blank" rel="noreferrer"><i className="bi bi-whatsapp" style={{ fontSize: "2.5rem", color: "#2a2a2a" }}></i></a>
               </div>
             </div>
           </div>
