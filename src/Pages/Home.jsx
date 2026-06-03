@@ -112,7 +112,7 @@ export default function Home() {
             <div className="col-auto text-center">
               <p className="mb-4" style={{ fontFamily: f, fontSize: "0.9rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#2a2a2a", fontWeight: 700 }}>Redes Sociales</p>
               <div className="d-flex gap-4 align-items-center justify-content-center">
-                <a href="#" target="_blank" rel="noreferrer"><i className="bi bi-facebook" style={{ fontSize: "2.5rem", color: "#2a2a2a" }}></i></a>
+                <a href="https://www.facebook.com/share/1CUVKmwfeK/" target="_blank" rel="noreferrer"><i className="bi bi-facebook" style={{ fontSize: "2.5rem", color: "#2a2a2a" }}></i></a>
                 <a href="https://www.instagram.com/____sanchez_10" target="_blank" rel="noreferrer"><i className="bi bi-instagram" style={{ fontSize: "2.5rem", color: "#2a2a2a" }}></i></a>
                 <a href="https://wa.me/573125965458" target="_blank" rel="noreferrer"><i className="bi bi-whatsapp" style={{ fontSize: "2.5rem", color: "#2a2a2a" }}></i></a>
               </div>
