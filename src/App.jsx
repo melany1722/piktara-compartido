@@ -1,4 +1,5 @@
 import React from 'react'
+import LottieJuan from './Components/LottieJuan'
 import NuestroComic from './Pages/NuestroComic'
 import SobrePiktara from './Pages/SobrePiktara'
 import Home from './Pages/Home'
@@ -9,6 +10,7 @@ const App = () => {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/lottiej" element={<LottieJuan/>} />
         <Route path="/" element={<Home />} />
         <Route path="/sobre-piktara" element={<SobrePiktara />} />
         <Route path="/nuestro-comic" element={<Trailer />} />
