@@ -1,5 +1,5 @@
 import React from 'react'
-import LottieJuan from './Components/LottieJuan'
+import {LottieJuan} from './Components/LottieJuan'
 import NuestroComic from './Pages/NuestroComic'
 import SobrePiktara from './Pages/SobrePiktara'
 import Home from './Pages/Home'
