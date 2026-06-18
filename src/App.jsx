@@ -5,6 +5,7 @@ import Home from './Pages/Home'
 import Trailer from './Pages/Trailer'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { LottieMelany } from './Components/LottieMelany'
+import { LottieKevin } from './Components/LottieKevin'
 
 const App = () => {
   return (
@@ -15,6 +16,7 @@ const App = () => {
         <Route path="/nuestro-comic" element={<Trailer />} />
         <Route path="/sobre-el-proyecto" element={<NuestroComic />} />
         <Route path="/melany" element={<LottieMelany />} />
+        <Route path="/kevin" element={<LottieKevin />} />
       </Routes>
     </BrowserRouter>
   )
