@@ -1,56 +1,75 @@
-import LottieModule from "lottie-react";
+import lottieReact from "lottie-react"
 import Oso from "../assets/Oso.json";
+import pinguinoAndres from "../assets/pinguinoAndres.json"
+import "./stylemelany.css"
 import { useRef } from "react";
 
-const Lottie = LottieReact.default;
+const Lottie = lottieReact.default;
 
 export const LottieMelany = () => {
+  const LottieRef = useRef();
+  const LottieRefPingui = useRef();
 
-  const lottieRef = useRef()
 
-  const reproducir = () => {
-    lottieRef.current.play()
+  const ReproducirOso = () => {
+    LottieRef.current.play();
+
   }
+
+  const ReproducirPingui = () => {
+    LottieRefPingui.current.play();
+  }
+
+  const lanzarhielo = () => {
+    LottieRefPingui.current.playSegments([0, 30], true);
+  }
+
+  const lanzarpez = () => {
+    LottieRef.current.playSegments([20, 50], true);
+  }
+
+
+
   return (
     <>
 
 
 
-    <div className="pantalla">
+      <div className="pantalla">
 
-      <img className= "position-absolute fondo" src="../public/SVG/Fondo.svg" alt="" />
-      <img className= "position-absolute nube1"    src="../public/SVG/Nube1.svg" alt="" />
-      <img className= "position-absolute nube2"  src="../public/SVG/Nube2.svg" alt="" />
-      <img className= "position-absolute hielo"   src="../public/SVG/Hielo.svg" alt="" />
-      <img className= "position-absolute pez"       src="../public/SVG/Pez.svg" alt="" />
-
-
+        <img className="position-absolute fondo" src="../public/Fondo.svg" alt="" />
+        <img className="position-absolute nube1" src="../public/Nube1.svg" alt="" />
+        <img className="position-absolute nube2" src="../public/Nube2.svg" alt="" />
+        <img onClick={lanzarhielo} className="position-absolute hielo" src="../public/SVG/Hielo.svg" alt="" />
+        <img onClick={lanzarpez} className="position-absolute pez" src="../public/SVG/pez.svg" alt="" />
 
 
+        <div onClick={ReproducirOso}>
+          <Lottie
+            lottieRef={LottieRef}
+            animationData={Oso}
+            loop={true}
+            autoplay={false}
+            className="Oso"
+          />
+        </div>
 
-    </div>
+        <div onClick={ReproducirPingui}>
+          <Lottie
+            lottieRef={LottieRefPingui}
+            animationData={pinguinoAndres}
+            loop={true}
+            autoplay={false}
+            className="pingo"
+          />
+        </div>
 
-
-
-
-
-
-
-
-
-
-      <div onClick={reproducir}>
-        <Lottie
-          lottieRef={lottieRef}
-          animationData={circuloj}
-          loop={false}
-          autoplay={false}
-          style={{
-            width: 500,
-            height: 500
-          }}
-        />
       </div>
+
+
+
     </>
+
+
   );
 };
