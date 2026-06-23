@@ -1,0 +1,5 @@
+.fondo-desierto {
+  background-image: url("./assets/fondodesierto1.jpg");
+  background-size: cover;
+  background-position: center;
+}
