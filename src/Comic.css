@@ -1,0 +1,11 @@
+.fondo-desierto {
+  background-image: url("./assets/fondodesierto1.jpg");
+  background-size: cover;
+  background-position: center;
+}
+
+@keyframes pulseScore {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
