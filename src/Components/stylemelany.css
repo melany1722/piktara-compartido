@@ -1,0 +1,22 @@
+.pantalla{
+    position: relative;
+    width: 1000px;
+    height: 408px;
+    overflow:hidden;
+    background:pink;
+
+}
+
+.hielo{
+    width: 60px;
+    left:70px;
+    bottom:20px;
+    cursor: pointer;
+    transition-duration: .1s;
+
+}
+
+.hielo:hover{
+    transform: rotate(-5deg) scale(1.1);
+
+}
