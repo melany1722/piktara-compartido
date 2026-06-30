@@ -68,9 +68,9 @@ export default function Trailer() {
                 Un antiguo artefacto, capaz de viajar en el tiempo, ha permanecido oculto durante milenios en las pirámides de Egipto. Cuando Ninove, una arquitecta egipcia, lo activa por accidente, comienza una aventura que la llevará a cruzar civilizaciones, conocer a guardianes legendarios y descubrir que el Reloj de las Arenas no solo controla el tiempo... también el destino de la humanidad. Perseguidos por reyes y gobernantes que ansían su poder, Ninove y Adad deberán decidir: ¿proteger el conocimiento o arriesgarlo todo frente a la ambición?
               </p>
               <div className="mt-4">
-                <a href="#" className="px-4 py-2 text-decoration-none fw-bold" style={{ fontFamily: f, fontSize: "0.8rem", letterSpacing: "0.15em", textTransform: "uppercase", background: "#c8a870", color: "#2a2a2a", borderRadius: "4px" }}>
+                <Link to="/comic" className="px-4 py-2 text-decoration-none fw-bold" style={{ fontFamily: f, fontSize: "0.8rem", letterSpacing: "0.15em", textTransform: "uppercase", background: "#c8a870", color: "#2a2a2a", borderRadius: "4px" }}>
                   VER CÓMIC
-                </a>
+                </Link>
               </div>
             </div>
           </div>
