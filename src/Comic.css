@@ -9,3 +9,13 @@
   50%  { transform: scale(1.25); }
   100% { transform: scale(1); }
 }
+
+@keyframes spinClock {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes bounceHint {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}

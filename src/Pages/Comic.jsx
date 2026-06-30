@@ -12,6 +12,7 @@ const Comic = () => {
   const [score, setScore] = useState(0);
   const [relojEncontrado, setRelojEncontrado] = useState(false);
   const [pulse, setPulse] = useState(false);
+  const [reproducido, setReproducido] = useState(false);
 
   useEffect(() => {
     const anim = lottie.loadAnimation({
@@ -30,9 +31,10 @@ const Comic = () => {
     return () => anim.destroy();
   }, []);
 
-  const handleClick = () => {
+  const handlePlayClick = () => {
     if (animRef.current) {
       animRef.current.play();
+      setReproducido(true);
     }
   };
 
@@ -47,10 +49,21 @@ const Comic = () => {
   };
 
   return (
-    <div className="min-vh-100 w-100 fondo-desierto">
+    <div
+      className="w-100"
+      style={{
+        height: "100vh",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
 
       {/* HEADER */}
-      <nav className="navbar navbar-expand-lg px-5" style={{ background: "#c8a870" }}>
+      <nav
+        className="navbar navbar-expand-lg px-5"
+        style={{ background: "#c8a870", flexShrink: 0 }}
+      >
         <Link to="/" className="navbar-brand me-5">
           <img src="/logo-piktara.png" alt="Piktara" style={{ height: "55px" }} />
         </Link>
@@ -88,38 +101,102 @@ const Comic = () => {
       </nav>
 
       {/* ESCENARIO */}
-      <div style={{ position: "relative", width: "100%" }}>
-
-        {/* ANIMACIÓN LOTTIE */}
+      <div
+        style={{
+          flex: 1,
+          minHeight: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          overflow: "hidden",
+          backgroundColor: "#967946",
+        }}
+      >
+        {/* Recuadro con la proporción EXACTA del gif (1920x1080) */}
         <div
-          ref={lottieContainer}
-          onClick={handleClick}
           style={{
-            width: "100%",
+            position: "relative",
+            height: "100%",
             aspectRatio: "1920 / 1080",
-            cursor: "pointer",
+            maxWidth: "100%",
           }}
-        />
+        >
 
-        {/* RELOJ ESCONDIDO */}
-        {!relojEncontrado && (
-          <img
-            src="/lottie/images/img_0.png"
-            alt=""
-            onClick={handleRelojClick}
+          {/* ANIMACIÓN LOTTIE */}
+          <div
+            ref={lottieContainer}
             style={{
-              position: "absolute",
-              bottom: "8%",
-              right: "6%",
-              width: "2.5%",
-              cursor: "pointer",
-              opacity: 0.55,
-              filter: "sepia(0.6) brightness(0.8)",
-              transform: "rotate(-15deg)",
+              width: "100%",
+              height: "100%",
             }}
           />
-        )}
 
+          {/* BOTÓN DE PLAY: reloj girando + texto indicativo */}
+          {!reproducido && (
+            <div
+              onClick={handlePlayClick}
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                cursor: "pointer",
+                zIndex: 10,
+              }}
+            >
+              <img
+                src="/lottie/images/img_0.png"
+                alt="Reproducir animación"
+                style={{
+                  width: "90px",
+                  filter: "drop-shadow(0 4px 10px rgba(0,0,0,0.5))",
+                  animation: "spinClock 3s linear infinite",
+                }}
+              />
+              <span
+                style={{
+                  marginTop: "10px",
+                  fontFamily: f,
+                  fontSize: "0.85rem",
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  fontWeight: "bold",
+                  color: "#2a2a2a",
+                  background: "rgba(244,217,160,0.9)",
+                  padding: "4px 14px",
+                  borderRadius: "999px",
+                  animation: "bounceHint 1.2s ease-in-out infinite",
+                }}
+              >
+                Toca para empezar
+              </span>
+            </div>
+          )}
+
+          {/* RELOJ ESCONDIDO */}
+          {!relojEncontrado && (
+            <img
+              src="/lottie/images/img_0.png"
+              alt=""
+              onClick={handleRelojClick}
+              style={{
+                position: "absolute",
+                bottom: "30%",
+                right: "12%",
+                width: "3%",
+                cursor: "pointer",
+                opacity: 0.55,
+                filter: "sepia(0.6) brightness(0.8)",
+                transform: "rotate(-15deg)",
+                zIndex: 5,
+              }}
+            />
+          )}
+
+        </div>
       </div>
 
     </div>
