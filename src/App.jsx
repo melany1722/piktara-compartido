@@ -6,7 +6,6 @@ import Home from './Pages/Home'
 import Trailer from './Pages/Trailer'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { MelanyEstrellas } from './Pages/MelanyEstrellas'
-import EscenaJ from './Pages/EscenaJ'
 
 const App = () => {
   return (
@@ -16,8 +15,7 @@ const App = () => {
         <Route path="/sobre-piktara" element={<SobrePiktara />} />
         <Route path="/nuestro-comic" element={<Trailer />} />
         <Route path="/sobre-el-proyecto" element={<NuestroComic />} />
-        <Route path="/comic" element={<EscenaJ />} />
-        <Route path="/comic/alien" element={<Comic />} />
+        <Route path="/comic" element={<Comic />} />
         <Route path="/melany" element={<MelanyEstrellas />} />
       </Routes>
     </BrowserRouter>
