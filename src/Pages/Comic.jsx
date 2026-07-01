@@ -109,7 +109,7 @@ const Comic = () => {
           alignItems: "center",
           justifyContent: "center",
           overflow: "hidden",
-          backgroundColor: "#967946",
+          backgroundColor: "#c8a870",
         }}
       >
         {/* Recuadro con la proporción EXACTA del gif (1920x1080) */}
@@ -131,49 +131,23 @@ const Comic = () => {
             }}
           />
 
-          {/* BOTÓN DE PLAY: reloj girando + texto indicativo */}
+          {/* BOTÓN DE PLAY: reloj centrado, con pulso suave (sin girar) */}
           {!reproducido && (
-            <div
+            <img
+              src="/lottie/images/img_0.png"
+              alt="Reproducir animación"
               onClick={handlePlayClick}
               style={{
                 position: "absolute",
                 top: "50%",
                 left: "50%",
                 transform: "translate(-50%, -50%)",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
+                width: "90px",
+                animation: "pulseClock 1.2s ease-in-out infinite",
                 cursor: "pointer",
                 zIndex: 10,
               }}
-            >
-              <img
-                src="/lottie/images/img_0.png"
-                alt="Reproducir animación"
-                style={{
-                  width: "90px",
-                  filter: "drop-shadow(0 4px 10px rgba(0,0,0,0.5))",
-                  animation: "spinClock 3s linear infinite",
-                }}
-              />
-              <span
-                style={{
-                  marginTop: "10px",
-                  fontFamily: f,
-                  fontSize: "0.85rem",
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  fontWeight: "bold",
-                  color: "#2a2a2a",
-                  background: "rgba(244,217,160,0.9)",
-                  padding: "4px 14px",
-                  borderRadius: "999px",
-                  animation: "bounceHint 1.2s ease-in-out infinite",
-                }}
-              >
-                Toca para empezar
-              </span>
-            </div>
+            />
           )}
 
           {/* RELOJ ESCONDIDO */}

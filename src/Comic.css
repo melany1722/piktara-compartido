@@ -10,12 +10,13 @@
   100% { transform: scale(1); }
 }
 
-@keyframes spinClock {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
-
-@keyframes bounceHint {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-6px); }
+@keyframes pulseClock {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+    filter: drop-shadow(0 6px 16px rgba(244,217,160,0.7));
+  }
 }
