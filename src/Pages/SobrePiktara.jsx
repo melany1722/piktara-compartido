@@ -5,9 +5,9 @@ import IniciarSeccion from "./IniciarSeccion";
 const f = "Arial, sans-serif";
 
 const equipo = [
-  { nombre: "KEVIN RESTREPO", img: null, desc: "tengo 18 años, me gusta mucho el arte y la historia, soy muy creativo y me gusta mucho el diseño gráfico." },
-  { nombre: "MELANY BELTRAN", img: null, desc: "tengo 18 años y entre mis pasiones es el arte abstracto, todo lo relacionado con el dibujo y el arte, soy una chica solidaria y alegre." },
-  { nombre: "JUAN LOPERA", img: null, desc: "tengo 18 años y me gusta mucho la tecnología y los videojuegos, soy un chico muy creativo y me gusta mucho el diseño gráfico." },
+  { nombre: "KEVIN RESTREPO", img: "/kevin.png", desc: "tengo 18 años, me gusta mucho el arte y la historia, soy muy creativo y me gusta mucho el diseño gráfico." },
+  { nombre: "MELANY BELTRAN", img: "/melany.png", desc: "tengo 18 años y entre mis pasiones es el arte abstracto, todo lo relacionado con el dibujo y el arte, soy una chica solidaria y alegre." },
+  { nombre: "JUAN LOPERA", img: "/juan.png", desc: "tengo 18 años y me gusta mucho la tecnología y los videojuegos, soy un chico muy creativo y me gusta mucho el diseño gráfico." },
 ];
 
 export default function SobrePiktara() {

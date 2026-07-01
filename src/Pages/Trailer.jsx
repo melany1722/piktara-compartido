@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import Buscar from "./Buscar";
 import IniciarSeccion from "./IniciarSeccion";
@@ -5,6 +6,8 @@ import IniciarSeccion from "./IniciarSeccion";
 const f = "Arial, sans-serif";
 
 export default function Trailer() {
+  const [reproducir, setReproducir] = useState(false);
+
   return (
     <>
       <nav className="navbar navbar-expand-lg px-5" style={{ background: "#c8a870" }}>
@@ -48,12 +51,24 @@ export default function Trailer() {
         <span style={{ fontFamily: f, fontSize: "0.85rem", letterSpacing: "0.3em", color: "#2a2a2a", textTransform: "uppercase" }}>TRAILER</span>
       </div>
 
-      {/* TRAILER IMAGE */}
+      {/* TRAILER IMAGE / VIDEO */}
       <div className="position-relative" style={{ background: "#000" }}>
-        <img src="/trailer_1.jpg" alt="Trailer" style={{ width: "100%", maxHeight: "380px", objectFit: "cover", opacity: 0.85 }} />
-        <div className="position-absolute top-50 start-50 translate-middle d-flex align-items-center justify-content-center" style={{ width: "70px", height: "70px", border: "3px solid #fff", cursor: "pointer" }}>
-          <i className="bi bi-play-fill" style={{ fontSize: "2.5rem", color: "#fff" }}></i>
-        </div>
+        {reproducir ? (
+          <iframe
+            src="https://drive.google.com/file/d/1VkMxdeUUWXW2NUuJKH_7WiqJ6mqPR8-N/preview"
+            style={{ width: "100%", height: "380px", border: "none", display: "block" }}
+            allow="autoplay"
+            allowFullScreen
+            title="Trailer Piktara"
+          />
+        ) : (
+          <div onClick={() => setReproducir(true)} style={{ cursor: "pointer" }}>
+            <img src="/trailer_1.jpg" alt="Trailer" style={{ width: "100%", maxHeight: "380px", objectFit: "cover", opacity: 0.85 }} />
+            <div className="position-absolute top-50 start-50 translate-middle d-flex align-items-center justify-content-center" style={{ width: "70px", height: "70px", border: "3px solid #fff" }}>
+              <i className="bi bi-play-fill" style={{ fontSize: "2.5rem", color: "#fff" }}></i>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* SECCIÓN CÓMIC */}
