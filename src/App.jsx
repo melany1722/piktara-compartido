@@ -7,7 +7,6 @@ import Trailer from './Pages/Trailer'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { MelanyEstrellas } from './Pages/MelanyEstrellas'
 
-
 const App = () => {
   return (
     <BrowserRouter>
@@ -21,7 +20,6 @@ const App = () => {
       </Routes>
     </BrowserRouter>
   )
-  
 }
 
 export default App
