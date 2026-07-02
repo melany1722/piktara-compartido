@@ -9,8 +9,8 @@ const Comic = () => {
   const lottieContainer = useRef(null);
   const animRef = useRef(null);
 
-  const [score, setScore] = useState(0);
-  const [relojEncontrado, setRelojEncontrado] = useState(false);
+  const [score, setScore] = useState(() => Number(localStorage.getItem("piktaraScore")) || 0);
+  const [relojEncontrado, setRelojEncontrado] = useState(() => localStorage.getItem("relojComic") === "true");
   const [pulse, setPulse] = useState(false);
   const [reproducido, setReproducido] = useState(false);
 
@@ -41,7 +41,10 @@ const Comic = () => {
   const handleRelojClick = (e) => {
     e.stopPropagation();
     if (!relojEncontrado) {
-      setScore((prev) => prev + 1);
+      const nuevoScore = score + 1;
+      setScore(nuevoScore);
+      localStorage.setItem("piktaraScore", nuevoScore);
+      localStorage.setItem("relojComic", "true");
       setRelojEncontrado(true);
       setPulse(true);
       setTimeout(() => setPulse(false), 400);
@@ -169,6 +172,29 @@ const Comic = () => {
               }}
             />
           )}
+
+          {/* BOTÓN ESCENA ANTERIOR (vuelve a Comicj.jsx) */}
+          <Link
+            to="/comicj"
+            className="d-flex align-items-center justify-content-center text-decoration-none"
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "12px",
+              transform: "translateY(-50%)",
+              width: "48px",
+              height: "48px",
+              borderRadius: "50%",
+              background: "rgba(42,42,42,0.7)",
+              color: "#f4d9a0",
+              fontSize: "1.6rem",
+              zIndex: 15,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+            }}
+            aria-label="Escena anterior"
+          >
+            ‹
+          </Link>
 
         </div>
       </div>

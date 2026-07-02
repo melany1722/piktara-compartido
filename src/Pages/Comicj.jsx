@@ -9,8 +9,8 @@ const Comicj = () => {
   const lottieContainer = useRef(null);
   const animRef = useRef(null);
 
-  const [score, setScore] = useState(0);
-  const [relojEncontrado, setRelojEncontrado] = useState(false);
+  const [score, setScore] = useState(() => Number(localStorage.getItem("piktaraScore")) || 0);
+  const [relojEncontrado, setRelojEncontrado] = useState(() => localStorage.getItem("relojComicj") === "true");
   const [pulse, setPulse] = useState(false);
   const [reproducido, setReproducido] = useState(false);
 
@@ -20,7 +20,7 @@ const Comicj = () => {
       renderer: "svg",
       loop: true,
       autoplay: false,
-      path: "/lottie2/animacionj.json",
+      path: "/lottiej/animacionj.json",
       rendererSettings: {
         preserveAspectRatio: "xMidYMid meet",
       },
@@ -41,7 +41,10 @@ const Comicj = () => {
   const handleRelojClick = (e) => {
     e.stopPropagation();
     if (!relojEncontrado) {
-      setScore((prev) => prev + 1);
+      const nuevoScore = score + 1;
+      setScore(nuevoScore);
+      localStorage.setItem("piktaraScore", nuevoScore);
+      localStorage.setItem("relojComicj", "true");
       setRelojEncontrado(true);
       setPulse(true);
       setTimeout(() => setPulse(false), 400);
@@ -134,7 +137,7 @@ const Comicj = () => {
           {/* BOTÓN DE PLAY: reloj centrado, con pulso suave */}
           {!reproducido && (
             <img
-              src="/lottie2/images/img_0.png"
+              src="/lottie/images/img_0.png"
               alt="Reproducir animación"
               onClick={handlePlayClick}
               style={{
@@ -153,7 +156,7 @@ const Comicj = () => {
           {/* RELOJ ESCONDIDO */}
           {!relojEncontrado && (
             <img
-              src="/lottie2/images/img_0.png"
+              src="/lottie/images/img_0.png"
               alt=""
               onClick={handleRelojClick}
               style={{
