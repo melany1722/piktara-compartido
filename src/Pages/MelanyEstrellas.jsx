@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react'
+﻿import React, { useEffect, useRef, useState } from 'react'
 import { Link } from "react-router-dom";
 import lottie from "lottie-web";
 import "../Comic.css";
 
 const f = "Arial, sans-serif";
+const relojImg = "/lottie/images/img_0.png";
 
 const Comick = () => {
   const lottieContainer = useRef(null);
@@ -20,7 +21,7 @@ const Comick = () => {
       renderer: "svg",
       loop: true,
       autoplay: false,
-      path: "/lottiek/animacionk.json",
+      path: "/lottiem/fondomela.json",
       rendererSettings: {
         preserveAspectRatio: "xMidYMid meet",
       },
@@ -39,17 +40,20 @@ const Comick = () => {
   };
 
   const handleRelojClick = (e) => {
-    e.stopPropagation();
-    if (!relojEncontrado) {
-      const nuevoScore = score + 1;
-      setScore(nuevoScore);
-      localStorage.setItem("piktaraScore", nuevoScore);
-      localStorage.setItem("relojComick", "true");
-      setRelojEncontrado(true);
-      setPulse(true);
-      setTimeout(() => setPulse(false), 400);
-    }
-  };
+  e.stopPropagation();
+
+  if (!relojEncontrado) {
+    const nuevoScore = score + 1;
+
+    setScore(nuevoScore);
+    localStorage.setItem("piktaraScore", nuevoScore);
+
+    setRelojEncontrado(true);
+
+    setPulse(true);
+    setTimeout(() => setPulse(false), 400);
+  }
+};
 
   return (
     <div
@@ -89,14 +93,29 @@ const Comick = () => {
             animation: pulse ? "pulseScore 0.4s ease" : "none",
           }}
         >
-          <span style={{ marginRight: "8px", fontSize: "1.1rem" }}>⏳</span>
+          <img
+            src={relojImg}
+            alt=""
+            style={{
+              width: "22px",
+              height: "22px",
+              objectFit: "contain",
+              marginRight: "8px",
+            }}
+          />
           {score}
         </div>
 
         <Link
           to="/nuestro-comic"
           className="d-flex align-items-center text-decoration-none"
-          style={{ fontFamily: f, fontSize: "0.8rem", letterSpacing: "0.12em", color: "#2a2a2a", textTransform: "uppercase" }}
+          style={{
+            fontFamily: f,
+            fontSize: "0.8rem",
+            letterSpacing: "0.12em",
+            color: "#2a2a2a",
+            textTransform: "uppercase",
+          }}
         >
           <i className="bi bi-arrow-left me-2" style={{ fontSize: "1.1rem" }}></i>
           Volver
@@ -112,10 +131,9 @@ const Comick = () => {
           alignItems: "center",
           justifyContent: "center",
           overflow: "hidden",
-          backgroundColor: "#c8a870",
+          backgroundColor: "#2a2a2a",
         }}
       >
-        {/* Recuadro con la proporción EXACTA de esta animación (1920x1080) */}
         <div
           style={{
             position: "relative",
@@ -134,10 +152,10 @@ const Comick = () => {
             }}
           />
 
-          {/* BOTÓN DE PLAY: reloj centrado, con pulso suave */}
+          {/* BOTÓN DE PLAY */}
           {!reproducido && (
             <img
-              src="/lottie/images/img_0.png"
+              src={relojImg}
               alt="Reproducir animación"
               onClick={handlePlayClick}
               style={{
@@ -146,32 +164,68 @@ const Comick = () => {
                 left: "50%",
                 transform: "translate(-50%, -50%)",
                 width: "90px",
+                height: "90px",
+                objectFit: "contain",
                 animation: "pulseClock 1.2s ease-in-out infinite",
                 cursor: "pointer",
-                zIndex: 10,
+                zIndex: 20,
+                filter: "drop-shadow(0 0 10px rgba(255, 230, 160, 0.85))",
               }}
             />
           )}
 
-          {/* RELOJ ESCONDIDO */}
-          {!relojEncontrado && (
-            <img
-              src="/lottie/images/img_0.png"
-              alt=""
-              onClick={handleRelojClick}
-              style={{
-                position: "absolute",
-                bottom: "30%",
-                right: "12%",
-                width: "3%",
-                cursor: "pointer",
-                opacity: 0.55,
-                filter: "sepia(0.6) brightness(0.8)",
-                transform: "rotate(-15deg)",
-                zIndex: 5,
-              }}
-            />
-          )}
+{/* RELOJ ESCONDIDO */}
+{!relojEncontrado && (
+  <img
+    src={relojImg}
+    alt="Reloj escondido"
+    onClick={handleRelojClick}
+    style={{
+      position: "absolute",
+
+      // Posición del reloj
+      left: "51.2%",
+      top: "47.5%",
+
+      transform: "translate(-50%, -50%) rotate(-18deg)",
+
+      // Tamaño
+      width: "30px",
+      height: "30px",
+      objectFit: "contain",
+
+      // Apariencia
+      opacity: 0.55,
+      cursor: "pointer",
+      zIndex: 999,
+      pointerEvents: "auto",
+
+      filter: "drop-shadow(0 0 3px rgba(255,220,120,.6))",
+    }}
+  />
+)}
+          {/* BOTÓN ESCENA ANTERIOR */}
+          <Link
+            to="/comicj"
+            className="d-flex align-items-center justify-content-center text-decoration-none"
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "12px",
+              transform: "translateY(-50%)",
+              width: "48px",
+              height: "48px",
+              borderRadius: "50%",
+              background: "rgba(42,42,42,0.7)",
+              color: "#f4d9a0",
+              fontSize: "1.6rem",
+              zIndex: 15,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+            }}
+            aria-label="Escena anterior"
+          >
+            ‹
+          </Link>
 
           {/* BOTÓN SIGUIENTE ESCENA */}
           <Link
@@ -198,10 +252,8 @@ const Comick = () => {
 
         </div>
       </div>
-
     </div>
   )
 }
 
 export default Comick
-

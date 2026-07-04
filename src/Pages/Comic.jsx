@@ -1,26 +1,64 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { Link } from "react-router-dom";
+﻿import React, { useEffect, useRef, useState } from 'react'
+import { Link, useLocation } from "react-router-dom";
 import lottie from "lottie-web";
 import "../Comic.css";
 
 const f = "Arial, sans-serif";
+const relojImg = "/lottie/images/img_0.png";
+
+const scenes = [
+  {
+    route: "/comicj",
+    animationPath: "/lottiej/animacionj.json",
+    foundKey: "relojComicj",
+    backgroundColor: "#c8a870",
+  },
+  {
+    route: "/melany",
+    animationPath: "/lottiem/fondomela.json",
+    foundKey: "relojComick",
+    backgroundColor: "#2a2a2a",
+  },
+  {
+    route: "/comic",
+    animationPath: "/lottie/gifalien.json",
+    foundKey: "relojComic",
+    backgroundColor: "#c8a870",
+  },
+];
+
+const getInitialScene = (pathname) => {
+  const sceneIndex = scenes.findIndex((scene) => scene.route === pathname);
+  return sceneIndex >= 0 ? sceneIndex : 0;
+};
 
 const Comic = () => {
+  const location = useLocation();
   const lottieContainer = useRef(null);
   const animRef = useRef(null);
 
+  const [sceneIndex, setSceneIndex] = useState(() => getInitialScene(location.pathname));
+  const scene = scenes[sceneIndex];
+
   const [score, setScore] = useState(() => Number(localStorage.getItem("piktaraScore")) || 0);
-  const [relojEncontrado, setRelojEncontrado] = useState(() => localStorage.getItem("relojComic") === "true");
+  const [relojEncontrado, setRelojEncontrado] = useState(() => localStorage.getItem(scene.foundKey) === "true");
   const [pulse, setPulse] = useState(false);
   const [reproducido, setReproducido] = useState(false);
 
   useEffect(() => {
+    setSceneIndex(getInitialScene(location.pathname));
+  }, [location.pathname]);
+
+  useEffect(() => {
+    setReproducido(false);
+    setRelojEncontrado(localStorage.getItem(scene.foundKey) === "true");
+
     const anim = lottie.loadAnimation({
       container: lottieContainer.current,
       renderer: "svg",
       loop: true,
       autoplay: false,
-      path: "/lottie/gifalien.json",
+      path: scene.animationPath,
       rendererSettings: {
         preserveAspectRatio: "xMidYMid meet",
       },
@@ -29,7 +67,7 @@ const Comic = () => {
     animRef.current = anim;
 
     return () => anim.destroy();
-  }, []);
+  }, [scene]);
 
   const handlePlayClick = () => {
     if (animRef.current) {
@@ -40,15 +78,24 @@ const Comic = () => {
 
   const handleRelojClick = (e) => {
     e.stopPropagation();
+
     if (!relojEncontrado) {
       const nuevoScore = score + 1;
       setScore(nuevoScore);
       localStorage.setItem("piktaraScore", nuevoScore);
-      localStorage.setItem("relojComic", "true");
+      localStorage.setItem(scene.foundKey, "true");
       setRelojEncontrado(true);
       setPulse(true);
       setTimeout(() => setPulse(false), 400);
     }
+  };
+
+  const goToPreviousScene = () => {
+    setSceneIndex((currentScene) => Math.max(currentScene - 1, 0));
+  };
+
+  const goToNextScene = () => {
+    setSceneIndex((currentScene) => Math.min(currentScene + 1, scenes.length - 1));
   };
 
   return (
@@ -61,7 +108,6 @@ const Comic = () => {
         flexDirection: "column",
       }}
     >
-
       {/* HEADER */}
       <nav
         className="navbar navbar-expand-lg px-5"
@@ -96,7 +142,13 @@ const Comic = () => {
         <Link
           to="/nuestro-comic"
           className="d-flex align-items-center text-decoration-none"
-          style={{ fontFamily: f, fontSize: "0.8rem", letterSpacing: "0.12em", color: "#2a2a2a", textTransform: "uppercase" }}
+          style={{
+            fontFamily: f,
+            fontSize: "0.8rem",
+            letterSpacing: "0.12em",
+            color: "#2a2a2a",
+            textTransform: "uppercase",
+          }}
         >
           <i className="bi bi-arrow-left me-2" style={{ fontSize: "1.1rem" }}></i>
           Volver
@@ -112,10 +164,9 @@ const Comic = () => {
           alignItems: "center",
           justifyContent: "center",
           overflow: "hidden",
-          backgroundColor: "#c8a870",
+          backgroundColor: scene.backgroundColor,
         }}
       >
-        {/* Recuadro con la proporción EXACTA del gif (1920x1080) */}
         <div
           style={{
             position: "relative",
@@ -124,7 +175,6 @@ const Comic = () => {
             maxWidth: "100%",
           }}
         >
-
           {/* ANIMACIÓN LOTTIE */}
           <div
             ref={lottieContainer}
@@ -134,10 +184,10 @@ const Comic = () => {
             }}
           />
 
-          {/* BOTÓN DE PLAY: reloj centrado, con pulso suave (sin girar) */}
+          {/* BOTÓN DE PLAY */}
           {!reproducido && (
             <img
-              src="/lottie/images/img_0.png"
+              src={relojImg}
               alt="Reproducir animación"
               onClick={handlePlayClick}
               style={{
@@ -156,7 +206,7 @@ const Comic = () => {
           {/* RELOJ ESCONDIDO */}
           {!relojEncontrado && (
             <img
-              src="/lottie/images/img_0.png"
+              src={relojImg}
               alt=""
               onClick={handleRelojClick}
               style={{
@@ -168,37 +218,68 @@ const Comic = () => {
                 opacity: 0.55,
                 filter: "sepia(0.6) brightness(0.8)",
                 transform: "rotate(-15deg)",
-                zIndex: 5,
+                zIndex: 50,
               }}
             />
           )}
 
-          {/* BOTÓN ESCENA ANTERIOR (vuelve a Comicj.jsx) */}
-          <Link
-            to="/comicj"
-            className="d-flex align-items-center justify-content-center text-decoration-none"
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "12px",
-              transform: "translateY(-50%)",
-              width: "48px",
-              height: "48px",
-              borderRadius: "50%",
-              background: "rgba(42,42,42,0.7)",
-              color: "#f4d9a0",
-              fontSize: "1.6rem",
-              zIndex: 15,
-              boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
-            }}
-            aria-label="Escena anterior"
-          >
-            ‹
-          </Link>
+          {/* BOTÓN ESCENA ANTERIOR */}
+          {sceneIndex > 0 && (
+            <button
+              type="button"
+              onClick={goToPreviousScene}
+              className="d-flex align-items-center justify-content-center"
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "12px",
+                transform: "translateY(-50%)",
+                width: "48px",
+                height: "48px",
+                borderRadius: "50%",
+                border: "none",
+                background: "rgba(42,42,42,0.7)",
+                color: "#f4d9a0",
+                fontSize: "1.6rem",
+                zIndex: 60,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+                cursor: "pointer",
+              }}
+              aria-label="Escena anterior"
+            >
+              ‹
+            </button>
+          )}
 
+          {/* BOTÓN SIGUIENTE ESCENA */}
+          {sceneIndex < scenes.length - 1 && (
+            <button
+              type="button"
+              onClick={goToNextScene}
+              className="d-flex align-items-center justify-content-center"
+              style={{
+                position: "absolute",
+                top: "50%",
+                right: "12px",
+                transform: "translateY(-50%)",
+                width: "48px",
+                height: "48px",
+                borderRadius: "50%",
+                border: "none",
+                background: "rgba(42,42,42,0.7)",
+                color: "#f4d9a0",
+                fontSize: "1.6rem",
+                zIndex: 60,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+                cursor: "pointer",
+              }}
+              aria-label="Siguiente escena"
+            >
+              ›
+            </button>
+          )}
         </div>
       </div>
-
     </div>
   )
 }

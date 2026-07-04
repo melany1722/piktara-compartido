@@ -173,9 +173,9 @@ const Comicj = () => {
             />
           )}
 
-          {/* BOTÓN SIGUIENTE ESCENA (lleva a Comic.jsx) */}
+          {/* BOTÓN SIGUIENTE ESCENA (lleva a MelanyEstrellas.jsx) */}
           <Link
-            to="/comic"
+            to="/melany"
             className="d-flex align-items-center justify-content-center text-decoration-none"
             style={{
               position: "absolute",
