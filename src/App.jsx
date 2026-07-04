@@ -7,6 +7,7 @@ import Home from './Pages/Home'
 import Trailer from './Pages/Trailer'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { MelanyEstrellas } from './Pages/MelanyEstrellas'
+import Comick from './Pages/Comick'
 
 const App = () => {
   return (
@@ -18,7 +19,7 @@ const App = () => {
         <Route path="/sobre-el-proyecto" element={<NuestroComic />} />
         <Route path="/comic" element={<Comic />} />
         <Route path="/comicj" element={<Comicj />} />
-        <Route path="/melany" element={<MelanyEstrellas />} />
+        <Route path="/melany" element={<Comick />} />
       </Routes>
     </BrowserRouter>
   )
