@@ -1,10 +1,63 @@
-﻿import React, { useEffect, useRef, useState } from 'react'
+﻿import React, { useEffect, useRef, useState } from 'react';
 import { Link } from "react-router-dom";
 import lottie from "lottie-web";
 import "../Comic.css";
 
-const f = "Arial, sans-serif";
+const fDisplay = "'Baloo 2', 'Comic Sans MS', sans-serif";
+
+const palette = {
+  morado: "#5A189A",
+  amarillo: "#FFC300",
+  crema: "#FFF8E7",
+  borde: "#3A2312",
+  rosa: "#FF597B",
+  verde: "#00E676",
+  fondoEscena: "#BFF0D9",
+};
+
 const relojImg = "/lottie/images/img_0.png";
+
+const WashiTape = ({ top, left, right, rotate, color }) => (
+  <div
+    style={{
+      position: "absolute",
+      top,
+      left,
+      right,
+      width: "70px",
+      height: "26px",
+      background: color,
+      border: `2.5px solid ${palette.borde}`,
+      transform: `rotate(${rotate}deg)`,
+      boxShadow: `0 3px 0 ${palette.borde}`,
+      borderRadius: "4px",
+      zIndex: 40,
+    }}
+  />
+);
+
+const Confetti = ({ pieces }) => (
+  <>
+    {pieces.map((p) => (
+      <span
+        key={p.id}
+        style={{
+          position: "absolute",
+          top: p.top,
+          right: p.right,
+          fontSize: p.size,
+          zIndex: 55,
+          pointerEvents: "none",
+          "--tx": `${p.tx}px`,
+          "--ty": `${p.ty}px`,
+          animation: `confettiBurst 0.9s ease-out forwards`,
+        }}
+      >
+        {p.emoji}
+      </span>
+    ))}
+  </>
+);
 
 const Comick = () => {
   const lottieContainer = useRef(null);
@@ -14,6 +67,7 @@ const Comick = () => {
   const [relojEncontrado, setRelojEncontrado] = useState(() => localStorage.getItem("relojComick") === "true");
   const [pulse, setPulse] = useState(false);
   const [reproducido, setReproducido] = useState(false);
+  const [confetti, setConfetti] = useState([]);
 
   useEffect(() => {
     const anim = lottie.loadAnimation({
@@ -40,20 +94,31 @@ const Comick = () => {
   };
 
   const handleRelojClick = (e) => {
-  e.stopPropagation();
+    e.stopPropagation();
 
-  if (!relojEncontrado) {
-    const nuevoScore = score + 1;
+    if (!relojEncontrado) {
+      const nuevoScore = score + 1;
+      setScore(nuevoScore);
+      localStorage.setItem("piktaraScore", nuevoScore);
+      localStorage.setItem("relojComick", "true");
+      setRelojEncontrado(true);
+      setPulse(true);
+      setTimeout(() => setPulse(false), 500);
 
-    setScore(nuevoScore);
-    localStorage.setItem("piktaraScore", nuevoScore);
-
-    setRelojEncontrado(true);
-
-    setPulse(true);
-    setTimeout(() => setPulse(false), 400);
-  }
-};
+      const emojis = ["✨", "⭐", "🎉", "💥"];
+      const pieces = Array.from({ length: 10 }).map((_, i) => ({
+        id: `${Date.now()}-${i}`,
+        emoji: emojis[i % emojis.length],
+        top: "30%",
+        right: "12%",
+        size: `${14 + Math.random() * 12}px`,
+        tx: Math.round((Math.random() - 0.5) * 220),
+        ty: Math.round(-40 - Math.random() * 140),
+      }));
+      setConfetti(pieces);
+      setTimeout(() => setConfetti([]), 900);
+    }
+  };
 
   return (
     <div
@@ -63,66 +128,104 @@ const Comick = () => {
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
+        position: "relative",
+        background: palette.crema,
       }}
     >
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Quicksand:wght@500;600;700&display=swap');
 
-      {/* HEADER */}
+        @keyframes bounceIn {
+          0% { transform: scale(1); }
+          35% { transform: scale(1.25) rotate(-4deg); }
+          65% { transform: scale(0.95) rotate(2deg); }
+          100% { transform: scale(1) rotate(0); }
+        }
+        @keyframes wiggleSticker {
+          0%, 100% { transform: translate(-50%, -50%) rotate(-18deg) scale(1); }
+          50% { transform: translate(-50%, -50%) rotate(-10deg) scale(1.08); }
+        }
+        @keyframes sunPulse {
+          0%, 100% { transform: translate(-50%, -50%) scale(1); }
+          50% { transform: translate(-50%, -50%) scale(1.08); }
+        }
+        @keyframes confettiBurst {
+          0% { transform: translate(0, 0) scale(0.6) rotate(0deg); opacity: 1; }
+          100% { transform: translate(var(--tx), var(--ty)) scale(1.1) rotate(200deg); opacity: 0; }
+        }
+
+        .comic-nav-btn {
+          transition: transform 0.15s ease;
+        }
+        .comic-nav-btn:hover {
+          transform: translateY(-50%) scale(1.12) !important;
+        }
+        .comic-back-btn:hover {
+          transform: translateY(-3px) scale(1.04);
+          box-shadow: 0 6px 0 ${palette.borde} !important;
+        }
+      `}</style>
+
       <nav
-        className="navbar navbar-expand-lg px-5"
-        style={{ background: "#c8a870", flexShrink: 0 }}
+        className="navbar navbar-expand-lg px-4 px-md-5"
+        style={{
+          background: palette.amarillo,
+          flexShrink: 0,
+          borderBottom: `6px solid ${palette.morado}`,
+          position: "relative",
+          zIndex: 20,
+        }}
       >
-        <Link to="/" className="navbar-brand me-5">
-          <img src="/logo-piktara.png" alt="Piktara" style={{ height: "55px" }} />
-        </Link>
-
-        {/* CONTADOR DE PUNTOS */}
-        <div
-          className="ms-auto me-4 d-flex align-items-center"
-          style={{
-            fontFamily: f,
-            background: "#2a2a2a",
-            color: "#f4d9a0",
-            padding: "8px 18px",
-            borderRadius: "999px",
-            border: "2px solid #f4d9a0",
-            boxShadow: "0 2px 6px rgba(0,0,0,0.25)",
-            fontSize: "0.85rem",
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            fontWeight: "bold",
-            animation: pulse ? "pulseScore 0.4s ease" : "none",
-          }}
-        >
+        <Link to="/" className="navbar-brand me-4">
           <img
-            src={relojImg}
-            alt=""
+            src="/logo-piktara.png"
+            alt="Piktara"
             style={{
-              width: "22px",
-              height: "22px",
-              objectFit: "contain",
-              marginRight: "8px",
+              height: "55px",
+              filter: `drop-shadow(0 3px 0 ${palette.borde})`,
             }}
           />
+        </Link>
+
+        <div
+          className="ms-auto me-3 d-flex align-items-center"
+          style={{
+            fontFamily: fDisplay,
+            background: palette.crema,
+            color: palette.morado,
+            padding: "6px 20px",
+            borderRadius: "16px",
+            border: `3.5px solid ${palette.borde}`,
+            boxShadow: `0 4px 0 ${palette.borde}`,
+            fontSize: "1rem",
+            fontWeight: 800,
+            animation: pulse ? "bounceIn 0.5s ease" : "none",
+          }}
+        >
+          <span style={{ marginRight: "8px", fontSize: "1.2rem" }}>⭐</span>
           {score}
         </div>
 
         <Link
           to="/nuestro-comic"
-          className="d-flex align-items-center text-decoration-none"
+          className="comic-back-btn d-flex align-items-center text-decoration-none"
           style={{
-            fontFamily: f,
-            fontSize: "0.8rem",
-            letterSpacing: "0.12em",
-            color: "#2a2a2a",
-            textTransform: "uppercase",
+            fontFamily: fDisplay,
+            fontSize: "0.95rem",
+            color: palette.borde,
+            background: palette.crema,
+            padding: "8px 20px",
+            borderRadius: "14px",
+            border: `3.5px solid ${palette.borde}`,
+            boxShadow: `0 4px 0 ${palette.borde}`,
+            fontWeight: 800,
           }}
         >
-          <i className="bi bi-arrow-left me-2" style={{ fontSize: "1.1rem" }}></i>
-          Volver
+          <span style={{ marginRight: "8px", fontSize: "1.1rem" }}>👈</span>
+          VOLVER
         </Link>
       </nav>
 
-      {/* ESCENARIO */}
       <div
         style={{
           flex: 1,
@@ -131,7 +234,9 @@ const Comick = () => {
           alignItems: "center",
           justifyContent: "center",
           overflow: "hidden",
-          backgroundColor: "#2a2a2a",
+          position: "relative",
+          padding: "2%",
+          zIndex: 5,
         }}
       >
         <div
@@ -140,120 +245,157 @@ const Comick = () => {
             height: "100%",
             aspectRatio: "1920 / 1080",
             maxWidth: "100%",
+            background: "#fff",
+            borderRadius: "32px",
+            padding: "16px",
+            border: `6px solid ${palette.morado}`,
+            boxShadow: `0 10px 0 ${palette.borde}`,
           }}
         >
+          <WashiTape top="-14px" left="-18px" rotate={-18} color={palette.amarillo} />
+          <WashiTape top="-14px" right="-18px" rotate={18} color={palette.rosa} />
 
-          {/* ANIMACIÓN LOTTIE */}
           <div
-            ref={lottieContainer}
             style={{
+              position: "absolute",
+              top: "-6px",
+              left: "50%",
+              transform: "translate(-50%, 0)",
+              background: palette.morado,
+              color: palette.crema,
+              fontFamily: fDisplay,
+              fontWeight: 800,
+              fontSize: "0.95rem",
+              letterSpacing: "0.04em",
+              padding: "6px 24px",
+              borderRadius: "0 0 16px 16px",
+              border: `3px solid ${palette.borde}`,
+              borderTop: "none",
+              boxShadow: `0 4px 0 ${palette.borde}`,
+              zIndex: 45,
+              textTransform: "uppercase",
+            }}
+          >
+            Aventura 3
+          </div>
+
+          <div
+            style={{
+              position: "relative",
               width: "100%",
               height: "100%",
+              borderRadius: "22px",
+              overflow: "hidden",
+              border: `3px solid ${palette.borde}`,
+              backgroundColor: palette.fondoEscena,
             }}
-          />
+          >
+            <div ref={lottieContainer} style={{ width: "100%", height: "100%" }} />
 
-          {/* BOTÓN DE PLAY */}
-          {!reproducido && (
-            <img
-              src={relojImg}
-              alt="Reproducir animación"
-              onClick={handlePlayClick}
+            {!reproducido && (
+              <div
+                onClick={handlePlayClick}
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  width: "100px",
+                  height: "100px",
+                  borderRadius: "50%",
+                  background: palette.amarillo,
+                  border: `5px solid ${palette.borde}`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "2.4rem",
+                  cursor: "pointer",
+                  zIndex: 20,
+                  animation: "sunPulse 1.3s ease-in-out infinite",
+                  boxShadow: `0 6px 0 ${palette.borde}`,
+                }}
+                role="button"
+              >
+                ▶️
+              </div>
+            )}
+
+            {!relojEncontrado && (
+              <img
+                src={relojImg}
+                alt="Reloj escondido"
+                onClick={handleRelojClick}
+                style={{
+                  position: "absolute",
+                  left: "51.2%",
+                  top: "47.5%",
+                  transform: "translate(-50%, -50%) rotate(-18deg)",
+                  width: "42px",
+                  height: "42px",
+                  objectFit: "contain",
+                  opacity: 0.95,
+                  cursor: "pointer",
+                  zIndex: 50,
+                  pointerEvents: "auto",
+                  filter: `drop-shadow(0 0 6px ${palette.amarillo})`,
+                  animation: "wiggleSticker 1.6s ease-in-out infinite",
+                }}
+              />
+            )}
+            <Confetti pieces={confetti} />
+
+            <Link
+              to="/comicj"
+              className="comic-nav-btn d-flex align-items-center justify-content-center text-decoration-none"
               style={{
                 position: "absolute",
                 top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                width: "90px",
-                height: "90px",
-                objectFit: "contain",
-                animation: "pulseClock 1.2s ease-in-out infinite",
-                cursor: "pointer",
-                zIndex: 20,
-                filter: "drop-shadow(0 0 10px rgba(255, 230, 160, 0.85))",
+                left: "14px",
+                transform: "translateY(-50%)",
+                width: "52px",
+                height: "52px",
+                borderRadius: "50%",
+                border: `4px solid ${palette.borde}`,
+                background: palette.amarillo,
+                color: palette.borde,
+                fontSize: "1.8rem",
+                fontFamily: fDisplay,
+                fontWeight: 800,
+                zIndex: 60,
+                boxShadow: `0 5px 0 ${palette.borde}`,
               }}
-            />
-          )}
+            >
+              ‹
+            </Link>
 
-{/* RELOJ ESCONDIDO */}
-{!relojEncontrado && (
-  <img
-    src={relojImg}
-    alt="Reloj escondido"
-    onClick={handleRelojClick}
-    style={{
-      position: "absolute",
-
-      // Posición del reloj
-      left: "51.2%",
-      top: "47.5%",
-
-      transform: "translate(-50%, -50%) rotate(-18deg)",
-
-      // Tamaño
-      width: "30px",
-      height: "30px",
-      objectFit: "contain",
-
-      // Apariencia
-      opacity: 0.55,
-      cursor: "pointer",
-      zIndex: 999,
-      pointerEvents: "auto",
-
-      filter: "drop-shadow(0 0 3px rgba(255,220,120,.6))",
-    }}
-  />
-)}
-          {/* BOTÓN ESCENA ANTERIOR */}
-          <Link
-            to="/comicj"
-            className="d-flex align-items-center justify-content-center text-decoration-none"
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "12px",
-              transform: "translateY(-50%)",
-              width: "48px",
-              height: "48px",
-              borderRadius: "50%",
-              background: "rgba(42,42,42,0.7)",
-              color: "#f4d9a0",
-              fontSize: "1.6rem",
-              zIndex: 15,
-              boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
-            }}
-            aria-label="Escena anterior"
-          >
-            ‹
-          </Link>
-
-          {/* BOTÓN SIGUIENTE ESCENA */}
-          <Link
-            to="/comic"
-            className="d-flex align-items-center justify-content-center text-decoration-none"
-            style={{
-              position: "absolute",
-              top: "50%",
-              right: "12px",
-              transform: "translateY(-50%)",
-              width: "48px",
-              height: "48px",
-              borderRadius: "50%",
-              background: "rgba(42,42,42,0.7)",
-              color: "#f4d9a0",
-              fontSize: "1.6rem",
-              zIndex: 15,
-              boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
-            }}
-            aria-label="Siguiente escena"
-          >
-            ›
-          </Link>
-
+            <Link
+              to="/comic"
+              className="comic-nav-btn d-flex align-items-center justify-content-center text-decoration-none"
+              style={{
+                position: "absolute",
+                top: "50%",
+                right: "14px",
+                transform: "translateY(-50%)",
+                width: "52px",
+                height: "52px",
+                borderRadius: "50%",
+                border: `4px solid ${palette.borde}`,
+                background: palette.rosa,
+                color: "#fff",
+                fontSize: "1.8rem",
+                fontFamily: fDisplay,
+                fontWeight: 800,
+                zIndex: 60,
+                boxShadow: `0 5px 0 ${palette.borde}`,
+              }}
+            >
+              ›
+            </Link>
+          </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Comick
+export default Comick;
