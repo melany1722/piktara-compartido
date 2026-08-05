@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import Buscar from "./Buscar";
 import IniciarSeccion from "./IniciarSeccion";
 
-// ── Tipografías y Paleta Oficial (3 Colores + Contorno) ─────────────────
+// ── Tipografías y Paleta Oficial ─────────────────
 const fDisplay = "'Baloo 2', 'Comic Sans MS', sans-serif";
 const fBody = "'Quicksand', 'Comic Sans MS', sans-serif";
 
@@ -17,17 +17,17 @@ const palette = {
 const equipo = [
   { 
     nombre: "KEVIN RESTREPO", 
-    img: "/kevin.png", 
+    img: "/Kevin.svg", 
     desc: "Tengo 18 años, me gusta mucho el arte y la historia. Soy muy creativo y me apasiona el diseño gráfico." 
   },
   { 
     nombre: "MELANY BELTRAN", 
-    img: "/melany.png", 
+    img: "/Mely.svg", 
     desc: "Tengo 18 años. Entre mis pasiones está el arte abstracto y el dibujo; me considero una chica alegre y solidaria." 
   },
   { 
     nombre: "JUAN LOPERA", 
-    img: "/juan.png", 
+    img: "/Juan.svg", 
     desc: "Tengo 18 años, apasionado por la tecnología, los videojuegos y la creatividad aplicada al diseño gráfico." 
   },
 ];
@@ -50,19 +50,21 @@ export default function SobrePiktara() {
           box-shadow: 0 12px 0 ${palette.borde};
         }
 
-        .nav-btn-link {
+        .nav-btn-pill {
           font-family: ${fDisplay};
           font-weight: 700;
-          color: #ffffff !important;
-          background: ${palette.morado};
-          padding: 8px 20px;
+          font-size: 1.1rem;
+          padding: 8px 22px;
           border-radius: 999px;
           border: 3px solid ${palette.borde};
           box-shadow: 0 4px 0 ${palette.borde};
           text-decoration: none;
-          transition: transform 0.15s ease;
+          transition: transform 0.15s ease, background-color 0.15s ease;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
         }
-        .nav-btn-link:hover {
+        .nav-btn-pill:hover {
           transform: scale(1.05);
         }
 
@@ -88,9 +90,9 @@ export default function SobrePiktara() {
         }
       `}</style>
 
-      {/* NAVBAR */}
+      {/* NAVBAR ÚNICA Y SIMPLIFICADA */}
       <nav
-        className="navbar navbar-expand-lg px-4 px-md-5 py-2"
+        className="navbar navbar-expand-lg px-4 px-md-5 py-3"
         style={{
           background: palette.amarillo,
           borderBottom: `6px solid ${palette.borde}`,
@@ -99,7 +101,11 @@ export default function SobrePiktara() {
         }}
       >
         <Link to="/" className="navbar-brand me-4">
-          <img src="/logo-piktara.png" alt="Piktara" style={{ height: "55px", filter: `drop-shadow(0 3px 0 ${palette.borde})` }} />
+          <img 
+            src="/LOGO COMPL...ARA.svg" 
+            alt="Piktara" 
+            style={{ height: "50px", objectFit: "contain", filter: `drop-shadow(0 3px 0 ${palette.borde})` }} 
+          />
         </Link>
 
         <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuSobre" style={{ borderColor: palette.borde }}>
@@ -107,26 +113,29 @@ export default function SobrePiktara() {
         </button>
 
         <div className="collapse navbar-collapse justify-content-center" id="menuSobre">
-          <ul className="navbar-nav gap-3 align-items-center">
-            <li className="nav-item">
-              <a
-                className="nav-link fw-bold px-3 py-1"
-                href="#"
+          <ul className="navbar-nav gap-3 align-items-center my-2 my-lg-0">
+            {/* Botón Activo: Sobre Piktara */}
+            <li>
+              <span
+                className="nav-btn-pill"
                 style={{
-                  fontFamily: fDisplay,
-                  fontSize: "1.1rem",
-                  color: palette.morado,
                   background: palette.crema,
-                  borderRadius: "20px",
-                  border: `3px solid ${palette.borde}`,
-                  boxShadow: `0 3px 0 ${palette.borde}`
+                  color: palette.morado,
                 }}
               >
                 Sobre Piktara
-              </a>
+              </span>
             </li>
-            <li className="nav-item">
-              <Link to="/nuestro-comic" className="nav-btn-link">
+            {/* Botón de Enlace: Nuestro Cómic */}
+            <li>
+              <Link
+                to="/nuestro-comic"
+                className="nav-btn-pill"
+                style={{
+                  background: palette.morado,
+                  color: "#ffffff",
+                }}
+              >
                 Nuestro Cómic
               </Link>
             </li>
@@ -159,6 +168,18 @@ export default function SobrePiktara() {
               boxShadow: `0 10px 0 ${palette.borde}`
             }}
           >
+            <div className="mb-4">
+              <img 
+                src="/MANO LOGO.svg" 
+                alt="Isotipo Mano" 
+                style={{ 
+                  height: "90px", 
+                  objectFit: "contain",
+                  filter: `drop-shadow(0 4px 0 ${palette.borde})` 
+                }} 
+              />
+            </div>
+
             <h1 
               style={{ 
                 fontFamily: fDisplay, 
@@ -240,19 +261,18 @@ export default function SobrePiktara() {
               <div key={i} className="col-12 col-md-4 d-flex">
                 <div className="piktara-card text-center p-4 w-100 d-flex flex-column align-items-center position-relative">
                   
-                  <div 
-                    className="mb-3 overflow-hidden"
-                    style={{
-                      width: "160px",
-                      height: "200px",
-                      borderRadius: "20px",
-                      border: `4px solid ${palette.borde}`,
-                      background: palette.crema,
-                      boxShadow: `0 5px 0 ${palette.borde}`
-                    }}
-                  >
+                  <div className="mb-3 w-100" style={{ height: "200px" }}>
                     {miembro.img ? (
-                      <img src={miembro.img} alt={miembro.nombre} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      <img 
+                        src={miembro.img} 
+                        alt={miembro.nombre} 
+                        style={{ 
+                          width: "100%", 
+                          height: "100%", 
+                          objectFit: "contain",
+                          filter: `drop-shadow(0 5px 0 ${palette.borde})` 
+                        }} 
+                      />
                     ) : (
                       <div className="w-100 h-100 d-flex align-items-center justify-content-center">
                         <i className="bi bi-person-fill" style={{ fontSize: "4rem", color: palette.morado }} />
@@ -260,7 +280,7 @@ export default function SobrePiktara() {
                     )}
                   </div>
 
-                  <h3 style={{ fontFamily: fDisplay, fontSize: "1.3rem", fontWeight: 800, color: palette.morado }}>
+                  <h3 style={{ fontFamily: fDisplay, fontSize: "1.3rem", fontWeight: 800, color: palette.morado, marginTop: "10px" }}>
                     {miembro.nombre}
                   </h3>
 
@@ -283,11 +303,8 @@ export default function SobrePiktara() {
             
             <div className="col-12 col-md-auto d-flex flex-column align-items-center align-items-md-start">
               <Link to="/">
-                <img src="/logo-piktara.png" alt="Piktara" style={{ width: "120px", filter: `drop-shadow(0 2px 0 ${palette.borde})` }} />
+                <img src="/PIKTARA LOGO (1).svg" alt="Piktara" style={{ width: "140px", filter: `drop-shadow(0 2px 0 ${palette.borde})` }} />
               </Link>
-              <span style={{ fontFamily: fDisplay, fontWeight: 800, color: palette.morado, fontSize: "1.2rem" }}>
-                PIKTARA
-              </span>
             </div>
 
             <div className="col-12 col-md-auto text-center">
@@ -295,7 +312,7 @@ export default function SobrePiktara() {
                 Navegación
               </p>
               <div className="d-flex gap-3 justify-content-center fw-bold">
-                <a href="#" style={{ color: palette.borde, textDecoration: "none" }}>Sobre Piktara</a>
+                <span style={{ color: palette.borde }}>Sobre Piktara</span>
                 <span>•</span>
                 <Link to="/nuestro-comic" style={{ color: palette.borde, textDecoration: "none" }}>Nuestro Cómic</Link>
               </div>

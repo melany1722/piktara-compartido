@@ -6,16 +6,16 @@ import IniciarSeccion from "./IniciarSeccion";
 const fDisplay = "'Baloo 2', 'Comic Sans MS', sans-serif";
 
 const palette = {
-  morado: "#5A189A",
+  morado: "#9D6A8E",
   amarillo: "#FFC300",
   crema: "#FFF8E7",
   borde: "#3A2312",
 };
 
 const personajes = [
-  { nombre: "ADAD", img: "/adad.png", rot: "-2deg" },
-  { nombre: "NINOVE", img: "/ninove.png", rot: "1.5deg" },
-  { nombre: "NARAMSIN", img: "/naramsin.png", rot: "-1.5deg" },
+  { nombre: "ADAD", img: "/Adad.svg", rot: "-2deg" },
+  { nombre: "ATREUS", img: "/diosgriego.svg", rot: "1.5deg" },
+  { nombre: "NINOVE", img: "/Ninove.svg", rot: "-1.5deg" },
 ];
 
 const Cloud = ({ top, left, size, delay, duration, color = palette.crema }) => (
@@ -200,7 +200,7 @@ export default function Home() {
             }}
           >
             <img
-              src="/logo-piktara.png"
+              src="./MANOLOGO.svg"
               alt="Piktara"
               style={{
                 width: "250px",
@@ -225,7 +225,7 @@ export default function Home() {
       >
         <Link to="/" className="navbar-brand me-5">
           <img
-            src="/logo-piktara.png"
+            src="./MANOLOGO.svg"
             alt="Piktara"
             style={{ height: "55px", filter: `drop-shadow(0 3px 0 ${palette.borde})` }}
           />
@@ -390,7 +390,7 @@ export default function Home() {
         <div className="container">
           <div className="row justify-content-center g-4">
             {personajes.map((p, i) => (
-              <div key={i} className="col-6 col-md-3 text-center personaje-card" style={{ transform: `rotate(${p.rot})` }}>
+              <div key={i} className="col-6 col-md-4 text-center personaje-card" style={{ transform: `rotate(${p.rot})` }}>
                 <div
                   className="card h-100"
                   style={{
@@ -408,8 +408,9 @@ export default function Home() {
                     style={{
                       width: "100%",
                       aspectRatio: "3/4",
-                      objectFit: "cover",
+                      objectFit: "contain",
                       objectPosition: "top",
+                      background: "#fff",
                       border: `3px solid ${palette.amarillo}`,
                     }}
                   />
@@ -519,7 +520,7 @@ export default function Home() {
           <div className="row justify-content-between align-items-center gy-4">
             <div className="col-md-3 text-center text-md-start">
               <img
-                src="/logo-piktara.png"
+                src="./nombresolo.svg"
                 alt="Piktara"
                 style={{ width: "150px", filter: `drop-shadow(0 3px 0 ${palette.borde})` }}
               />
