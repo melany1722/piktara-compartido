@@ -190,17 +190,6 @@ export default function Trailer() {
       <Buscar />
       <IniciarSeccion />
 
-      {/* PESTAÑAS DE CAMBIO DE SECCIÓN */}
-      <div className="py-3 px-3" style={{ background: palette.morado, borderBottom: `5px solid ${palette.borde}` }}>
-        <div className="container d-flex justify-content-center gap-3">
-          <Link to="/sobre-el-proyecto" className="tab-button-nav inactive">
-            Sobre el Proyecto
-          </Link>
-          <span className="tab-button-nav active">
-            Sobre el Cómic
-          </span>
-        </div>
-      </div>
 
       {/* REPRODUCTOR DE TRAILER */}
       <section className="py-5 px-3" style={{ background: palette.crema, borderBottom: `5px solid ${palette.morado}` }}>

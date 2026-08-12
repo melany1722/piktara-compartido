@@ -13,21 +13,6 @@ const palette = {
   borde: "#3A2312",  // Color principal 2 (Textos, contornos y estructura fuerte)
 };
 
-const tabs = {
-  proyecto: {
-    title: "SOBRE EL PROYECTO",
-    text: 'El proyecto "Primeras civilizaciones y la invención de la escritura" busca acercar a los niños y jóvenes al conocimiento histórico mediante un cómic digital interactivo transmedia. A través de ilustraciones, animaciones, sonido y decisiones del lector, se crea una experiencia de aprendizaje dinámica, entretenida e inmersiva.',
-  },
-  funciona: {
-    title: "¿CÓMO FUNCIONA?",
-    text: "Un cómic digital interactivo permite al lector tomar decisiones que afectan la narrativa, combinando texto, imágenes, audio y animación. Además, al ser transmedia, la historia puede expandirse en diferentes formatos y plataformas.",
-  },
-  objetivo: {
-    title: "OBJETIVO DEL PROYECTO",
-    text: "Desarrollar un cómic digital interactivo transmedia sobre las primeras civilizaciones y la invención de la escritura, que permita a los estudiantes aprender historia de forma dinámica, entretenida e inmersiva, fomentando el pensamiento crítico y la creatividad.",
-  },
-};
-
 const imagenesComic = [
   { src: "/fondo_9.png", alt: "Desierto con oasis" },
   { src: "/fondo_10.png", alt: "Sala con columnas" },
@@ -57,9 +42,6 @@ const WashiTape = ({ top, left, right, rotate }) => (
 );
 
 export default function NuestroComic() {
-  const [tab, setTab] = useState("proyecto");
-  const c = tabs[tab];
-
   return (
     <div style={{ background: palette.crema, minHeight: "100vh", fontFamily: fBody, color: palette.borde }}>
       {/* Estilos optimizados para máxima usabilidad */}
@@ -91,34 +73,6 @@ export default function NuestroComic() {
         .nav-btn-pill:active {
           transform: translateY(2px);
           box-shadow: 0 2px 0 ${palette.borde};
-        }
-
-        /* Pestañas interiores interactivas y amplias */
-        .tab-button {
-          font-family: ${fDisplay};
-          font-weight: 800;
-          font-size: 1.1rem;
-          padding: 14px 30px;
-          border-radius: 999px;
-          border: 4px solid ${palette.borde};
-          cursor: pointer;
-          transition: all 0.2s ease;
-          box-shadow: 0 5px 0 ${palette.borde};
-        }
-        .tab-button.active {
-          background: ${palette.morado};
-          color: #ffffff;
-          transform: translateY(-3px);
-          box-shadow: 0 8px 0 ${palette.borde};
-        }
-        .tab-button.inactive {
-          background: #ffffff;
-          color: ${palette.borde};
-        }
-        .tab-button.inactive:hover {
-          background: ${palette.morado};
-          color: #ffffff;
-          transform: translateY(-2px);
         }
 
         /* Botones de iconos circulares de fácil clic */
@@ -230,67 +184,6 @@ export default function NuestroComic() {
 
       <Buscar />
       <IniciarSeccion />
-
-      {/* PESTAÑAS DE NAVEGACIÓN SUPERIOR (INTERNAS) */}
-      <div className="py-4 px-3" style={{ background: "#ffffff", borderBottom: `5px solid ${palette.borde}` }}>
-        <div className="container d-flex justify-content-center gap-3 flex-wrap">
-          {[
-            { key: "proyecto", label: "Sobre el Proyecto" },
-            { key: "funciona", label: "¿Cómo Funciona?" },
-            { key: "objetivo", label: "Objetivo del Proyecto" },
-          ].map(({ key, label }) => (
-            <button
-              key={key}
-              onClick={() => setTab(key)}
-              className={`tab-button ${tab === key ? "active" : "inactive"}`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* DISPLAY DINÁMICO (HERO TAB) */}
-      <div className="py-5 px-3" style={{ background: palette.crema, borderBottom: `5px solid ${palette.borde}` }}>
-        <div className="container position-relative" style={{ maxWidth: "900px" }}>
-          
-          <div 
-            className="p-4 p-md-5 position-relative"
-            style={{
-              background: "#ffffff",
-              borderRadius: "36px",
-              border: `6px solid ${palette.borde}`,
-              boxShadow: `0 10px 0 ${palette.borde}`
-            }}
-          >
-            <WashiTape top="-14px" left="-14px" rotate={-15} />
-            <WashiTape top="-14px" right="-14px" rotate={15} />
-
-            <div className="row align-items-center g-4">
-              <div className="col-md-5 text-center text-md-start">
-                <h1 
-                  style={{ 
-                    fontFamily: fDisplay, 
-                    fontSize: "2.3rem", 
-                    fontWeight: 800, 
-                    color: palette.morado,
-                    lineHeight: 1.2
-                  }}
-                >
-                  {c.title}
-                </h1>
-              </div>
-              <div className="col-md-7">
-                <p style={{ fontFamily: fBody, fontSize: "1.1rem", lineHeight: 1.8, color: palette.borde, fontWeight: 700, margin: 0 }}>
-                  {c.text}
-                </p>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-      </div>
 
       {/* SECCIÓN MUESTRA DEL CÓMIC CON CARRUSEL */}
       <section className="py-5 px-3" style={{ background: palette.crema }}>

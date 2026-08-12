@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import Buscar from "./Buscar";
 import IniciarSeccion from "./IniciarSeccion";
@@ -10,48 +10,231 @@ const palette = {
   amarillo: "#FFC300",
   crema: "#FFF8E7",
   borde: "#3A2312",
+  lavanda: "#E6E6FA",
 };
 
 const personajes = [
-  { nombre: "ADAD", img: "/Adad.svg", rot: "-2deg" },
-  { nombre: "ATREUS", img: "/diosgriego.svg", rot: "1.5deg" },
-  { nombre: "NINOVE", img: "/Ninove.svg", rot: "-1.5deg" },
+  {
+    nombre: "ADAD",
+    img: "/Adad.svg",
+    rot: "-2deg",
+    descripcion:
+      "Un niño curioso y valiente que crece rodeado de las historias antiguas de Mesopotamia.",
+    funcion:
+      "Es el guía del lector: hace las preguntas que todos nos haríamos y ayuda a descubrir el mundo paso a paso.",
+  },
+  {
+    nombre: "ATREUS",
+    img: "/diosgriego.svg",
+    rot: "1.5deg",
+    descripcion:
+      "Un joven con raíces en la mitología griega, siempre coronado con laurel como los héroes clásicos.",
+    funcion:
+      "Introduce al lector en las leyendas y valores del mundo griego, aportando sabiduría a las decisiones de la historia.",
+  },
+  {
+    nombre: "NINOVE",
+    img: "/Ninove.svg",
+    rot: "-1.5deg",
+    descripcion:
+      "Una joven decidida y protectora, conectada a las tradiciones ancestrales de su pueblo.",
+    funcion:
+      "Acompaña al lector en los momentos clave, ayudando a tomar las decisiones que cambian el rumbo de la aventura.",
+  },
 ];
 
-const Cloud = ({ top, left, size, delay, duration, color = palette.crema }) => (
-  <div
-    style={{
-      position: "absolute",
-      top,
-      left,
-      width: size,
-      height: size * 0.55,
-      opacity: 0.85,
-      animation: `driftCloud ${duration}s linear ${delay}s infinite`,
-      pointerEvents: "none",
-      zIndex: 2,
-    }}
-  >
-    <svg viewBox="0 0 200 110" width="100%" height="100%">
-      <ellipse cx="55" cy="70" rx="55" ry="35" fill={color} />
-      <ellipse cx="110" cy="50" rx="65" ry="45" fill={color} />
-      <ellipse cx="165" cy="72" rx="45" ry="30" fill={color} />
-    </svg>
-  </div>
-);
+const equipo = [
+  {
+    nombre: "KEVIN RESTREPO",
+    img: "/Kevin.svg",
+    desc: "Tengo 18 años, me gusta mucho el arte y la historia. Soy muy creativo y me apasiona el diseño gráfico.",
+  },
+  {
+    nombre: "MELANY BELTRAN",
+    img: "/Mely.svg",
+    desc: "Tengo 18 años. Entre mis pasiones está el arte abstracto y el dibujo; me considero una chica alegre y solidaria.",
+  },
+  {
+    nombre: "JUAN LOPERA",
+    img: "/Juan.svg",
+    desc: "Tengo 18 años, apasionado por la tecnología, los videojuegos y la creatividad aplicada al diseño gráfico.",
+  },
+];
+
+// --- MODAL DE PERSONAJE ---
+const PersonajeModal = ({ personaje, onClose }) => {
+  if (!personaje) return null;
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100vh",
+        background: "rgba(58, 35, 18, 0.6)",
+        zIndex: 999,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "20px",
+        backdropFilter: "blur(5px)",
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: palette.morado,
+          border: `5px solid ${palette.borde}`,
+          borderRadius: "28px",
+          boxShadow: `0 12px 0 ${palette.borde}`,
+          maxWidth: "480px",
+          width: "100%",
+          padding: "28px",
+          position: "relative",
+          transform: "rotate(-0.5deg)",
+          animation: "modalPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both",
+          textAlign: "center",
+        }}
+      >
+        <button
+          onClick={onClose}
+          style={{
+            position: "absolute",
+            top: "-16px",
+            right: "-16px",
+            width: "40px",
+            height: "40px",
+            borderRadius: "50%",
+            background: palette.amarillo,
+            border: `3px solid ${palette.borde}`,
+            boxShadow: `0 4px 0 ${palette.borde}`,
+            fontFamily: fDisplay,
+            fontWeight: 800,
+            fontSize: "1.1rem",
+            color: palette.borde,
+            cursor: "pointer",
+            lineHeight: 1,
+          }}
+          aria-label="Cerrar"
+        >
+          ✕
+        </button>
+
+        <img
+          src={personaje.img}
+          alt={personaje.nombre}
+          style={{
+            width: "160px",
+            aspectRatio: "3/4",
+            objectFit: "contain",
+            objectPosition: "top",
+            background: palette.crema,
+            border: `3px solid ${palette.amarillo}`,
+            borderRadius: "18px",
+            margin: "0 auto 16px",
+            boxShadow: `0 6px 0 ${palette.borde}33`,
+          }}
+        />
+
+        <h3
+          style={{
+            fontFamily: fDisplay,
+            fontSize: "1.4rem",
+            letterSpacing: "0.06em",
+            color: palette.amarillo,
+            textTransform: "uppercase",
+            fontWeight: 800,
+            marginBottom: "14px",
+          }}
+        >
+          {personaje.nombre}
+        </h3>
+
+        <p
+          style={{
+            fontFamily: "Quicksand, sans-serif",
+            fontSize: "1.02rem",
+            lineHeight: 1.6,
+            color: "#ffffff",
+            fontWeight: 600,
+            marginBottom: "18px",
+          }}
+        >
+          {personaje.descripcion}
+        </p>
+
+        <div
+          style={{
+            display: "inline-block",
+            background: "rgba(58, 35, 18, 0.3)",
+            color: "#ffffff",
+            borderRadius: "16px",
+            padding: "12px 20px",
+            border: `2px solid ${palette.borde}`,
+            boxShadow: `0 4px 0 ${palette.borde}`,
+            transform: "rotate(1deg)",
+            width: "100%",
+          }}
+        >
+          <p
+            style={{
+              fontFamily: fDisplay,
+              fontSize: "0.85rem",
+              fontWeight: 800,
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+              margin: 0,
+              marginBottom: "4px",
+              color: palette.amarillo,
+            }}
+          >
+            Función en la historia
+          </p>
+          <p
+            style={{
+              fontFamily: "Quicksand, sans-serif",
+              fontSize: "0.92rem",
+              fontWeight: 600,
+              margin: 0,
+              lineHeight: 1.5,
+              color: "#ffffff",
+            }}
+          >
+            {personaje.funcion}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
+  const [personajeActivo, setPersonajeActivo] = useState(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const heroRef = useRef(null);
   const location = useLocation();
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 2200);
+    }, 4200);
     return () => clearTimeout(timer);
   }, []);
 
-  // Escuchar si el buscador requiere hacer scroll tras navegar
+  useEffect(() => {
+    const handleScroll = () => {
+      const heroHeight = heroRef.current?.offsetHeight || 800;
+      const progress = Math.min(window.scrollY / heroHeight, 1);
+      setScrollProgress(progress);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   useEffect(() => {
     if (location.state?.scrollTo) {
       const targetId = location.state.scrollTo;
@@ -69,26 +252,27 @@ export default function Home() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Quicksand:wght@500;600;700&display=swap');
 
-        @keyframes rotateSunburst {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+        @keyframes spiralAndLogoIntro {
+          0% { transform: scale(0.1) rotate(0deg); opacity: 0; }
+          40% { transform: scale(1.5) rotate(1080deg); opacity: 1; }
+          60% { transform: scale(1.2) rotate(1440deg); opacity: 1; }
+          80% { transform: scale(3.2) rotate(1800deg); opacity: 1; }
+          100% { transform: scale(4.5) rotate(2160deg); opacity: 0; }
         }
 
-        @keyframes comicBounceLogo {
+        @keyframes logoPopReveal {
           0% { transform: scale(0.2) rotate(-10deg); opacity: 0; }
-          50% { transform: scale(1.15) rotate(4deg); opacity: 1; }
-          75% { transform: scale(0.95) rotate(-2deg); }
-          100% { transform: scale(1) rotate(0deg); opacity: 1; }
+          50% { transform: scale(0.2) rotate(-10deg); opacity: 0; }
+          65% { transform: scale(1.15) rotate(3deg); opacity: 1; }
+          78% { transform: scale(0.95) rotate(-2deg); opacity: 1; }
+          90% { transform: scale(1.05) rotate(0deg); opacity: 1; }
+          100% { transform: scale(1.3) rotate(0deg); opacity: 0; }
         }
 
-        @keyframes curtainElasticExit {
-          0% { transform: scale(1); opacity: 1; }
-          100% { transform: translateY(-100%); opacity: 0; visibility: hidden; }
-        }
-
-        @keyframes driftCloud {
-          from { transform: translateX(-15vw); }
-          to { transform: translateX(105vw); }
+        @keyframes spiralFadeOutBg {
+          0% { background-color: ${palette.morado}; }
+          88% { background-color: ${palette.morado}; }
+          100% { background-color: transparent; visibility: hidden; }
         }
 
         @keyframes headerDrop {
@@ -96,14 +280,29 @@ export default function Home() {
           to { transform: translateY(0); opacity: 1; }
         }
 
+        @keyframes modalPop {
+          0% { transform: scale(0.5) rotate(-4deg); opacity: 0; }
+          70% { transform: scale(1.05) rotate(1deg); opacity: 1; }
+          100% { transform: scale(1) rotate(-0.5deg); opacity: 1; }
+        }
+
         .home-navlink { transition: transform 0.15s ease, color 0.15s ease; }
         .home-navlink:hover { transform: scale(1.08) rotate(-1deg); color: ${palette.morado} !important; }
 
-        .personaje-card { transition: transform 0.25s ease; }
+        .personaje-card { transition: transform 0.25s ease; cursor: pointer; }
         .personaje-card:hover { transform: translateY(-10px) scale(1.04) rotate(0deg) !important; }
 
-        .aventura-img { transition: transform 0.25s ease; }
-        .aventura-img:hover { transform: translateY(-8px) scale(1.05) rotate(0deg) !important; }
+        .piktara-card {
+          background: #ffffff;
+          border: 4px solid ${palette.borde};
+          border-radius: 28px;
+          box-shadow: 0 8px 0 ${palette.borde};
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .piktara-card:hover {
+          transform: translateY(-6px);
+          box-shadow: 0 12px 0 ${palette.borde};
+        }
 
         .btn-interactivo {
           transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -134,7 +333,6 @@ export default function Home() {
         }
       `}</style>
 
-      {/* CORTINA / ANIMACIÓN DE ENTRADA LIMPIA */}
       {loading && (
         <div
           style={{
@@ -143,68 +341,43 @@ export default function Home() {
             left: 0,
             width: "100vw",
             height: "100vh",
-            backgroundColor: palette.amarillo,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             zIndex: 9999,
             overflow: "hidden",
-            animation: "curtainElasticExit 0.5s ease-in-out 1.7s forwards",
+            animation: "spiralFadeOutBg 4.2s ease-in-out forwards",
           }}
         >
-          {/* Fondo Pop-Art Giratorio */}
           <div
             style={{
               position: "absolute",
-              width: "180vw",
-              height: "180vw",
-              background: `conic-gradient(
-                ${palette.morado} 0deg 15deg, 
-                transparent 15deg 30deg, 
-                ${palette.morado} 30deg 45deg, 
-                transparent 45deg 60deg,
-                ${palette.morado} 60deg 75deg, 
-                transparent 75deg 90deg,
-                ${palette.morado} 90deg 105deg, 
-                transparent 105deg 120deg,
-                ${palette.morado} 120deg 135deg, 
-                transparent 135deg 150deg,
-                ${palette.morado} 150deg 165deg, 
-                transparent 165deg 180deg,
-                ${palette.morado} 180deg 195deg, 
-                transparent 195deg 210deg,
-                ${palette.morado} 210deg 225deg, 
-                transparent 225deg 240deg,
-                ${palette.morado} 240deg 255deg, 
-                transparent 255deg 270deg,
-                ${palette.morado} 270deg 285deg, 
-                transparent 285deg 300deg,
-                ${palette.morado} 300deg 315deg, 
-                transparent 315deg 330deg,
-                ${palette.morado} 330deg 345deg, 
-                transparent 345deg 360deg
-              )`,
-              opacity: 0.12,
-              animation: "rotateSunburst 20s linear infinite",
-              pointerEvents: "none",
+              width: "220px",
+              height: "220px",
+              borderRadius: "50%",
+              background: `conic-gradient(${palette.morado} 0deg 180deg, ${palette.amarillo} 180deg 360deg)`,
+              border: `6px solid ${palette.borde}`,
+              boxShadow: `0 0 0 3000px ${palette.morado}`,
+              animation: "spiralAndLogoIntro 4s cubic-bezier(0.77, 0, 0.175, 1) forwards",
             }}
           />
-
-          {/* Logo Animado Solo */}
           <div
             style={{
-              animation: "comicBounceLogo 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both",
-              textAlign: "center",
-              position: "relative",
-              zIndex: 5,
+              position: "absolute",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              animation: "logoPopReveal 4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
+              zIndex: 10000,
             }}
           >
             <img
-              src="./MANOLOGO.svg"
-              alt="Piktara"
+              src="/LOGO COMPLETO PIKTARA.svg"
+              alt="Piktara Logo"
               style={{
-                width: "250px",
-                filter: `drop-shadow(6px 8px 0px ${palette.borde})`,
+                width: "280px",
+                height: "auto",
+                filter: `drop-shadow(0 8px 0px ${palette.borde}) drop-shadow(0 15px 25px rgba(58, 35, 18, 0.5))`,
               }}
             />
           </div>
@@ -225,7 +398,7 @@ export default function Home() {
       >
         <Link to="/" className="navbar-brand me-5">
           <img
-            src="./MANOLOGO.svg"
+            src="/LOGO COMPLETO PIKTARA.svg"
             alt="Piktara"
             style={{ height: "55px", filter: `drop-shadow(0 3px 0 ${palette.borde})` }}
           />
@@ -234,30 +407,14 @@ export default function Home() {
           <span className="navbar-toggler-icon"></span>
         </button>
         <div className="collapse navbar-collapse justify-content-center" id="menuHome">
-          <ul className="navbar-nav gap-5">
-            <li className="nav-item">
-              <Link
-                to="/sobre-piktara"
-                className="home-navlink nav-link"
-                style={{
-                  fontFamily: fDisplay,
-                  fontSize: "0.95rem",
-                  letterSpacing: "0.04em",
-                  color: palette.borde,
-                  fontWeight: 800,
-                  textTransform: "uppercase",
-                }}
-              >
-                Sobre Piktara
-              </Link>
-            </li>
+          <ul className="navbar-nav mx-auto">
             <li className="nav-item">
               <Link
                 to="/nuestro-comic"
                 className="home-navlink nav-link"
                 style={{
                   fontFamily: fDisplay,
-                  fontSize: "0.95rem",
+                  fontSize: "1.05rem",
                   letterSpacing: "0.04em",
                   color: palette.borde,
                   fontWeight: 800,
@@ -310,28 +467,58 @@ export default function Home() {
       <Buscar />
       <IniciarSeccion />
 
-      {/* HERO SECTION - ID: hero */}
-      <div id="hero" className="position-relative overflow-hidden py-5 px-3 d-flex align-items-center" style={{ background: palette.crema, minHeight: "82vh" }}>
-        <div
-          className="position-absolute top-0 start-0 w-100 h-100"
+      {/* HERO SECTION CON IMAGEN DE FONDO (BACKGROUND-IMAGE) */}
+      <div 
+        ref={heroRef}
+        className="position-relative overflow-hidden d-flex align-items-center justify-content-center w-100" 
+        style={{ 
+          backgroundImage: `url('/fondo_7.png')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          height: "95vh",
+          borderBottom: `6px solid ${palette.borde}`
+        }}
+      >
+        <div 
+          className="position-absolute w-100 px-3 px-md-5 text-center d-flex justify-content-center pointer-events-none"
           style={{
-            backgroundImage: "url('/piramide 1.png')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            opacity: 0.3,
-            zIndex: 0,
+            zIndex: 4,
+            transform: `translateY(${scrollProgress * -200}px) scale(${Math.max(1 - scrollProgress * 0.4, 0.5)}) rotate(${scrollProgress * 20}deg)`,
+            opacity: Math.max(1 - scrollProgress * 1.5, 0),
+            transition: "transform 0.05s ease-out, opacity 0.05s ease-out",
           }}
         />
 
-        <Cloud top="10%" left="4%" size={140} delay={0} duration={22} />
-        <Cloud top="18%" left="72%" size={110} delay={4} duration={18} />
+        <div 
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            width: "100%",
+            height: "25px",
+            background: palette.lavanda,
+            borderTop: `4px solid ${palette.borde}`,
+            zIndex: 5
+          }}
+        />
       </div>
 
-      {/* SECCIÓN: ¿QUÉ ES? - ID: que-es */}
-      <section id="que-es" className="py-5" style={{ background: palette.morado, position: "relative" }}>
-        <div className="container py-3">
+      {/* SECCIÓN: ¿QUÉ ES? */}
+      <section 
+        id="que-es" 
+        className="py-5 overflow-hidden" 
+        style={{ background: palette.morado, position: "relative", borderBottom: `6px solid ${palette.borde}` }}
+      >
+        <div 
+          className="container py-4 text-center"
+          style={{
+            transform: `translateX(${(scrollProgress - 0.5) * 110}px)`,
+            transition: "transform 0.05s ease-out"
+          }}
+        >
           <div className="row justify-content-center">
-            <div className="col-md-9 text-center">
+            <div className="col-md-9">
               <div
                 style={{
                   display: "inline-block",
@@ -368,7 +555,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECCIÓN: PERSONAJES - ID: personajes */}
+      {/* SECCIÓN: PERSONAJES */}
       <section id="personajes" className="py-5" style={{ background: palette.crema }}>
         <div className="text-center mb-5">
           <h2
@@ -390,7 +577,12 @@ export default function Home() {
         <div className="container">
           <div className="row justify-content-center g-4">
             {personajes.map((p, i) => (
-              <div key={i} className="col-6 col-md-4 text-center personaje-card" style={{ transform: `rotate(${p.rot})` }}>
+              <div
+                key={i}
+                className="col-6 col-md-4 text-center personaje-card"
+                style={{ transform: `rotate(${p.rot})` }}
+                onClick={() => setPersonajeActivo(p)}
+              >
                 <div
                   className="card h-100"
                   style={{
@@ -434,76 +626,136 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECCIÓN: DESCUBRE MÁS AVENTURAS - ID: aventuras */}
-      <section id="aventuras" className="py-5" style={{ background: palette.crema }}>
-        <div className="container py-3">
-          <div className="row align-items-center g-4">
-            <div className="col-md-5 text-center text-md-start">
-              <div
+      {/* BANNER PRINCIPAL DE BIENVENIDA */}
+      <div className="py-5 px-3" style={{ background: palette.crema, borderBottom: `5px solid ${palette.borde}` }}>
+        <div className="container text-center py-3 position-relative" style={{ maxWidth: "850px" }}>
+          <div
+            className="p-4 p-md-5 position-relative"
+            style={{
+              background: "#ffffff",
+              borderRadius: "36px",
+              border: `6px solid ${palette.borde}`,
+              boxShadow: `0 10px 0 ${palette.borde}`,
+            }}
+          >
+            <div className="mb-4">
+              <img
+                src="/LOGO COMPLETO PIKTARA.svg"
+                alt="Isotipo Mano"
                 style={{
-                  display: "inline-block",
-                  background: palette.morado,
-                  color: palette.crema,
-                  borderRadius: "20px",
-                  padding: "16px 32px",
-                  boxShadow: `0 6px 0 ${palette.borde}`,
-                  transform: "rotate(-2deg)",
+                  height: "90px",
+                  objectFit: "contain",
+                  filter: `drop-shadow(0 4px 0 ${palette.borde})`,
                 }}
-              >
-                <h2
-                  style={{
-                    fontFamily: fDisplay,
-                    fontSize: "1.4rem",
-                    letterSpacing: "0.03em",
-                    fontWeight: 800,
-                    margin: 0,
-                  }}
-                >
-                  Descubre más aventuras
-                </h2>
-              </div>
+              />
             </div>
 
-            <div className="col-md-7 d-flex justify-content-center justify-content-md-end gap-4 align-items-center flex-wrap">
-              <img
-                src="/revolucion2 1.png"
-                alt="Revolución"
-                className="aventura-img"
-                style={{
-                  height: "210px",
-                  borderRadius: "16px",
-                  border: `4px solid ${palette.borde}`,
-                  boxShadow: "0 8px 16px rgba(0,0,0,0.12)",
-                  objectFit: "cover",
-                  transform: "rotate(-3deg)",
-                }}
-              />
-              <img
-                src="/Imagen de WhatsApp 2025-10-03 a las 12.53.55_32a9272f 2.png"
-                alt="Crónicas del Imperio"
-                className="aventura-img"
-                style={{
-                  height: "230px",
-                  borderRadius: "16px",
-                  border: `4px solid ${palette.amarillo}`,
-                  boxShadow: "0 10px 20px rgba(0,0,0,0.15)",
-                  objectFit: "cover",
-                }}
-              />
-              <img
-                src="/bixuales2 1.png"
-                alt="Bisual"
-                className="aventura-img"
-                style={{
-                  height: "210px",
-                  borderRadius: "16px",
-                  border: `4px solid ${palette.borde}`,
-                  boxShadow: "0 8px 16px rgba(0,0,0,0.12)",
-                  objectFit: "cover",
-                  transform: "rotate(3deg)",
-                }}
-              />
+            <h1
+              style={{
+                fontFamily: fDisplay,
+                fontSize: "3rem",
+                fontWeight: 800,
+                color: palette.morado,
+                letterSpacing: "0.05em",
+                textShadow: `0 3px 0 ${palette.amarillo}`,
+                marginBottom: "1rem",
+              }}
+            >
+              BIENVENIDOS A PIKTARA
+            </h1>
+
+            <p style={{ fontFamily: "Quicksand, sans-serif", fontSize: "1.05rem", lineHeight: 1.8, color: palette.borde, fontWeight: 600, margin: 0 }}>
+              Piktara es una marca creativa que une arte, historia y narrativa digital. Su esencia nace de la
+              inspiración en lo místico y antiguo, transformado en experiencias modernas como cómics interactivos y
+              proyectos visuales llenos de imaginación.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* SECCIÓN ORIGEN DEL NOMBRE */}
+      <section className="py-5 px-3" style={{ background: palette.crema }}>
+        <div className="container">
+          <div
+            className="row align-items-center g-4 p-4 p-md-5"
+            style={{
+              background: "#ffffff",
+              borderRadius: "32px",
+              border: `5px solid ${palette.borde}`,
+              boxShadow: `0 8px 0 ${palette.borde}`,
+              position: "relative",
+            }}
+          >
+            <div className="col-md-5 text-center text-md-start">
+              <h2 style={{ fontFamily: fDisplay, fontSize: "1.8rem", fontWeight: 800, color: palette.morado, lineHeight: 1.3, margin: 0 }}>
+                ¿Cómo surge el nombre PIKTARA?
+              </h2>
             </div>
+            <div className="col-md-7">
+              <p style={{ fontFamily: "Quicksand, sans-serif", fontSize: "1rem", lineHeight: 1.8, color: palette.borde, fontWeight: 600, margin: 0 }}>
+                Surge de la conexión con la historia antigua:
+                <br />
+                <br />
+                <strong>"PIK":</strong> Proviene de los pictogramas y jeroglíficos egipcios, entendiendo la
+                escritura como un arte visual y sagrado.
+                <br />
+                <strong>"TARA":</strong> Se relaciona con el concepto de las estrellas y astros que guiaban la
+                navegación y el tiempo en las civilizaciones antiguas.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECCIÓN EQUIPO */}
+      <section className="py-5 px-3" style={{ background: palette.amarillo, borderTop: `5px solid ${palette.borde}`, borderBottom: `6px solid ${palette.borde}` }}>
+        <div className="container">
+          <div className="text-center mb-5">
+            <span
+              style={{
+                fontFamily: fDisplay,
+                fontSize: "2rem",
+                fontWeight: 800,
+                background: palette.morado,
+                color: "#ffffff",
+                padding: "8px 30px",
+                borderRadius: "999px",
+                border: `4px solid ${palette.borde}`,
+                boxShadow: `0 6px 0 ${palette.borde}`,
+                display: "inline-block",
+              }}
+            >
+              NUESTRO EQUIPO
+            </span>
+          </div>
+
+          <div className="row justify-content-center g-4">
+            {equipo.map((miembro, i) => (
+              <div key={i} className="col-12 col-md-4 d-flex">
+                <div className="piktara-card text-center p-4 w-100 d-flex flex-column align-items-center position-relative">
+                  <div className="mb-3 w-100" style={{ height: "200px" }}>
+                    <img
+                      src={miembro.img}
+                      alt={miembro.nombre}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                        filter: `drop-shadow(0 5px 0 ${palette.borde})`,
+                      }}
+                    />
+                  </div>
+
+                  <h3 style={{ fontFamily: fDisplay, fontSize: "1.3rem", fontWeight: 800, color: palette.morado, marginTop: "10px" }}>
+                    {miembro.nombre}
+                  </h3>
+
+                  <p style={{ fontFamily: "Quicksand, sans-serif", fontSize: "0.92rem", lineHeight: 1.6, color: palette.borde, fontWeight: 600, margin: 0 }}>
+                    {miembro.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -520,7 +772,7 @@ export default function Home() {
           <div className="row justify-content-between align-items-center gy-4">
             <div className="col-md-3 text-center text-md-start">
               <img
-                src="./nombresolo.svg"
+                src="/nombresolo.svg"
                 alt="Piktara"
                 style={{ width: "150px", filter: `drop-shadow(0 3px 0 ${palette.borde})` }}
               />
@@ -541,18 +793,6 @@ export default function Home() {
                 ACERCA DE
               </p>
               <div className="d-flex justify-content-center gap-4">
-                <Link
-                  to="/sobre-piktara"
-                  style={{
-                    fontFamily: "Quicksand, sans-serif",
-                    color: palette.borde,
-                    textDecoration: "none",
-                    fontWeight: 700,
-                    fontSize: "0.95rem",
-                  }}
-                >
-                  Nuestro Grupo
-                </Link>
                 <Link
                   to="/nuestro-comic"
                   style={{
@@ -621,25 +861,10 @@ export default function Home() {
               </div>
             </div>
           </div>
-
-          <div className="row mt-4 pt-3" style={{ borderTop: `2px dashed ${palette.borde}33` }}>
-            <div className="col-12 text-center">
-              <Link
-                to="/"
-                style={{
-                  color: palette.borde,
-                  textDecoration: "none",
-                  fontFamily: fDisplay,
-                  fontWeight: 800,
-                  fontSize: "0.9rem",
-                }}
-              >
-                Volver al Inicio
-              </Link>
-            </div>
-          </div>
         </div>
       </footer>
+
+      <PersonajeModal personaje={personajeActivo} onClose={() => setPersonajeActivo(null)} />
     </>
   );
 }
