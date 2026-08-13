@@ -31,20 +31,16 @@ export default function Buscar() {
       );
 
   const irASeccion = (item) => {
-    // 1. Cerrar el panel Offcanvas de Bootstrap
     const elem = document.getElementById("panelBuscar");
     if (elem) {
       const bsOffcanvas = window.bootstrap?.Offcanvas?.getInstance(elem);
       if (bsOffcanvas) bsOffcanvas.hide();
     }
 
-    // 2. Ejecutar la navegación o el scroll
     if (item.selector) {
       if (location.pathname !== "/") {
-        // Si no estamos en Home, vamos a Home y pasamos el destino
         navigate("/", { state: { scrollTo: item.selector } });
       } else {
-        // Si ya estamos en Home, hacemos scroll directamente
         setTimeout(() => {
           const el = document.getElementById(item.selector);
           if (el) {
@@ -61,15 +57,6 @@ export default function Buscar() {
 
   return (
     <>
-      {/* BOTÓN LUPA  */}
-      <i
-        
-        style={{ cursor: "pointer", fontSize: "1.2rem", color: "#2a2a2a" }}
-        data-bs-toggle="offcanvas"
-        data-bs-target="#panelBuscar"
-        aria-controls="panelBuscar"
-      />
-
       <div
         className="offcanvas offcanvas-end"
         tabIndex="-1"
@@ -83,7 +70,6 @@ export default function Buscar() {
         }}
       >
         <div className="piktara-pop-card h-100 d-flex flex-column">
-          {/* Cabecera */}
           <div className="offcanvas-header px-4 pt-4 pb-2 align-items-center justify-content-between">
             <div
               style={{
@@ -105,7 +91,7 @@ export default function Buscar() {
                   textTransform: "uppercase",
                 }}
               >
-                🔍 ¿Qué buscas?
+                ¿Qué buscas?
               </h5>
             </div>
 
@@ -125,16 +111,15 @@ export default function Buscar() {
                 cursor: "pointer",
               }}
             >
-              ✕
+              X
             </button>
           </div>
 
-          {/* Cuerpo */}
           <div className="offcanvas-body px-4 pt-3 d-flex flex-column gap-3">
             <input
               type="text"
               className="form-control input-piktara-buscar"
-              placeholder="Buscar 'Personajes', 'Piktara'..."
+              placeholder="Buscar Personajes, Piktara..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               style={{
@@ -147,13 +132,14 @@ export default function Buscar() {
                 borderRadius: "18px",
                 padding: "12px 18px",
                 boxShadow: `0 4px 0 ${palette.borde}22`,
+                outline: "none",
               }}
             />
 
             <div className="d-flex flex-column gap-2 mt-2" style={{ maxHeight: "65vh", overflowY: "auto" }}>
               {query.trim() !== "" && resultados.length === 0 && (
                 <p className="text-center py-3" style={{ fontFamily: "'Quicksand', sans-serif", fontWeight: 700, color: palette.borde }}>
-                  😕 No encontramos la sección "{query}"
+                  No encontramos la sección "{query}"
                 </p>
               )}
 
@@ -167,6 +153,8 @@ export default function Buscar() {
                     border: `3px solid ${palette.borde}`,
                     borderRadius: "16px",
                     boxShadow: `0 3.5px 0 ${palette.borde}22`,
+                    cursor: "pointer",
+                    transition: "transform 0.15s ease",
                   }}
                 >
                   <h6
@@ -179,7 +167,7 @@ export default function Buscar() {
                       fontSize: "0.95rem",
                     }}
                   >
-                    👉 {item.titulo}
+                    {item.titulo}
                   </h6>
                   <p
                     style={{

@@ -46,7 +46,7 @@ const Confetti = ({ pieces }) => (
           top: p.top,
           right: p.right,
           fontSize: p.size,
-          zIndex: 55,
+          zIndex: 150,
           pointerEvents: "none",
           "--tx": `${p.tx}px`,
           "--ty": `${p.ty}px`,
@@ -73,7 +73,7 @@ const Comick = () => {
     const anim = lottie.loadAnimation({
       container: lottieContainer.current,
       renderer: "svg",
-      loop: true,
+      loop: false,
       autoplay: false,
       path: "/lottiem/fondomela.json",
       rendererSettings: {
@@ -83,12 +83,18 @@ const Comick = () => {
 
     animRef.current = anim;
 
-    return () => anim.destroy();
+    anim.addEventListener('complete', () => {
+      setReproducido(false);
+    });
+
+    return () => {
+      anim.destroy();
+    };
   }, []);
 
   const handlePlayClick = () => {
     if (animRef.current) {
-      animRef.current.play();
+      animRef.current.goToAndPlay(0, true);
       setReproducido(true);
     }
   };
@@ -245,7 +251,7 @@ const Comick = () => {
             height: "100%",
             aspectRatio: "1920 / 1080",
             maxWidth: "100%",
-            background: "#fff",
+            background: palette.crema,
             borderRadius: "32px",
             padding: "16px",
             border: `6px solid ${palette.morado}`,
@@ -333,12 +339,16 @@ const Comick = () => {
                   width: "42px",
                   height: "42px",
                   objectFit: "contain",
-                  opacity: 0.95,
+                  opacity: 1,
                   cursor: "pointer",
-                  zIndex: 50,
+                  zIndex: 100,
                   pointerEvents: "auto",
-                  filter: `drop-shadow(0 0 6px ${palette.amarillo})`,
+                  filter: `drop-shadow(0 0 8px ${palette.amarillo})`,
                   animation: "wiggleSticker 1.6s ease-in-out infinite",
+                  background: palette.crema,
+                  padding: "4px",
+                  borderRadius: "50%",
+                  border: `2px dashed ${palette.borde}`,
                 }}
               />
             )}

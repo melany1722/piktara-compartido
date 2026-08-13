@@ -28,7 +28,6 @@ export default function IniciarSeccion() {
 
   useEffect(() => {
     actualizarEstadoUsuario();
-    // Escuchar cambios de sesión en la aplicación
     window.addEventListener("piktara_auth_change", actualizarEstadoUsuario);
     return () => window.removeEventListener("piktara_auth_change", actualizarEstadoUsuario);
   }, []);
@@ -42,7 +41,7 @@ export default function IniciarSeccion() {
     setMensaje("");
 
     if (!email || !password || (esRegistro && !nombre)) {
-      setMensaje("⚠️ Completa todos los campos obligatorios.");
+      setMensaje("Completa todos los campos obligatorios.");
       return;
     }
 
@@ -54,7 +53,7 @@ export default function IniciarSeccion() {
     localStorage.setItem("piktara_user", JSON.stringify(usuario));
     setUsuarioLogueado(usuario);
     notificarCambioAuth();
-    setMensaje("🎉 ¡Bienvenido a Piktara!");
+    setMensaje("Bienvenido a Piktara.");
   };
 
   const cerrarSesion = () => {
@@ -116,7 +115,6 @@ export default function IniciarSeccion() {
         }}
       >
         <div className="piktara-login-card h-100 d-flex flex-column">
-          {/* Cabecera */}
           <div className="offcanvas-header px-4 pt-4 pb-2 justify-content-between align-items-center">
             <div
               style={{
@@ -138,7 +136,7 @@ export default function IniciarSeccion() {
                   textTransform: "uppercase",
                 }}
               >
-                {usuarioLogueado ? "👤 Cuenta Activa" : esRegistro ? "📝 Crear Cuenta" : "⚡ ¡Ingresar!"}
+                {usuarioLogueado ? "Cuenta Activa" : esRegistro ? "Crear Cuenta" : "Ingresar"}
               </h5>
             </div>
 
@@ -158,14 +156,12 @@ export default function IniciarSeccion() {
                 cursor: "pointer",
               }}
             >
-              ✕
+              X
             </button>
           </div>
 
-          {/* Cuerpo */}
           <div className="offcanvas-body pt-3 px-4 d-flex flex-column align-items-center gap-3">
             {usuarioLogueado ? (
-              /* VISTA: USUARIO CON SESIÓN INICIADA */
               <div
                 className="w-100 text-center p-4 mt-2"
                 style={{
@@ -195,7 +191,6 @@ export default function IniciarSeccion() {
                   >
                     {usuarioLogueado.nombre.charAt(0).toUpperCase()}
                   </div>
-                  {/* Badge verde de En Línea */}
                   <span
                     style={{
                       position: "absolute",
@@ -211,7 +206,7 @@ export default function IniciarSeccion() {
                 </div>
 
                 <h4 style={{ fontFamily: fDisplay, fontWeight: 800, color: palette.morado, margin: 0 }}>
-                  ¡Hola, {usuarioLogueado.nombre}!
+                  Hola, {usuarioLogueado.nombre}
                 </h4>
                 <p style={{ fontFamily: "'Quicksand', sans-serif", fontWeight: 700, color: palette.borde, fontSize: "0.85rem", marginTop: "4px" }}>
                   {usuarioLogueado.email}
@@ -229,7 +224,7 @@ export default function IniciarSeccion() {
                     color: palette.morado,
                   }}
                 >
-                  ✨ Tu progreso en los cómics está guardado
+                  Tu progreso en los cómics está guardado
                 </div>
 
                 <button
@@ -248,11 +243,10 @@ export default function IniciarSeccion() {
                     textTransform: "uppercase",
                   }}
                 >
-                  🚪 Cerrar Sesión
+                  Cerrar Sesión
                 </button>
               </div>
             ) : (
-              /* VISTA: FORMULARIO LOGIN / REGISTRO */
               <form onSubmit={handleSubmit} className="w-100 d-flex flex-column gap-3">
                 {mensaje && (
                   <div
@@ -323,7 +317,7 @@ export default function IniciarSeccion() {
                   <input
                     type="password"
                     className="form-control input-piktara-login"
-                    placeholder="••••••••"
+                    placeholder="********"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     style={{
@@ -353,7 +347,7 @@ export default function IniciarSeccion() {
                     boxShadow: `0 5px 0 ${palette.borde}`,
                   }}
                 >
-                  {esRegistro ? "🚀 Crear Mi Cuenta" : "🔑 Ingresar"}
+                  {esRegistro ? "Crear Mi Cuenta" : "Ingresar"}
                 </button>
 
                 <div className="text-center mt-2">
