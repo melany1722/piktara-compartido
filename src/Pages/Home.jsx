@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import Buscar from "./Buscar";
-import IniciarSeccion from "./IniciarSeccion";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 const fDisplay = "'Baloo 2', 'Comic Sans MS', sans-serif";
+const fBody = "'Quicksand', 'Comic Sans MS', sans-serif";
 
 const palette = {
   morado: "#9D6A8E",
@@ -120,7 +121,7 @@ const PersonajeModal = ({ personaje, onClose }) => {
           }}
           aria-label="Cerrar"
         >
-          ✕
+          X
         </button>
 
         <img
@@ -155,7 +156,7 @@ const PersonajeModal = ({ personaje, onClose }) => {
 
         <p
           style={{
-            fontFamily: "Quicksand, sans-serif",
+            fontFamily: fBody,
             fontSize: "1.02rem",
             lineHeight: 1.6,
             color: "#ffffff",
@@ -195,7 +196,7 @@ const PersonajeModal = ({ personaje, onClose }) => {
           </p>
           <p
             style={{
-              fontFamily: "Quicksand, sans-serif",
+              fontFamily: fBody,
               fontSize: "0.92rem",
               fontWeight: 600,
               margin: 0,
@@ -219,6 +220,13 @@ export default function Home() {
   const location = useLocation();
 
   useEffect(() => {
+    AOS.init({
+      duration: 900,
+      once: false,
+      easing: "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+      offset: 120,
+    });
+
     const timer = setTimeout(() => {
       setLoading(false);
     }, 4200);
@@ -248,7 +256,7 @@ export default function Home() {
   }, [location]);
 
   return (
-    <>
+    <div style={{ background: palette.crema, minHeight: "100vh", fontFamily: fBody, color: palette.borde, overflowX: "hidden" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Quicksand:wght@500;600;700&display=swap');
 
@@ -286,30 +294,27 @@ export default function Home() {
           100% { transform: scale(1) rotate(-0.5deg); opacity: 1; }
         }
 
+        @keyframes textBounceAndGlow {
+          0%, 100% { transform: translateY(0) scale(1); }
+          50% { transform: translateY(-12px) scale(1.03); }
+        }
+
         .home-navlink { transition: transform 0.15s ease, color 0.15s ease; }
         .home-navlink:hover { transform: scale(1.08) rotate(-1deg); color: ${palette.morado} !important; }
 
         .personaje-card { transition: transform 0.25s ease; cursor: pointer; }
-        .personaje-card:hover { transform: translateY(-10px) scale(1.04) rotate(0deg) !important; }
+        .personaje-card:hover { transform: translateY(-12px) scale(1.05) rotate(0deg) !important; }
 
         .piktara-card {
           background: #ffffff;
           border: 4px solid ${palette.borde};
           border-radius: 28px;
           box-shadow: 0 8px 0 ${palette.borde};
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
+          transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
         }
         .piktara-card:hover {
-          transform: translateY(-6px);
-          box-shadow: 0 12px 0 ${palette.borde};
-        }
-
-        .btn-interactivo {
-          transition: transform 0.15s ease, box-shadow 0.15s ease;
-        }
-        .btn-interactivo:hover {
-          transform: translateY(-3px) scale(1.04);
-          box-shadow: 0 7px 0 ${palette.borde};
+          transform: translateY(-8px) scale(1.02);
+          box-shadow: 0 14px 0 ${palette.borde};
         }
 
         .social-icon-btn {
@@ -327,7 +332,7 @@ export default function Home() {
           text-decoration: none;
         }
         .social-icon-btn:hover {
-          transform: translateY(-3px) scale(1.1);
+          transform: translateY(-4px) scale(1.15);
           background: ${palette.morado};
           color: ${palette.amarillo};
         }
@@ -372,7 +377,7 @@ export default function Home() {
             }}
           >
             <img
-              src="/LOGO COMPLETO PIKTARA.svg"
+              src="./MANOLOGO.svg"
               alt="Piktara Logo"
               style={{
                 width: "280px",
@@ -398,7 +403,7 @@ export default function Home() {
       >
         <Link to="/" className="navbar-brand me-5">
           <img
-            src="/LOGO COMPLETO PIKTARA.svg"
+            src="./MANOLOGO.svg"
             alt="Piktara"
             style={{ height: "55px", filter: `drop-shadow(0 3px 0 ${palette.borde})` }}
           />
@@ -426,48 +431,9 @@ export default function Home() {
             </li>
           </ul>
         </div>
-        <div className="d-flex gap-3 ms-auto align-items-center">
-          <button
-            className="btn btn-interactivo"
-            style={{
-              fontFamily: fDisplay,
-              background: palette.crema,
-              border: `3px solid ${palette.borde}`,
-              color: palette.borde,
-              borderRadius: "14px",
-              padding: "6px 18px",
-              fontWeight: 800,
-              boxShadow: `0 4px 0 ${palette.borde}`,
-            }}
-            data-bs-toggle="offcanvas"
-            data-bs-target="#panelBuscar"
-          >
-            Buscar
-          </button>
-          <button
-            className="btn btn-interactivo"
-            style={{
-              fontFamily: fDisplay,
-              background: palette.crema,
-              border: `3.5px solid ${palette.borde}`,
-              color: palette.borde,
-              borderRadius: "14px",
-              padding: "6px 18px",
-              fontWeight: 800,
-              boxShadow: `0 4px 0 ${palette.borde}`,
-            }}
-            data-bs-toggle="offcanvas"
-            data-bs-target="#panelLogin"
-          >
-            Iniciar Sesión
-          </button>
-        </div>
       </nav>
 
-      <Buscar />
-      <IniciarSeccion />
-
-      {/* HERO SECTION CON IMAGEN DE FONDO (BACKGROUND-IMAGE) */}
+      {/* HERO SECTION GIGANTE CON LOGO MÁS GRANDE Y MISMO TEXTO */}
       <div 
         ref={heroRef}
         className="position-relative overflow-hidden d-flex align-items-center justify-content-center w-100" 
@@ -476,19 +442,51 @@ export default function Home() {
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
-          height: "95vh",
+          minHeight: "100vh",
+          paddingTop: "8rem",
+          paddingBottom: "8rem",
           borderBottom: `6px solid ${palette.borde}`
         }}
       >
-        <div 
-          className="position-absolute w-100 px-3 px-md-5 text-center d-flex justify-content-center pointer-events-none"
-          style={{
-            zIndex: 4,
-            transform: `translateY(${scrollProgress * -200}px) scale(${Math.max(1 - scrollProgress * 0.4, 0.5)}) rotate(${scrollProgress * 20}deg)`,
-            opacity: Math.max(1 - scrollProgress * 1.5, 0),
-            transition: "transform 0.05s ease-out, opacity 0.05s ease-out",
-          }}
-        />
+        {/* Capa oscura semitransparente para dar contraste perfecto */}
+        <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", background: "rgba(0,0,0,0.45)" }} />
+
+        <div className="container text-center position-relative py-5" style={{ zIndex: 2 }}>
+          <div className="mx-auto px-3" style={{ maxWidth: "1150px" }}>
+            
+            <div className="mb-4" data-aos="zoom-in" data-aos-duration="800">
+              <img
+                src="./MANOLOGO.svg"
+                alt="Isotipo Mano"
+                style={{
+                  height: "210px",
+                  objectFit: "contain",
+                  filter: `drop-shadow(0 8px 0 ${palette.borde})`,
+                }}
+              />
+            </div>
+
+            <h1
+              data-aos="fade-up"
+              data-aos-duration="1000"
+              style={{
+                fontFamily: fDisplay,
+                fontSize: "clamp(3.2rem, 6.8vw, 5.8rem)",
+                fontWeight: 800,
+                color: palette.amarillo,
+                textTransform: "uppercase",
+                letterSpacing: "0.04em",
+                lineHeight: 1.12,
+                margin: 0,
+                textShadow: `5px 5px 0 ${palette.borde}, -4px -4px 0 ${palette.borde}, 4px -4px 0 ${palette.borde}, -4px 4px 0 ${palette.borde}, 0 10px 25px rgba(0,0,0,0.8)`,
+                animation: "textBounceAndGlow 3.5s ease-in-out infinite",
+              }}
+            >
+              ¡Atraviesa el portal del tiempo y descubre la aventura!
+            </h1>
+
+          </div>
+        </div>
 
         <div 
           style={{
@@ -496,7 +494,7 @@ export default function Home() {
             bottom: 0,
             left: 0,
             width: "100%",
-            height: "25px",
+            height: "30px",
             background: palette.lavanda,
             borderTop: `4px solid ${palette.borde}`,
             zIndex: 5
@@ -512,6 +510,8 @@ export default function Home() {
       >
         <div 
           className="container py-4 text-center"
+          data-aos="zoom-in-up"
+          data-aos-duration="1000"
           style={{
             transform: `translateX(${(scrollProgress - 0.5) * 110}px)`,
             transition: "transform 0.05s ease-out"
@@ -520,6 +520,8 @@ export default function Home() {
           <div className="row justify-content-center">
             <div className="col-md-9">
               <div
+                data-aos="flip-down"
+                data-aos-delay="200"
                 style={{
                   display: "inline-block",
                   background: palette.amarillo,
@@ -544,7 +546,11 @@ export default function Home() {
                   ¿Qué es un cómic digital interactivo?
                 </h2>
               </div>
-              <p style={{ fontFamily: "Quicksand, sans-serif", fontSize: "1.15rem", lineHeight: 1.8, color: palette.crema, fontWeight: 600 }}>
+              <p 
+                data-aos="fade-up" 
+                data-aos-delay="400"
+                style={{ fontFamily: fBody, fontSize: "1.15rem", lineHeight: 1.8, color: palette.crema, fontWeight: 600 }}
+              >
                 Un cómic digital interactivo es una nueva forma de contar historias que combina ilustraciones,
                 texto, animaciones y decisiones del lector. A diferencia de un cómic tradicional, el lector puede
                 tomar decisiones que afectan el desarrollo de la narrativa, convirtiendo la lectura en una
@@ -556,8 +562,8 @@ export default function Home() {
       </section>
 
       {/* SECCIÓN: PERSONAJES */}
-      <section id="personajes" className="py-5" style={{ background: palette.crema }}>
-        <div className="text-center mb-5">
+      <section id="personajes" className="py-5 overflow-hidden" style={{ background: palette.crema }}>
+        <div className="text-center mb-5" data-aos="fade-down" data-aos-duration="800">
           <h2
             style={{
               display: "inline-block",
@@ -580,6 +586,8 @@ export default function Home() {
               <div
                 key={i}
                 className="col-6 col-md-4 text-center personaje-card"
+                data-aos={i === 0 ? "fade-right" : i === 1 ? "zoom-in" : "fade-left"}
+                data-aos-delay={i * 200}
                 style={{ transform: `rotate(${p.rot})` }}
                 onClick={() => setPersonajeActivo(p)}
               >
@@ -626,11 +634,15 @@ export default function Home() {
         </div>
       </section>
 
-      {/* BANNER PRINCIPAL DE BIENVENIDA */}
-      <div className="py-5 px-3" style={{ background: palette.crema, borderBottom: `5px solid ${palette.borde}` }}>
+      <PersonajeModal personaje={personajeActivo} onClose={() => setPersonajeActivo(null)} />
+
+      {/* BANNER PRINCIPAL DE BIENVENIDA A PIKTARA */}
+      <div className="py-5 px-3 overflow-hidden" style={{ background: palette.crema, borderBottom: `5px solid ${palette.borde}` }}>
         <div className="container text-center py-3 position-relative" style={{ maxWidth: "850px" }}>
           <div
             className="p-4 p-md-5 position-relative"
+            data-aos="flip-up"
+            data-aos-duration="1000"
             style={{
               background: "#ffffff",
               borderRadius: "36px",
@@ -638,9 +650,9 @@ export default function Home() {
               boxShadow: `0 10px 0 ${palette.borde}`,
             }}
           >
-            <div className="mb-4">
+            <div className="mb-4" data-aos="zoom-in" data-aos-delay="300">
               <img
-                src="/LOGO COMPLETO PIKTARA.svg"
+                src="/MANOLOGO.svg"
                 alt="Isotipo Mano"
                 style={{
                   height: "90px",
@@ -650,10 +662,12 @@ export default function Home() {
               />
             </div>
 
-            <h1
+            <h2
+              data-aos="fade-down"
+              data-aos-delay="400"
               style={{
                 fontFamily: fDisplay,
-                fontSize: "3rem",
+                fontSize: "2.5rem",
                 fontWeight: 800,
                 color: palette.morado,
                 letterSpacing: "0.05em",
@@ -662,9 +676,13 @@ export default function Home() {
               }}
             >
               BIENVENIDOS A PIKTARA
-            </h1>
+            </h2>
 
-            <p style={{ fontFamily: "Quicksand, sans-serif", fontSize: "1.05rem", lineHeight: 1.8, color: palette.borde, fontWeight: 600, margin: 0 }}>
+            <p 
+              data-aos="fade-up" 
+              data-aos-delay="500"
+              style={{ fontFamily: fBody, fontSize: "1.05rem", lineHeight: 1.8, color: palette.borde, fontWeight: 600, margin: 0 }}
+            >
               Piktara es una marca creativa que une arte, historia y narrativa digital. Su esencia nace de la
               inspiración en lo místico y antiguo, transformado en experiencias modernas como cómics interactivos y
               proyectos visuales llenos de imaginación.
@@ -674,10 +692,12 @@ export default function Home() {
       </div>
 
       {/* SECCIÓN ORIGEN DEL NOMBRE */}
-      <section className="py-5 px-3" style={{ background: palette.crema }}>
+      <section className="py-5 px-3 overflow-hidden" style={{ background: palette.crema }}>
         <div className="container">
           <div
             className="row align-items-center g-4 p-4 p-md-5"
+            data-aos="fade-right"
+            data-aos-duration="900"
             style={{
               background: "#ffffff",
               borderRadius: "32px",
@@ -686,13 +706,13 @@ export default function Home() {
               position: "relative",
             }}
           >
-            <div className="col-md-5 text-center text-md-start">
+            <div className="col-md-5 text-center text-md-start" data-aos="zoom-in" data-aos-delay="200">
               <h2 style={{ fontFamily: fDisplay, fontSize: "1.8rem", fontWeight: 800, color: palette.morado, lineHeight: 1.3, margin: 0 }}>
                 ¿Cómo surge el nombre PIKTARA?
               </h2>
             </div>
-            <div className="col-md-7">
-              <p style={{ fontFamily: "Quicksand, sans-serif", fontSize: "1rem", lineHeight: 1.8, color: palette.borde, fontWeight: 600, margin: 0 }}>
+            <div className="col-md-7" data-aos="fade-left" data-aos-delay="300">
+              <p style={{ fontFamily: fBody, fontSize: "1rem", lineHeight: 1.8, color: palette.borde, fontWeight: 600, margin: 0 }}>
                 Surge de la conexión con la historia antigua:
                 <br />
                 <br />
@@ -708,9 +728,9 @@ export default function Home() {
       </section>
 
       {/* SECCIÓN EQUIPO */}
-      <section className="py-5 px-3" style={{ background: palette.amarillo, borderTop: `5px solid ${palette.borde}`, borderBottom: `6px solid ${palette.borde}` }}>
+      <section className="py-5 px-3 overflow-hidden" style={{ background: palette.amarillo, borderTop: `5px solid ${palette.borde}`, borderBottom: `6px solid ${palette.borde}` }}>
         <div className="container">
-          <div className="text-center mb-5">
+          <div className="text-center mb-5" data-aos="zoom-in-down" data-aos-duration="800">
             <span
               style={{
                 fontFamily: fDisplay,
@@ -731,9 +751,15 @@ export default function Home() {
 
           <div className="row justify-content-center g-4">
             {equipo.map((miembro, i) => (
-              <div key={i} className="col-12 col-md-4 d-flex">
+              <div 
+                key={i} 
+                className="col-12 col-md-4 d-flex" 
+                data-aos="fade-up" 
+                data-aos-delay={i * 250}
+                data-aos-duration="900"
+              >
                 <div className="piktara-card text-center p-4 w-100 d-flex flex-column align-items-center position-relative">
-                  <div className="mb-3 w-100" style={{ height: "200px" }}>
+                  <div className="mb-3 w-100" style={{ height: "200px" }} data-aos="zoom-in" data-aos-delay={i * 250 + 150}>
                     <img
                       src={miembro.img}
                       alt={miembro.nombre}
@@ -750,7 +776,7 @@ export default function Home() {
                     {miembro.nombre}
                   </h3>
 
-                  <p style={{ fontFamily: "Quicksand, sans-serif", fontSize: "0.92rem", lineHeight: 1.6, color: palette.borde, fontWeight: 600, margin: 0 }}>
+                  <p style={{ fontFamily: fBody, fontSize: "0.92rem", lineHeight: 1.6, color: palette.borde, fontWeight: 600, margin: 0 }}>
                     {miembro.desc}
                   </p>
                 </div>
@@ -768,7 +794,7 @@ export default function Home() {
           borderTop: `6px solid ${palette.morado}`,
         }}
       >
-        <div className="container">
+        <div className="container" data-aos="fade-up" data-aos-duration="800">
           <div className="row justify-content-between align-items-center gy-4">
             <div className="col-md-3 text-center text-md-start">
               <img
@@ -796,7 +822,7 @@ export default function Home() {
                 <Link
                   to="/nuestro-comic"
                   style={{
-                    fontFamily: "Quicksand, sans-serif",
+                    fontFamily: fBody,
                     color: palette.borde,
                     textDecoration: "none",
                     fontWeight: 700,
@@ -855,16 +881,15 @@ export default function Home() {
                   title="WhatsApp"
                 >
                   <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.64 1.93 6.559 6.559 0 0 1 1.929 4.646c-.002 3.627-2.958 6.585-6.57 6.585zm3.61-4.933c-.197-.099-1.17-.578-1.353-.646-.182-.067-.315-.099-.448.099-.133.197-.513.646-.629.778-.117.133-.232.148-.43.05-.197-.099-.833-.307-1.587-.98-.588-.524-.985-1.172-1.101-1.37-.116-.197-.012-.304.086-.402.088-.088.197-.232.296-.349.099-.117.133-.197.198-.329.065-.133.033-.248-.016-.347-.049-.099-.448-1.08-.614-1.479-.161-.389-.327-.336-.448-.342-.115-.006-.248-.007-.38-.007s-.348.049-.53.248c-.182.198-.696.68-.696 1.658 0 .979.712 1.925.811 2.057.099.133 1.398 2.137 3.388 2.997.473.204.843.326 1.13.418.475.152.908.13 1.25.079.381-.058 1.17-.478 1.335-.94.165-.463.165-.859.116-.94-.049-.082-.182-.132-.38-.231z"/>
+                    <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.64 1.93 6.559 6.559 0 0 1 1.929 4.646c-.002 3.627-2.958 6.585-6.57 6.585zm3.61-4.933c-.197-.099-1.17-.578-1.353-.646-.182-.067-.315-.099-.448.099-.133.197-.513.646-.629.778-.117.133-.232.148-.43.05-.197-.099-.833-.307-1.587-.98-.588-.524-.985-1.172-1.101-1.37-.116-.197-.012-.304.086-.402.088-.088.197-.232.296-.349.099-.117.133-.197.198-.329.065-.133.033-.248-.016-.347-.049-.099-.448-1.08-.614-1.479-.161-.389-.327-.336-.448-.342-.115-.006-.248-.007-.38-.007s-.348.049-.53.248c-.182.198-.696.68-.696 1.658 0 .979.712 1.925.811 2.057.099.133 1.398 2.137 3.388 2.997.473.204.843.326 1.13.418.475.152.908.13 1.25.079.381-.058 1.17-.4"/>
                   </svg>
                 </a>
               </div>
             </div>
+
           </div>
         </div>
       </footer>
-
-      <PersonajeModal personaje={personajeActivo} onClose={() => setPersonajeActivo(null)} />
-    </>
+    </div>
   );
 }
