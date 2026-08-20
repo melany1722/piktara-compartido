@@ -216,8 +216,12 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [personajeActivo, setPersonajeActivo] = useState(null);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [currentBgIndex, setCurrentBgIndex] = useState(0);
   const heroRef = useRef(null);
   const location = useLocation();
+
+  // Actualizado a fondo111.svg
+  const backgroundImages = ["./ultimofondo (1).svg", "./fondo111.svg"];
 
   useEffect(() => {
     AOS.init({
@@ -231,6 +235,14 @@ export default function Home() {
       setLoading(false);
     }, 4200);
     return () => clearTimeout(timer);
+  }, []);
+
+  // Slider automático configurado a 6 segundos (6000 ms)
+  useEffect(() => {
+    const bgTimer = setInterval(() => {
+      setCurrentBgIndex((prevIndex) => (prevIndex === 0 ? 1 : 0));
+    }, 6000);
+    return () => clearInterval(bgTimer);
   }, []);
 
   useEffect(() => {
@@ -283,6 +295,11 @@ export default function Home() {
           100% { background-color: transparent; visibility: hidden; }
         }
 
+        @keyframes heroEntrance {
+          0% { opacity: 0; transform: translateY(40px) scale(0.9); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
         @keyframes headerDrop {
           from { transform: translateY(-100%); opacity: 0; }
           to { transform: translateY(0); opacity: 1; }
@@ -296,7 +313,7 @@ export default function Home() {
 
         @keyframes textBounceAndGlow {
           0%, 100% { transform: translateY(0) scale(1); }
-          50% { transform: translateY(-12px) scale(1.03); }
+          50% { transform: translateY(-8px) scale(1.02); }
         }
 
         .home-navlink { transition: transform 0.15s ease, color 0.15s ease; }
@@ -433,57 +450,79 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* HERO SECTION GIGANTE CON LOGO MÁS GRANDE Y MISMO TEXTO */}
+      {/* HERO SECTION CON SLIDER DE IMÁGENES Y ANIMACIÓN DE ESCALA (1.5) */}
       <div 
         ref={heroRef}
         className="position-relative overflow-hidden d-flex align-items-center justify-content-center w-100" 
         style={{ 
-          backgroundImage: `url('/fondo_7.png')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
           minHeight: "100vh",
           paddingTop: "8rem",
           paddingBottom: "8rem",
           borderBottom: `6px solid ${palette.borde}`
         }}
       >
-        {/* Capa oscura semitransparente para dar contraste perfecto */}
-        <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", background: "rgba(0,0,0,0.45)" }} />
+        {/* Capas de imágenes del Slider con transición y escalado a 1.5 */}
+        {backgroundImages.map((bgImg, index) => (
+          <div
+            key={index}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              backgroundImage: `url('${bgImg}')`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+              opacity: currentBgIndex === index ? 1 : 0,
+              transform: currentBgIndex === index ? "scale(1.5)" : "scale(1)",
+              transition: "opacity 1.5s ease-in-out, transform 2s cubic-bezier(0.25, 1, 0.5, 1)",
+              zIndex: 1,
+            }}
+          />
+        ))}
 
-        <div className="container text-center position-relative py-5" style={{ zIndex: 2 }}>
+        {/* Capa oscura semitransparente para mantener contraste con los textos */}
+        <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", background: "rgba(0,0,0,0.45)", zIndex: 2 }} />
+
+        <div className="container text-center position-relative py-5" style={{ zIndex: 3 }}>
           <div className="mx-auto px-3" style={{ maxWidth: "1150px" }}>
             
-            <div className="mb-4" data-aos="zoom-in" data-aos-duration="800">
-              <img
-                src="./MANOLOGO.svg"
-                alt="Isotipo Mano"
-                style={{
-                  height: "210px",
-                  objectFit: "contain",
-                  filter: `drop-shadow(0 8px 0 ${palette.borde})`,
-                }}
-              />
-            </div>
-
-            <h1
-              data-aos="fade-up"
-              data-aos-duration="1000"
-              style={{
-                fontFamily: fDisplay,
-                fontSize: "clamp(3.2rem, 6.8vw, 5.8rem)",
-                fontWeight: 800,
-                color: palette.amarillo,
-                textTransform: "uppercase",
-                letterSpacing: "0.04em",
-                lineHeight: 1.12,
-                margin: 0,
-                textShadow: `5px 5px 0 ${palette.borde}, -4px -4px 0 ${palette.borde}, 4px -4px 0 ${palette.borde}, -4px 4px 0 ${palette.borde}, 0 10px 25px rgba(0,0,0,0.8)`,
-                animation: "textBounceAndGlow 3.5s ease-in-out infinite",
+            <div 
+              style={{ 
+                animation: "heroEntrance 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 4.1s both" 
               }}
             >
-              ¡Atraviesa el portal del tiempo y descubre la aventura!
-            </h1>
+              <div className="mb-4">
+                <img
+                  src="./MANOLOGO.svg"
+                  alt="Isotipo Mano"
+                  style={{
+                    height: "210px",
+                    objectFit: "contain",
+                    filter: `drop-shadow(0 8px 0 ${palette.borde})`,
+                  }}
+                />
+              </div>
+
+              <h1
+                style={{
+                  fontFamily: fDisplay,
+                  fontSize: "clamp(3.2rem, 6.8vw, 5.8rem)",
+                  fontWeight: 800,
+                  color: palette.amarillo,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.04em",
+                  lineHeight: 1.12,
+                  margin: 0,
+                  textShadow: `5px 5px 0 ${palette.borde}, -4px -4px 0 ${palette.borde}, 4px -4px 0 ${palette.borde}, -4px 4px 0 ${palette.borde}, 0 10px 25px rgba(0,0,0,0.8)`,
+                  animation: "textBounceAndGlow 3.5s ease-in-out infinite",
+                }}
+              >
+                ¡Atraviesa el portal del tiempo y descubre la aventura!
+              </h1>
+            </div>
 
           </div>
         </div>
@@ -872,21 +911,8 @@ export default function Home() {
                     <path d="M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.917 3.917 0 0 0-1.417.923A3.927 3.927 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.916 3.916 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.197-.509.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.926 3.926 0 0 0-.923-1.417A3.911 3.911 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0h.003zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046.78.035 1.204.166 1.486.275.373.145.64.319.92.599.28.28.453.546.598.92.11.281.24.705.275 1.485.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.47 2.47 0 0 1-.599.919c-.28.28-.546.453-.92.598-.28.11-.704.24-1.485.276-.843.038-1.096.047-3.232.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.485-.276a2.478 2.478 0 0 1-.92-.598 2.48 2.48 0 0 1-.6-.92c-.109-.281-.24-.705-.275-1.485-.038-.843-.046-1.096-.046-3.233 0-2.136.008-2.388.046-3.231.036-.78.166-1.204.276-1.486.145-.373.319-.64.599-.92.28-.28.546-.453.92-.598.282-.11.705-.24 1.485-.276.738-.034 1.024-.044 2.515-.045v.002zm4.988 1.328a.96.96 0 1 0 0 1.92.96.96 0 0 0 0-1.92zm-4.27 1.122a4.109 4.109 0 1 0 0 8.217 4.109 4.109 0 0 0 0-8.217zm0 1.441a2.667 2.667 0 1 1 0 5.334 2.667 2.667 0 0 1 0-5.334z"/>
                   </svg>
                 </a>
-
-                <a
-                  href="https://wa.me/573125965458"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="social-icon-btn"
-                  title="WhatsApp"
-                >
-                  <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.64 1.93 6.559 6.559 0 0 1 1.929 4.646c-.002 3.627-2.958 6.585-6.57 6.585zm3.61-4.933c-.197-.099-1.17-.578-1.353-.646-.182-.067-.315-.099-.448.099-.133.197-.513.646-.629.778-.117.133-.232.148-.43.05-.197-.099-.833-.307-1.587-.98-.588-.524-.985-1.172-1.101-1.37-.116-.197-.012-.304.086-.402.088-.088.197-.232.296-.349.099-.117.133-.197.198-.329.065-.133.033-.248-.016-.347-.049-.099-.448-1.08-.614-1.479-.161-.389-.327-.336-.448-.342-.115-.006-.248-.007-.38-.007s-.348.049-.53.248c-.182.198-.696.68-.696 1.658 0 .979.712 1.925.811 2.057.099.133 1.398 2.137 3.388 2.997.473.204.843.326 1.13.418.475.152.908.13 1.25.079.381-.058 1.17-.4"/>
-                  </svg>
-                </a>
               </div>
             </div>
-
           </div>
         </div>
       </footer>

@@ -227,7 +227,7 @@ export default function Trailer() {
                   style={{ cursor: "pointer", height: "520px" }}
                 >
                   <img 
-                    src="/trailer_1.jpg" 
+                    src="/FONDO2.svg" 
                     alt="Trailer" 
                     style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.85 }} 
                   />
