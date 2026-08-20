@@ -1,21 +1,25 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AOS from "aos";
 import "aos/dist/aos.css";
+import Buscar from "./Buscar";
+import IniciarSeccion from "./IniciarSeccion";
 
+// ── Paleta Estricta de 2 Colores + Neutros de Soporte (Crema y Borde) ──
 const fDisplay = "'Baloo 2', 'Comic Sans MS', sans-serif";
 const fBody = "'Quicksand', 'Comic Sans MS', sans-serif";
 
 const palette = {
-  morado: "#5A189A",
-  amarillo: "#FFC300",
-  crema: "#FFF8E7",
-  borde: "#3A2312",
+  morado: "#5A189A",   // Color Principal
+  amarillo: "#FFC300", // Color Secundario
+  crema: "#FFF8E7",    // Fondo Suave
+  borde: "#3A2312",    // Trazos y sombras estilo cómic
 };
 
 export default function Trailer() {
   const [reproducir, setReproducir] = useState(false);
   const [animando, setAnimando] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Inicializar AOS con una configuración fluida y atractiva
@@ -36,13 +40,14 @@ export default function Trailer() {
     localStorage.removeItem("relojComic");
 
     setTimeout(() => {
-      window.location.href = "/comicj";
+      navigate("/comicj");
     }, 500);
   };
 
   return (
     <div style={{ background: palette.crema, minHeight: "100vh", fontFamily: fBody, color: palette.borde, overflowX: "hidden" }}>
       
+      {/* ── ESTILOS GLOBALES & COMPONENTES ── */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Quicksand:wght@500;600;700&display=swap');
 
@@ -135,7 +140,7 @@ export default function Trailer() {
         }
       `}</style>
 
-      {/* NAVBAR */}
+      {/* ── NAVBAR ── */}
       <nav
         className="navbar navbar-expand-lg px-4 px-md-5"
         style={{
@@ -157,25 +162,66 @@ export default function Trailer() {
             />
           </Link>
 
-          <div className="flex-grow-1 text-center d-none d-md-block">
+          {/* TÍTULO CENTRAL ABSOLUTO EN NAVBAR */}
+          <div className="position-absolute start-50 translate-middle-x d-none d-lg-block">
             <span
               style={{
                 fontFamily: fDisplay,
-                fontSize: "1.5rem",
+                fontSize: "1.35rem",
                 letterSpacing: "0.06em",
                 color: palette.borde,
                 fontWeight: 800,
                 textTransform: "uppercase",
               }}
             >
-              Nuestro Cómic
+              NUESTRO CÓMIC
             </span>
+          </div>
+
+          <div className="ms-auto d-flex gap-3 align-items-center">
+            <button
+              className="btn"
+              style={{
+                fontFamily: fDisplay,
+                background: palette.crema,
+                border: `3px solid ${palette.borde}`,
+                color: palette.borde,
+                borderRadius: "14px",
+                padding: "6px 18px",
+                fontWeight: 800,
+                boxShadow: `0 4px 0 ${palette.borde}`,
+              }}
+              data-bs-toggle="offcanvas"
+              data-bs-target="#panelBuscar"
+            >
+              Buscar
+            </button>
+            <button
+              className="btn"
+              style={{
+                fontFamily: fDisplay,
+                background: palette.crema,
+                border: `3.5px solid ${palette.borde}`,
+                color: palette.borde,
+                borderRadius: "14px",
+                padding: "6px 18px",
+                fontWeight: 800,
+                boxShadow: `0 4px 0 ${palette.borde}`,
+              }}
+              data-bs-toggle="offcanvas"
+              data-bs-target="#panelLogin"
+            >
+              Iniciar Sesión
+            </button>
           </div>
         </div>
       </nav>
 
-      {/* SECCIÓN DEL TRAILER */}
-      <section className="py-5 px-3" style={{ background: palette.crema, borderBottom: `5px solid ${palette.morado}` }}>
+      <Buscar />
+      <IniciarSeccion />
+
+      {/* ── REPRODUCTOR DE TRAILER (Perfectamente Centrado) ── */}
+      <section className="py-4 px-3" style={{ background: palette.crema, borderBottom: `5px solid ${palette.morado}` }}>
         <div className="container" style={{ maxWidth: "1100px" }}>
           
           <div className="w-100 text-center mb-4" data-aos="fade-down" data-aos-duration="800">
@@ -285,7 +331,7 @@ export default function Trailer() {
                   onClick={handleVerComic} 
                   className={`btn-ver-comic ${animando ? 'animar-salida' : ''}`}
                 >
-                  Leer Comic Ahora
+                  ¡LEER CÓMIC AHORA!
                 </button>
               </div>
             </div>

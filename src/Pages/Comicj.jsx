@@ -7,6 +7,7 @@ const fDisplay = "'Baloo 2', 'Comic Sans MS', sans-serif";
 
 const palette = {
   morado: "#5A189A",
+  moradoClaro: "#F3E8FF",
   amarillo: "#FFC300",
   crema: "#FFF8E7",
   borde: "#3A2312",
@@ -68,7 +69,7 @@ const Confetti = ({ pieces }) => (
           top: p.top,
           right: p.right,
           fontSize: p.size,
-          zIndex: 55,
+          zIndex: 150,
           pointerEvents: "none",
           "--tx": `${p.tx}px`,
           "--ty": `${p.ty}px`,
@@ -90,6 +91,12 @@ const Comicj = () => {
   const [pulse, setPulse] = useState(false);
   const [reproducido, setReproducido] = useState(false);
   const [confetti, setConfetti] = useState([]);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setReady(true), 30);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     const anim = lottie.loadAnimation({
@@ -151,7 +158,7 @@ const Comicj = () => {
         display: "flex",
         flexDirection: "column",
         position: "relative",
-        background: palette.crema,
+        background: palette.moradoClaro,
       }}
     >
       <style>{`
@@ -175,13 +182,17 @@ const Comicj = () => {
           0%, 100% { transform: translate(-50%, -50%) scale(1); }
           50% { transform: translate(-50%, -50%) scale(1.08); }
         }
-        @keyframes sunRing {
-          0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.8; }
-          100% { transform: translate(-50%, -50%) scale(1.7); opacity: 0; }
-        }
         @keyframes confettiBurst {
           0% { transform: translate(0, 0) scale(0.6) rotate(0deg); opacity: 1; }
           100% { transform: translate(var(--tx), var(--ty)) scale(1.1) rotate(200deg); opacity: 0; }
+        }
+        @keyframes headerDrop {
+          from { transform: translateY(-100%); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes sceneEnter {
+          0% { opacity: 0; transform: scale(0.85) translateY(20px); }
+          100% { opacity: 1; transform: scale(1) translateY(0); }
         }
 
         .comic-nav-btn {
@@ -194,19 +205,26 @@ const Comicj = () => {
           transform: translateY(-3px) scale(1.04);
           box-shadow: 0 6px 0 ${palette.borde} !important;
         }
+        .comic-header {
+          animation: headerDrop 0.6s cubic-bezier(.34,1.56,.64,1) both;
+        }
+        .comic-frame {
+          animation: sceneEnter 0.5s cubic-bezier(.34,1.56,.64,1) both;
+        }
       `}</style>
 
       <Cloud top="8%" left="2%" size={140} delay={0} duration={24} />
       <Cloud top="75%" left="70%" size={160} delay={3} duration={28} />
 
       <nav
-        className="navbar navbar-expand-lg px-4 px-md-5"
+        className="comic-header navbar navbar-expand-lg px-4 px-md-5"
         style={{
           background: palette.amarillo,
           flexShrink: 0,
           borderBottom: `6px solid ${palette.morado}`,
           position: "relative",
           zIndex: 20,
+          opacity: ready ? 1 : 0,
         }}
       >
         <Link to="/" className="navbar-brand me-4">
@@ -273,12 +291,13 @@ const Comicj = () => {
         }}
       >
         <div
+          className="comic-frame"
           style={{
             position: "relative",
             height: "100%",
             aspectRatio: "1920 / 1080",
             maxWidth: "100%",
-            background: "#fff",
+            background: palette.crema,
             borderRadius: "32px",
             padding: "16px",
             border: `6px solid ${palette.morado}`,
@@ -356,21 +375,24 @@ const Comicj = () => {
             {!relojEncontrado && (
               <img
                 src={relojImg}
-                alt=""
+                alt="Reloj escondido"
                 onClick={handleRelojClick}
                 style={{
                   position: "absolute",
                   bottom: "30%",
                   right: "12%",
-                  width: "5%",
-                  minWidth: "34px",
+                  width: "6%",
+                  minWidth: "40px",
                   cursor: "pointer",
-                  opacity: 0.95,
-                  filter: `drop-shadow(0 0 6px ${palette.amarillo})`,
+                  opacity: 1,
+                  filter: `drop-shadow(0 0 8px ${palette.amarillo})`,
                   transform: "rotate(-12deg)",
                   animation: "wiggleSticker 1.6s ease-in-out infinite",
-                  zIndex: 50,
+                  zIndex: 100,
                   borderRadius: "50%",
+                  background: palette.crema,
+                  padding: "4px",
+                  border: `2px dashed ${palette.borde}`
                 }}
               />
             )}

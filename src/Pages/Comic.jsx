@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useRef, useState } from 'react';
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import lottie from "lottie-web";
 import "../Comic.css";
 
@@ -7,6 +7,7 @@ const fDisplay = "'Baloo 2', 'Comic Sans MS', sans-serif";
 
 const palette = {
   morado: "#5A189A",
+  moradoClaro: "#F3E8FF", // Fondo general cambiado a un morado super clarito
   amarillo: "#FFC300",
   crema: "#FFF8E7",
   borde: "#3A2312",
@@ -22,7 +23,6 @@ const scenes = [
     animationPath: "/lottiej/animacionj.json",
     foundKey: "relojComicj",
     backgroundColor: "#FFE8B8",
-    tapeColors: [palette.rosa, palette.amarillo],
     nombre: "Aventura 1",
   },
   {
@@ -30,7 +30,6 @@ const scenes = [
     animationPath: "/lottiem/fondomela.json",
     foundKey: "relojComick",
     backgroundColor: "#D9C7FF",
-    tapeColors: [palette.verde, palette.morado],
     nombre: "Aventura 2",
   },
   {
@@ -38,7 +37,6 @@ const scenes = [
     animationPath: "/lottie/gifalien.json",
     foundKey: "relojComic",
     backgroundColor: "#BFF0D9",
-    tapeColors: [palette.amarillo, palette.rosa],
     nombre: "Aventura 3",
   },
 ];
@@ -63,58 +61,16 @@ const Cloud = ({ top, left, size, delay, duration }) => (
     }}
   >
     <svg viewBox="0 0 200 110" width="100%" height="100%">
-      <ellipse cx="55" cy="70" rx="55" ry="35" fill={palette.crema} />
-      <ellipse cx="110" cy="50" rx="65" ry="45" fill={palette.crema} />
-      <ellipse cx="165" cy="72" rx="45" ry="30" fill={palette.crema} />
+      <ellipse cx="55" cy="70" rx="55" ry="35" fill="#FFFFFF" />
+      <ellipse cx="110" cy="50" rx="65" ry="45" fill="#FFFFFF" />
+      <ellipse cx="165" cy="72" rx="45" ry="30" fill="#FFFFFF" />
     </svg>
   </div>
 );
 
-const WashiTape = ({ top, left, right, rotate, color, delay }) => (
-  <div
-    style={{
-      position: "absolute",
-      top,
-      left,
-      right,
-      width: "70px",
-      height: "26px",
-      background: color,
-      border: `2.5px solid ${palette.borde}`,
-      transform: `rotate(${rotate}deg)`,
-      boxShadow: `0 3px 0 ${palette.borde}`,
-      borderRadius: "4px",
-      zIndex: 40,
-      animation: `tapeDrop 0.5s cubic-bezier(.34,1.56,.64,1) ${delay}s both`,
-    }}
-  />
-);
-
-const Confetti = ({ pieces }) => (
-  <>
-    {pieces.map((p) => (
-      <span
-        key={p.id}
-        style={{
-          position: "absolute",
-          top: p.top,
-          right: p.right,
-          fontSize: p.size,
-          zIndex: 55,
-          pointerEvents: "none",
-          "--tx": `${p.tx}px`,
-          "--ty": `${p.ty}px`,
-          animation: `confettiBurst 0.9s ease-out forwards`,
-        }}
-      >
-        {p.emoji}
-      </span>
-    ))}
-  </>
-);
-
 const Comic = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const lottieContainer = useRef(null);
   const animRef = useRef(null);
 
@@ -125,7 +81,6 @@ const Comic = () => {
   const [relojEncontrado, setRelojEncontrado] = useState(() => localStorage.getItem(scene.foundKey) === "true");
   const [pulse, setPulse] = useState(false);
   const [reproducido, setReproducido] = useState(false);
-  const [confetti, setConfetti] = useState([]);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -174,29 +129,20 @@ const Comic = () => {
       localStorage.setItem(scene.foundKey, "true");
       setRelojEncontrado(true);
       setPulse(true);
-      setTimeout(() => setPulse(false), 500);
-
-      const emojis = ["✨", "⭐", "🎉", "💥"];
-      const pieces = Array.from({ length: 10 }).map((_, i) => ({
-        id: `${Date.now()}-${i}`,
-        emoji: emojis[i % emojis.length],
-        top: "30%",
-        right: "12%",
-        size: `${14 + Math.random() * 12}px`,
-        tx: Math.round((Math.random() - 0.5) * 220),
-        ty: Math.round(-40 - Math.random() * 140),
-      }));
-      setConfetti(pieces);
-      setTimeout(() => setConfetti([]), 900);
+      setTimeout(() => setPulse(false), 600);
     }
   };
 
   const goToPreviousScene = () => {
-    setSceneIndex((currentScene) => Math.max(currentScene - 1, 0));
+    const newIndex = Math.max(sceneIndex - 1, 0);
+    setSceneIndex(newIndex);
+    navigate(scenes[newIndex].route);
   };
 
   const goToNextScene = () => {
-    setSceneIndex((currentScene) => Math.min(currentScene + 1, scenes.length - 1));
+    const newIndex = Math.min(sceneIndex + 1, scenes.length - 1);
+    setSceneIndex(newIndex);
+    navigate(scenes[newIndex].route);
   };
 
   return (
@@ -208,7 +154,7 @@ const Comic = () => {
         display: "flex",
         flexDirection: "column",
         position: "relative",
-        background: palette.crema,
+        background: palette.moradoClaro,
       }}
     >
       <style>{`
@@ -218,43 +164,31 @@ const Comic = () => {
           from { transform: translateX(-15vw); }
           to { transform: translateX(105vw); }
         }
-        @keyframes bounceIn {
+        @keyframes scorePop {
           0% { transform: scale(1); }
-          35% { transform: scale(1.25) rotate(-4deg); }
-          65% { transform: scale(0.95) rotate(2deg); }
-          100% { transform: scale(1) rotate(0); }
+          40% { transform: scale(1.35) rotate(6deg); }
+          70% { transform: scale(0.9) rotate(-4deg); }
+          100% { transform: scale(1); }
         }
         @keyframes wiggleSticker {
           0%, 100% { transform: rotate(-12deg) scale(1); }
           50% { transform: rotate(-2deg) scale(1.08); }
         }
-        @keyframes sunPulse {
-          0%, 100% { transform: translate(-50%, -50%) scale(1); }
-          50% { transform: translate(-50%, -50%) scale(1.08); }
-        }
-        @keyframes sunRing {
-          0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.8; }
-          100% { transform: translate(-50%, -50%) scale(1.7); opacity: 0; }
+        @keyframes playBounce {
+          0%, 100% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 8px 0 ${palette.borde}; }
+          50% { transform: translate(-50%, -54%) scale(1.08); box-shadow: 0 14px 0 ${palette.borde}; }
         }
         @keyframes headerDrop {
           from { transform: translateY(-100%); opacity: 0; }
           to { transform: translateY(0); opacity: 1; }
         }
         @keyframes sceneEnter {
-          0% { opacity: 0; transform: scale(0.85) rotate(-3deg) translateY(20px); }
-          100% { opacity: 1; transform: scale(1) rotate(0) translateY(0); }
-        }
-        @keyframes tapeDrop {
-          from { opacity: 0; transform: translateY(-20px) rotate(0deg); }
-          to { opacity: 1; transform: translateY(0) rotate(var(--rot, 0deg)); }
+          0% { opacity: 0; transform: scale(0.85) translateY(20px); }
+          100% { opacity: 1; transform: scale(1) translateY(0); }
         }
         @keyframes ribbonPop {
           0% { opacity: 0; transform: translate(-50%, -18px) scale(0.8); }
           100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
-        }
-        @keyframes confettiBurst {
-          0% { transform: translate(0, 0) scale(0.6) rotate(0deg); opacity: 1; }
-          100% { transform: translate(var(--tx), var(--ty)) scale(1.1) rotate(200deg); opacity: 0; }
         }
 
         .comic-nav-btn {
@@ -270,11 +204,12 @@ const Comic = () => {
           transform: translateY(-3px) scale(1.04);
           box-shadow: 0 6px 0 ${palette.borde} !important;
         }
-        .comic-play-sticker {
-          transition: transform 0.15s ease;
+        .comic-play-btn {
+          transition: transform 0.15s ease, filter 0.15s ease;
         }
-        .comic-play-sticker:hover {
-          transform: translate(-50%, -50%) scale(1.12) !important;
+        .comic-play-btn:hover {
+          transform: translate(-50%, -54%) scale(1.1) !important;
+          filter: brightness(1.05);
         }
         .comic-header {
           animation: headerDrop 0.6s cubic-bezier(.34,1.56,.64,1) both;
@@ -287,6 +222,7 @@ const Comic = () => {
       <Cloud top="8%" left="2%" size={140} delay={0} duration={24} />
       <Cloud top="75%" left="70%" size={160} delay={3} duration={28} />
 
+      {/* ── NAVBAR LIMPIO Y SIN MODIFICACIONES DE ESTRUCTURA ── */}
       <nav
         className="comic-header navbar navbar-expand-lg px-4 px-md-5"
         style={{
@@ -321,10 +257,11 @@ const Comic = () => {
             boxShadow: `0 4px 0 ${palette.borde}`,
             fontSize: "1rem",
             fontWeight: 800,
-            animation: pulse ? "bounceIn 0.5s ease" : "none",
+            animation: pulse ? "scorePop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)" : "none",
+            transformOrigin: "center",
           }}
         >
-          <span style={{ marginRight: "8px", fontSize: "1.2rem" }}>⭐</span>
+          <span style={{ marginRight: "8px", fontWeight: 700, fontSize: "0.85rem", textTransform: "uppercase" }}>Progreso:</span>
           {score}
         </div>
 
@@ -343,7 +280,6 @@ const Comic = () => {
             fontWeight: 800,
           }}
         >
-          <span style={{ marginRight: "8px", fontSize: "1.1rem" }}>👈</span>
           VOLVER
         </Link>
       </nav>
@@ -376,8 +312,7 @@ const Comic = () => {
             boxShadow: `0 10px 0 ${palette.borde}`,
           }}
         >
-          <WashiTape top="-14px" left="-18px" rotate={-18} color={scene.tapeColors[0]} delay={0.15} />
-          <WashiTape top="-14px" right="-18px" rotate={18} color={scene.tapeColors[1]} delay={0.25} />
+          {/* SE ELIMINARON LAS CINTAS (WASHITAPES) DE LAS ESQUINAS */}
 
           <div
             style={{
@@ -418,48 +353,45 @@ const Comic = () => {
             <div ref={lottieContainer} style={{ width: "100%", height: "100%" }} />
 
             {!reproducido && (
-              <>
+              <div
+                className="comic-play-btn"
+                onClick={handlePlayClick}
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  padding: "16px 36px",
+                  borderRadius: "50px",
+                  background: palette.amarillo,
+                  border: `4px solid ${palette.borde}`,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  fontFamily: fDisplay,
+                  fontSize: "1.3rem",
+                  fontWeight: 800,
+                  color: palette.borde,
+                  cursor: "pointer",
+                  zIndex: 10,
+                  animation: "playBounce 1.8s ease-in-out infinite",
+                  boxShadow: `0 8px 0 ${palette.borde}`,
+                  letterSpacing: "0.05em",
+                  textTransform: "uppercase",
+                }}
+                role="button"
+              >
                 <div
                   style={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    width: "110px",
-                    height: "110px",
-                    borderRadius: "50%",
-                    border: `4px solid ${palette.amarillo}`,
-                    animation: "sunRing 1.6s ease-out infinite",
-                    zIndex: 9,
-                    pointerEvents: "none",
+                    width: 0,
+                    height: 0,
+                    borderTop: "9px solid transparent",
+                    borderBottom: "9px solid transparent",
+                    borderLeft: `15px solid ${palette.borde}`,
                   }}
                 />
-                <div
-                  className="comic-play-sticker"
-                  onClick={handlePlayClick}
-                  style={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    width: "100px",
-                    height: "100px",
-                    borderRadius: "50%",
-                    background: palette.amarillo,
-                    border: `5px solid ${palette.borde}`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "2.4rem",
-                    cursor: "pointer",
-                    zIndex: 10,
-                    animation: "sunPulse 1.3s ease-in-out infinite",
-                    boxShadow: `0 6px 0 ${palette.borde}`,
-                  }}
-                  role="button"
-                >
-                  ▶️
-                </div>
-              </>
+                Reproducir
+              </div>
             )}
 
             {!relojEncontrado && (
@@ -483,7 +415,6 @@ const Comic = () => {
                 }}
               />
             )}
-            <Confetti pieces={confetti} />
 
             {sceneIndex > 0 && (
               <button
@@ -501,7 +432,7 @@ const Comic = () => {
                   border: `4px solid ${palette.borde}`,
                   background: palette.amarillo,
                   color: palette.borde,
-                  fontSize: "1.8rem",
+                  fontSize: "1.4rem",
                   fontFamily: fDisplay,
                   fontWeight: 800,
                   zIndex: 60,
@@ -509,7 +440,7 @@ const Comic = () => {
                   cursor: "pointer",
                 }}
               >
-                ‹
+                &lt;
               </button>
             )}
 
@@ -529,7 +460,7 @@ const Comic = () => {
                   border: `4px solid ${palette.borde}`,
                   background: palette.rosa,
                   color: "#fff",
-                  fontSize: "1.8rem",
+                  fontSize: "1.4rem",
                   fontFamily: fDisplay,
                   fontWeight: 800,
                   zIndex: 60,
@@ -537,7 +468,7 @@ const Comic = () => {
                   cursor: "pointer",
                 }}
               >
-                ›
+                &gt;
               </button>
             )}
           </div>

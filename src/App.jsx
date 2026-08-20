@@ -1,8 +1,8 @@
 ﻿import React from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Comic from './Pages/Comic'
 import Home from './Pages/Home'
 import Trailer from './Pages/Trailer'
+import Comic from './Pages/Comic'
 
 const App = () => {
   return (
