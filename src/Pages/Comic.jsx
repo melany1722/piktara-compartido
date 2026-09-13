@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useRef, useState } from 'react';
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import lottie from "lottie-web";
 import "../Comic.css";
 
@@ -7,101 +7,51 @@ const fDisplay = "'Baloo 2', 'Comic Sans MS', sans-serif";
 
 const palette = {
   morado: "#5A189A",
-  moradoClaro: "#F3E8FF", // Fondo general cambiado a un morado super clarito
   amarillo: "#FFC300",
   crema: "#FFF8E7",
   borde: "#3A2312",
   rosa: "#FF597B",
   verde: "#00E676",
+  fondoEscena: "#BFF0D9",
 };
 
 const relojImg = "/lottie/images/img_0.png";
 
-const scenes = [
-  {
-    route: "/comicj",
-    animationPath: "/lottiej/animacionj.json",
-    foundKey: "relojComicj",
-    backgroundColor: "#FFE8B8",
-    nombre: "Aventura 1",
-  },
-  {
-    route: "/melany",
-    animationPath: "/lottiem/fondomela.json",
-    foundKey: "relojComick",
-    backgroundColor: "#D9C7FF",
-    nombre: "Aventura 2",
-  },
-  {
-    route: "/comic",
-    animationPath: "/lottie/gifalien.json",
-    foundKey: "relojComic",
-    backgroundColor: "#BFF0D9",
-    nombre: "Aventura 3",
-  },
-];
-
-const getInitialScene = (pathname) => {
-  const sceneIndex = scenes.findIndex((scene) => scene.route === pathname);
-  return sceneIndex >= 0 ? sceneIndex : 0;
-};
-
-const Cloud = ({ top, left, size, delay, duration }) => (
+const WashiTape = ({ top, left, right, rotate, color }) => (
   <div
     style={{
       position: "absolute",
       top,
       left,
-      width: size,
-      height: size * 0.55,
-      opacity: 0.85,
-      animation: `driftCloud ${duration}s linear ${delay}s infinite`,
-      pointerEvents: "none",
-      zIndex: 1,
+      right,
+      width: "70px",
+      height: "26px",
+      background: color,
+      border: `2.5px solid ${palette.borde}`,
+      transform: `rotate(${rotate}deg)`,
+      boxShadow: `0 3px 0 ${palette.borde}`,
+      borderRadius: "4px",
+      zIndex: 40,
     }}
-  >
-    <svg viewBox="0 0 200 110" width="100%" height="100%">
-      <ellipse cx="55" cy="70" rx="55" ry="35" fill="#FFFFFF" />
-      <ellipse cx="110" cy="50" rx="65" ry="45" fill="#FFFFFF" />
-      <ellipse cx="165" cy="72" rx="45" ry="30" fill="#FFFFFF" />
-    </svg>
-  </div>
+  />
 );
 
 const Comic = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
   const lottieContainer = useRef(null);
   const animRef = useRef(null);
 
-  const [sceneIndex, setSceneIndex] = useState(() => getInitialScene(location.pathname));
-  const scene = scenes[sceneIndex];
-
   const [score, setScore] = useState(() => Number(localStorage.getItem("piktaraScore")) || 0);
-  const [relojEncontrado, setRelojEncontrado] = useState(() => localStorage.getItem(scene.foundKey) === "true");
+  const [relojEncontrado, setRelojEncontrado] = useState(() => localStorage.getItem("relojComic") === "true");
   const [pulse, setPulse] = useState(false);
   const [reproducido, setReproducido] = useState(false);
-  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setReady(true), 30);
-    return () => clearTimeout(t);
-  }, []);
-
-  useEffect(() => {
-    setSceneIndex(getInitialScene(location.pathname));
-  }, [location.pathname]);
-
-  useEffect(() => {
-    setReproducido(false);
-    setRelojEncontrado(localStorage.getItem(scene.foundKey) === "true");
-
     const anim = lottie.loadAnimation({
       container: lottieContainer.current,
       renderer: "svg",
-      loop: true,
+      loop: false,
       autoplay: false,
-      path: scene.animationPath,
+      path: "/lottie/gifalien.json",
       rendererSettings: {
         preserveAspectRatio: "xMidYMid meet",
       },
@@ -109,12 +59,18 @@ const Comic = () => {
 
     animRef.current = anim;
 
-    return () => anim.destroy();
-  }, [scene]);
+    anim.addEventListener('complete', () => {
+      setReproducido(false);
+    });
+
+    return () => {
+      anim.destroy();
+    };
+  }, []);
 
   const handlePlayClick = () => {
     if (animRef.current) {
-      animRef.current.play();
+      animRef.current.goToAndPlay(0, true);
       setReproducido(true);
     }
   };
@@ -126,23 +82,11 @@ const Comic = () => {
       const nuevoScore = score + 1;
       setScore(nuevoScore);
       localStorage.setItem("piktaraScore", nuevoScore);
-      localStorage.setItem(scene.foundKey, "true");
+      localStorage.setItem("relojComic", "true");
       setRelojEncontrado(true);
       setPulse(true);
-      setTimeout(() => setPulse(false), 600);
+      setTimeout(() => setPulse(false), 500);
     }
-  };
-
-  const goToPreviousScene = () => {
-    const newIndex = Math.max(sceneIndex - 1, 0);
-    setSceneIndex(newIndex);
-    navigate(scenes[newIndex].route);
-  };
-
-  const goToNextScene = () => {
-    const newIndex = Math.min(sceneIndex + 1, scenes.length - 1);
-    setSceneIndex(newIndex);
-    navigate(scenes[newIndex].route);
   };
 
   return (
@@ -154,16 +98,12 @@ const Comic = () => {
         display: "flex",
         flexDirection: "column",
         position: "relative",
-        background: palette.moradoClaro,
+        background: palette.crema,
       }}
     >
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Quicksand:wght@500;600;700&display=swap');
 
-        @keyframes driftCloud {
-          from { transform: translateX(-15vw); }
-          to { transform: translateX(105vw); }
-        }
         @keyframes scorePop {
           0% { transform: scale(1); }
           40% { transform: scale(1.35) rotate(6deg); }
@@ -171,67 +111,34 @@ const Comic = () => {
           100% { transform: scale(1); }
         }
         @keyframes wiggleSticker {
-          0%, 100% { transform: rotate(-12deg) scale(1); }
-          50% { transform: rotate(-2deg) scale(1.08); }
+          0%, 100% { transform: translate(-50%, -50%) rotate(-18deg) scale(1); }
+          50% { transform: translate(-50%, -50%) rotate(-10deg) scale(1.08); }
         }
         @keyframes playBounce {
           0%, 100% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 8px 0 ${palette.borde}; }
           50% { transform: translate(-50%, -54%) scale(1.08); box-shadow: 0 14px 0 ${palette.borde}; }
         }
-        @keyframes headerDrop {
-          from { transform: translateY(-100%); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
-        }
-        @keyframes sceneEnter {
-          0% { opacity: 0; transform: scale(0.85) translateY(20px); }
-          100% { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        @keyframes ribbonPop {
-          0% { opacity: 0; transform: translate(-50%, -18px) scale(0.8); }
-          100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
-        }
 
         .comic-nav-btn {
-          transition: transform 0.15s ease, background-color 0.15s ease;
+          transition: transform 0.15s ease;
         }
         .comic-nav-btn:hover {
           transform: translateY(-50%) scale(1.12) !important;
-        }
-        .comic-back-btn {
-          transition: transform 0.15s ease;
         }
         .comic-back-btn:hover {
           transform: translateY(-3px) scale(1.04);
           box-shadow: 0 6px 0 ${palette.borde} !important;
         }
-        .comic-play-btn {
-          transition: transform 0.15s ease, filter 0.15s ease;
-        }
-        .comic-play-btn:hover {
-          transform: translate(-50%, -54%) scale(1.1) !important;
-          filter: brightness(1.05);
-        }
-        .comic-header {
-          animation: headerDrop 0.6s cubic-bezier(.34,1.56,.64,1) both;
-        }
-        .comic-frame {
-          animation: sceneEnter 0.5s cubic-bezier(.34,1.56,.64,1) both;
-        }
       `}</style>
 
-      <Cloud top="8%" left="2%" size={140} delay={0} duration={24} />
-      <Cloud top="75%" left="70%" size={160} delay={3} duration={28} />
-
-      {/* ── NAVBAR LIMPIO Y SIN MODIFICACIONES DE ESTRUCTURA ── */}
       <nav
-        className="comic-header navbar navbar-expand-lg px-4 px-md-5"
+        className="navbar navbar-expand-lg px-4 px-md-5"
         style={{
           background: palette.amarillo,
           flexShrink: 0,
           borderBottom: `6px solid ${palette.morado}`,
           position: "relative",
           zIndex: 20,
-          opacity: ready ? 1 : 0,
         }}
       >
         <Link to="/" className="navbar-brand me-4">
@@ -258,7 +165,6 @@ const Comic = () => {
             fontSize: "1rem",
             fontWeight: 800,
             animation: pulse ? "scorePop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)" : "none",
-            transformOrigin: "center",
           }}
         >
           <span style={{ marginRight: "8px", fontWeight: 700, fontSize: "0.85rem", textTransform: "uppercase" }}>Progreso:</span>
@@ -298,21 +204,20 @@ const Comic = () => {
         }}
       >
         <div
-          key={sceneIndex}
-          className="comic-frame"
           style={{
             position: "relative",
             height: "100%",
             aspectRatio: "1920 / 1080",
             maxWidth: "100%",
-            background: "#fff",
+            background: palette.crema,
             borderRadius: "32px",
             padding: "16px",
             border: `6px solid ${palette.morado}`,
             boxShadow: `0 10px 0 ${palette.borde}`,
           }}
         >
-          {/* SE ELIMINARON LAS CINTAS (WASHITAPES) DE LAS ESQUINAS */}
+          <WashiTape top="-14px" left="-18px" rotate={-18} color={palette.amarillo} />
+          <WashiTape top="-14px" right="-18px" rotate={18} color={palette.rosa} />
 
           <div
             style={{
@@ -333,10 +238,9 @@ const Comic = () => {
               boxShadow: `0 4px 0 ${palette.borde}`,
               zIndex: 45,
               textTransform: "uppercase",
-              animation: "ribbonPop 0.5s cubic-bezier(.34,1.56,.64,1) 0.35s both",
             }}
           >
-            {scene.nombre}
+            Aventura 3
           </div>
 
           <div
@@ -347,14 +251,13 @@ const Comic = () => {
               borderRadius: "22px",
               overflow: "hidden",
               border: `3px solid ${palette.borde}`,
-              backgroundColor: scene.backgroundColor,
+              backgroundColor: palette.fondoEscena,
             }}
           >
             <div ref={lottieContainer} style={{ width: "100%", height: "100%" }} />
 
             {!reproducido && (
               <div
-                className="comic-play-btn"
                 onClick={handlePlayClick}
                 style={{
                   position: "absolute",
@@ -373,7 +276,7 @@ const Comic = () => {
                   fontWeight: 800,
                   color: palette.borde,
                   cursor: "pointer",
-                  zIndex: 10,
+                  zIndex: 20,
                   animation: "playBounce 1.8s ease-in-out infinite",
                   boxShadow: `0 8px 0 ${palette.borde}`,
                   letterSpacing: "0.05em",
@@ -401,76 +304,73 @@ const Comic = () => {
                 onClick={handleRelojClick}
                 style={{
                   position: "absolute",
-                  bottom: "30%",
-                  right: "12%",
-                  width: "5%",
-                  minWidth: "34px",
+                  left: "42%",
+                  top: "62%",
+                  transform: "translate(-50%, -50%) rotate(-18deg)",
+                  width: "22px",
+                  height: "22px",
+                  objectFit: "contain",
+                  opacity: 1,
                   cursor: "pointer",
-                  opacity: 0.95,
-                  filter: `drop-shadow(0 0 6px ${palette.amarillo})`,
-                  transform: "rotate(-12deg)",
+                  zIndex: 100,
+                  pointerEvents: "auto",
+                  filter: `drop-shadow(0 0 8px ${palette.amarillo})`,
                   animation: "wiggleSticker 1.6s ease-in-out infinite",
-                  zIndex: 50,
+                  background: palette.crema,
+                  padding: "4px",
                   borderRadius: "50%",
+                  border: `2px dashed ${palette.borde}`,
                 }}
               />
             )}
 
-            {sceneIndex > 0 && (
-              <button
-                type="button"
-                onClick={goToPreviousScene}
-                className="comic-nav-btn d-flex align-items-center justify-content-center"
-                style={{
-                  position: "absolute",
-                  top: "50%",
-                  left: "14px",
-                  transform: "translateY(-50%)",
-                  width: "52px",
-                  height: "52px",
-                  borderRadius: "50%",
-                  border: `4px solid ${palette.borde}`,
-                  background: palette.amarillo,
-                  color: palette.borde,
-                  fontSize: "1.4rem",
-                  fontFamily: fDisplay,
-                  fontWeight: 800,
-                  zIndex: 60,
-                  boxShadow: `0 5px 0 ${palette.borde}`,
-                  cursor: "pointer",
-                }}
-              >
-                &lt;
-              </button>
-            )}
+            <Link
+              to="/melany"
+              className="comic-nav-btn d-flex align-items-center justify-content-center text-decoration-none"
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "14px",
+                transform: "translateY(-50%)",
+                width: "52px",
+                height: "52px",
+                borderRadius: "50%",
+                border: `4px solid ${palette.borde}`,
+                background: palette.amarillo,
+                color: palette.borde,
+                fontSize: "1.8rem",
+                fontFamily: fDisplay,
+                fontWeight: 800,
+                zIndex: 60,
+                boxShadow: `0 5px 0 ${palette.borde}`,
+              }}
+            >
+              &lt;
+            </Link>
 
-            {sceneIndex < scenes.length - 1 && (
-              <button
-                type="button"
-                onClick={goToNextScene}
-                className="comic-nav-btn d-flex align-items-center justify-content-center"
-                style={{
-                  position: "absolute",
-                  top: "50%",
-                  right: "14px",
-                  transform: "translateY(-50%)",
-                  width: "52px",
-                  height: "52px",
-                  borderRadius: "50%",
-                  border: `4px solid ${palette.borde}`,
-                  background: palette.rosa,
-                  color: "#fff",
-                  fontSize: "1.4rem",
-                  fontFamily: fDisplay,
-                  fontWeight: 800,
-                  zIndex: 60,
-                  boxShadow: `0 5px 0 ${palette.borde}`,
-                  cursor: "pointer",
-                }}
-              >
-                &gt;
-              </button>
-            )}
+            <Link
+              to="/comic/4"
+              className="comic-nav-btn d-flex align-items-center justify-content-center text-decoration-none"
+              style={{
+                position: "absolute",
+                top: "50%",
+                right: "14px",
+                transform: "translateY(-50%)",
+                width: "52px",
+                height: "52px",
+                borderRadius: "50%",
+                border: `4px solid ${palette.borde}`,
+                background: palette.rosa,
+                color: "#fff",
+                fontSize: "1.8rem",
+                fontFamily: fDisplay,
+                fontWeight: 800,
+                zIndex: 60,
+                boxShadow: `0 5px 0 ${palette.borde}`,
+              }}
+            >
+              &gt;
+            </Link>
           </div>
         </div>
       </div>

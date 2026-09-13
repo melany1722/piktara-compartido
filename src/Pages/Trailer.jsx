@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import Buscar from "./Buscar";
-import IniciarSeccion from "./IniciarSeccion";
 
 // ── Paleta Estricta de 2 Colores + Neutros de Soporte (Crema y Borde) ──
 const fDisplay = "'Baloo 2', 'Comic Sans MS', sans-serif";
@@ -177,48 +175,8 @@ export default function Trailer() {
               NUESTRO CÓMIC
             </span>
           </div>
-
-          <div className="ms-auto d-flex gap-3 align-items-center">
-            <button
-              className="btn"
-              style={{
-                fontFamily: fDisplay,
-                background: palette.crema,
-                border: `3px solid ${palette.borde}`,
-                color: palette.borde,
-                borderRadius: "14px",
-                padding: "6px 18px",
-                fontWeight: 800,
-                boxShadow: `0 4px 0 ${palette.borde}`,
-              }}
-              data-bs-toggle="offcanvas"
-              data-bs-target="#panelBuscar"
-            >
-              Buscar
-            </button>
-            <button
-              className="btn"
-              style={{
-                fontFamily: fDisplay,
-                background: palette.crema,
-                border: `3.5px solid ${palette.borde}`,
-                color: palette.borde,
-                borderRadius: "14px",
-                padding: "6px 18px",
-                fontWeight: 800,
-                boxShadow: `0 4px 0 ${palette.borde}`,
-              }}
-              data-bs-toggle="offcanvas"
-              data-bs-target="#panelLogin"
-            >
-              Iniciar Sesión
-            </button>
-          </div>
         </div>
       </nav>
-
-      <Buscar />
-      <IniciarSeccion />
 
       {/* ── REPRODUCTOR DE TRAILER (Perfectamente Centrado) ── */}
       <section className="py-4 px-3" style={{ background: palette.crema, borderBottom: `5px solid ${palette.morado}` }}>
@@ -260,7 +218,7 @@ export default function Trailer() {
             <div style={{ borderRadius: "20px", overflow: "hidden", background: "#000", position: "relative" }}>
               {reproducir ? (
                 <iframe
-                  src="https://drive.google.com/file/d/1VkMxdeUUWXW2NUuJKH_7WiqJ6mqPR8-N/preview"
+                  src="https://drive.google.com/file/d/1bFgoFVKzRfJ86PlpzLKVyumReU_XxMeN/preview"
                   style={{ width: "100%", height: "520px", border: "none", display: "block" }}
                   allow="autoplay"
                   allowFullScreen

@@ -12,7 +12,7 @@ const palette = {
   borde: "#3A2312",
   rosa: "#FF597B",
   verde: "#00E676",
-  fondoEscena: "#BFF0D9",
+  fondoEscena: "#D9C7FF",
 };
 
 const relojImg = "/lottie/images/img_0.png";
@@ -36,38 +36,14 @@ const WashiTape = ({ top, left, right, rotate, color }) => (
   />
 );
 
-const Confetti = ({ pieces }) => (
-  <>
-    {pieces.map((p) => (
-      <span
-        key={p.id}
-        style={{
-          position: "absolute",
-          top: p.top,
-          right: p.right,
-          fontSize: p.size,
-          zIndex: 150,
-          pointerEvents: "none",
-          "--tx": `${p.tx}px`,
-          "--ty": `${p.ty}px`,
-          animation: `confettiBurst 0.9s ease-out forwards`,
-        }}
-      >
-        {p.emoji}
-      </span>
-    ))}
-  </>
-);
-
-const Comick = () => {
+const MelanyEstrellas = () => {
   const lottieContainer = useRef(null);
   const animRef = useRef(null);
 
   const [score, setScore] = useState(() => Number(localStorage.getItem("piktaraScore")) || 0);
-  const [relojEncontrado, setRelojEncontrado] = useState(() => localStorage.getItem("relojComick") === "true");
+  const [relojEncontrado, setRelojEncontrado] = useState(() => localStorage.getItem("relojMelany") === "true");
   const [pulse, setPulse] = useState(false);
   const [reproducido, setReproducido] = useState(false);
-  const [confetti, setConfetti] = useState([]);
 
   useEffect(() => {
     const anim = lottie.loadAnimation({
@@ -106,23 +82,10 @@ const Comick = () => {
       const nuevoScore = score + 1;
       setScore(nuevoScore);
       localStorage.setItem("piktaraScore", nuevoScore);
-      localStorage.setItem("relojComick", "true");
+      localStorage.setItem("relojMelany", "true");
       setRelojEncontrado(true);
       setPulse(true);
       setTimeout(() => setPulse(false), 500);
-
-      const emojis = ["✨", "⭐", "🎉", "💥"];
-      const pieces = Array.from({ length: 10 }).map((_, i) => ({
-        id: `${Date.now()}-${i}`,
-        emoji: emojis[i % emojis.length],
-        top: "30%",
-        right: "12%",
-        size: `${14 + Math.random() * 12}px`,
-        tx: Math.round((Math.random() - 0.5) * 220),
-        ty: Math.round(-40 - Math.random() * 140),
-      }));
-      setConfetti(pieces);
-      setTimeout(() => setConfetti([]), 900);
     }
   };
 
@@ -141,23 +104,19 @@ const Comick = () => {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Quicksand:wght@500;600;700&display=swap');
 
-        @keyframes bounceIn {
+        @keyframes scorePop {
           0% { transform: scale(1); }
-          35% { transform: scale(1.25) rotate(-4deg); }
-          65% { transform: scale(0.95) rotate(2deg); }
-          100% { transform: scale(1) rotate(0); }
+          40% { transform: scale(1.35) rotate(6deg); }
+          70% { transform: scale(0.9) rotate(-4deg); }
+          100% { transform: scale(1); }
         }
         @keyframes wiggleSticker {
           0%, 100% { transform: translate(-50%, -50%) rotate(-18deg) scale(1); }
           50% { transform: translate(-50%, -50%) rotate(-10deg) scale(1.08); }
         }
-        @keyframes sunPulse {
-          0%, 100% { transform: translate(-50%, -50%) scale(1); }
-          50% { transform: translate(-50%, -50%) scale(1.08); }
-        }
-        @keyframes confettiBurst {
-          0% { transform: translate(0, 0) scale(0.6) rotate(0deg); opacity: 1; }
-          100% { transform: translate(var(--tx), var(--ty)) scale(1.1) rotate(200deg); opacity: 0; }
+        @keyframes playBounce {
+          0%, 100% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 8px 0 ${palette.borde}; }
+          50% { transform: translate(-50%, -54%) scale(1.08); box-shadow: 0 14px 0 ${palette.borde}; }
         }
 
         .comic-nav-btn {
@@ -205,10 +164,10 @@ const Comick = () => {
             boxShadow: `0 4px 0 ${palette.borde}`,
             fontSize: "1rem",
             fontWeight: 800,
-            animation: pulse ? "bounceIn 0.5s ease" : "none",
+            animation: pulse ? "scorePop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)" : "none",
           }}
         >
-          <span style={{ marginRight: "8px", fontSize: "1.2rem" }}>⭐</span>
+          <span style={{ marginRight: "8px", fontWeight: 700, fontSize: "0.85rem", textTransform: "uppercase" }}>Progreso:</span>
           {score}
         </div>
 
@@ -227,7 +186,6 @@ const Comick = () => {
             fontWeight: 800,
           }}
         >
-          <span style={{ marginRight: "8px", fontSize: "1.1rem" }}>👈</span>
           VOLVER
         </Link>
       </nav>
@@ -282,7 +240,7 @@ const Comick = () => {
               textTransform: "uppercase",
             }}
           >
-            Aventura 3
+            Aventura 2
           </div>
 
           <div
@@ -306,38 +264,51 @@ const Comick = () => {
                   top: "50%",
                   left: "50%",
                   transform: "translate(-50%, -50%)",
-                  width: "100px",
-                  height: "100px",
-                  borderRadius: "50%",
+                  padding: "16px 36px",
+                  borderRadius: "50px",
                   background: palette.amarillo,
-                  border: `5px solid ${palette.borde}`,
+                  border: `4px solid ${palette.borde}`,
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "2.4rem",
+                  gap: "12px",
+                  fontFamily: fDisplay,
+                  fontSize: "1.3rem",
+                  fontWeight: 800,
+                  color: palette.borde,
                   cursor: "pointer",
                   zIndex: 20,
-                  animation: "sunPulse 1.3s ease-in-out infinite",
-                  boxShadow: `0 6px 0 ${palette.borde}`,
+                  animation: "playBounce 1.8s ease-in-out infinite",
+                  boxShadow: `0 8px 0 ${palette.borde}`,
+                  letterSpacing: "0.05em",
+                  textTransform: "uppercase",
                 }}
                 role="button"
               >
-                ▶️
+                <div
+                  style={{
+                    width: 0,
+                    height: 0,
+                    borderTop: "9px solid transparent",
+                    borderBottom: "9px solid transparent",
+                    borderLeft: `15px solid ${palette.borde}`,
+                  }}
+                />
+                Reproducir
               </div>
             )}
 
             {!relojEncontrado && (
               <img
                 src={relojImg}
-                alt="Reloj escondido"
+                alt=""
                 onClick={handleRelojClick}
                 style={{
                   position: "absolute",
-                  left: "51.2%",
-                  top: "47.5%",
+                  left: "22%",
+                  top: "25%",
                   transform: "translate(-50%, -50%) rotate(-18deg)",
-                  width: "42px",
-                  height: "42px",
+                  width: "24px",
+                  height: "24px",
                   objectFit: "contain",
                   opacity: 1,
                   cursor: "pointer",
@@ -352,7 +323,6 @@ const Comick = () => {
                 }}
               />
             )}
-            <Confetti pieces={confetti} />
 
             <Link
               to="/comicj"
@@ -375,7 +345,7 @@ const Comick = () => {
                 boxShadow: `0 5px 0 ${palette.borde}`,
               }}
             >
-              ‹
+              &lt;
             </Link>
 
             <Link
@@ -399,7 +369,7 @@ const Comick = () => {
                 boxShadow: `0 5px 0 ${palette.borde}`,
               }}
             >
-              ›
+              &gt;
             </Link>
           </div>
         </div>
@@ -408,4 +378,4 @@ const Comick = () => {
   );
 };
 
-export default Comick;
+export default MelanyEstrellas;
