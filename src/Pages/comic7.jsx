@@ -32,7 +32,7 @@ const WashiTape = ({ top, left, right, rotate, color }) => (
   />
 );
 
-const relojImg = "/lottie/images/img_0.png";
+const relojImg = "/RELOJ.svg";
 
 const Comic7 = () => {
   const [score, setScore] = useState(() => Number(localStorage.getItem("piktaraScore")) || 0);

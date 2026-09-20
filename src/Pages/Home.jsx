@@ -1,7 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import AOS from "aos";
-import "aos/dist/aos.css";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ScrollToPlugin } from "gsap/ScrollToPlugin";
+
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 const fDisplay = "'Baloo 2', 'Comic Sans MS', sans-serif";
 const fBody = "'Quicksand', 'Comic Sans MS', sans-serif";
@@ -13,6 +16,8 @@ const palette = {
   borde: "#3A2312",
   lavanda: "#E6E6FA",
 };
+
+const HERO_TITLE = "¡Atraviesa el portal del tiempo y descubre la aventura!";
 
 const personajes = [
   {
@@ -62,12 +67,63 @@ const equipo = [
   },
 ];
 
+// Tilt 3D suave sobre una tarjeta al mover el mouse encima (GSAP quickTo)
+const useTiltHandlers = (maxTilt = 10) => {
+  const onEnter = (e) => {
+    gsap.to(e.currentTarget, { scale: 1.05, duration: 0.35, ease: "power2.out" });
+  };
+  const onMove = (e) => {
+    const card = e.currentTarget;
+    const rect = card.getBoundingClientRect();
+    const px = (e.clientX - rect.left) / rect.width - 0.5;
+    const py = (e.clientY - rect.top) / rect.height - 0.5;
+    gsap.to(card, {
+      rotateY: px * maxTilt,
+      rotateX: py * -maxTilt,
+      transformPerspective: 800,
+      duration: 0.4,
+      ease: "power2.out",
+    });
+  };
+  const onLeave = (e) => {
+    gsap.to(e.currentTarget, {
+      scale: 1,
+      rotateX: 0,
+      rotateY: 0,
+      duration: 0.6,
+      ease: "elastic.out(1, 0.5)",
+    });
+  };
+  return { onMouseEnter: onEnter, onMouseMove: onMove, onMouseLeave: onLeave };
+};
+
 // --- MODAL DE PERSONAJE ---
 const PersonajeModal = ({ personaje, onClose }) => {
+  const overlayRef = useRef(null);
+  const cardRef = useRef(null);
+
+  useEffect(() => {
+    if (!personaje) return;
+    const tl = gsap.timeline();
+    tl.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "power1.out" })
+      .fromTo(
+        cardRef.current,
+        { scale: 0.4, opacity: 0, rotate: -10, y: 50 },
+        { scale: 1, opacity: 1, rotate: -0.5, y: 0, duration: 0.55, ease: "back.out(1.8)" },
+        "-=0.1"
+      )
+      .fromTo(".ptk-modal-img", { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)" }, "-=0.3")
+      .fromTo(".ptk-modal-title", { opacity: 0, y: -18 }, { opacity: 1, y: 0, duration: 0.35 }, "-=0.2")
+      .fromTo(".ptk-modal-desc", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.35 }, "-=0.15")
+      .fromTo(".ptk-modal-fn", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.35 }, "-=0.15");
+    return () => tl.kill();
+  }, [personaje]);
+
   if (!personaje) return null;
 
   return (
     <div
+      ref={overlayRef}
       onClick={onClose}
       style={{
         position: "fixed",
@@ -85,6 +141,7 @@ const PersonajeModal = ({ personaje, onClose }) => {
       }}
     >
       <div
+        ref={cardRef}
         onClick={(e) => e.stopPropagation()}
         style={{
           background: palette.morado,
@@ -95,8 +152,6 @@ const PersonajeModal = ({ personaje, onClose }) => {
           width: "100%",
           padding: "28px",
           position: "relative",
-          transform: "rotate(-0.5deg)",
-          animation: "modalPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both",
           textAlign: "center",
         }}
       >
@@ -127,6 +182,7 @@ const PersonajeModal = ({ personaje, onClose }) => {
         <img
           src={personaje.img}
           alt={personaje.nombre}
+          className="ptk-modal-img"
           style={{
             width: "160px",
             aspectRatio: "3/4",
@@ -141,6 +197,7 @@ const PersonajeModal = ({ personaje, onClose }) => {
         />
 
         <h3
+          className="ptk-modal-title"
           style={{
             fontFamily: fDisplay,
             fontSize: "1.4rem",
@@ -155,6 +212,7 @@ const PersonajeModal = ({ personaje, onClose }) => {
         </h3>
 
         <p
+          className="ptk-modal-desc"
           style={{
             fontFamily: fBody,
             fontSize: "1.02rem",
@@ -168,6 +226,7 @@ const PersonajeModal = ({ personaje, onClose }) => {
         </p>
 
         <div
+          className="ptk-modal-fn"
           style={{
             display: "inline-block",
             background: "rgba(58, 35, 18, 0.3)",
@@ -215,26 +274,62 @@ const PersonajeModal = ({ personaje, onClose }) => {
 export default function Home() {
   const [loading, setLoading] = useState(true);
   const [personajeActivo, setPersonajeActivo] = useState(null);
-  const [scrollProgress, setScrollProgress] = useState(0);
   const [currentBgIndex, setCurrentBgIndex] = useState(0);
+
+  const rootRef = useRef(null);
+  const navRef = useRef(null);
   const heroRef = useRef(null);
+  const titleRef = useRef(null);
+  const loaderOverlayRef = useRef(null);
+  const loaderLogoRef = useRef(null);
+  const loaderGlowRef = useRef(null);
+  const progressBarRef = useRef(null);
+  const bgLayersRef = useRef([]);
   const location = useLocation();
+
+  const personajeTilt = useTiltHandlers(8);
+  const equipoTilt = useTiltHandlers(12);
 
   // Actualizado a fondo111.svg
   const backgroundImages = ["./ultimofondo (1).svg", "./fondo111.svg"];
 
+  // Loader de apertura: logo con pop elástico + halo, y un iris-wipe (clip-path)
+  // que abre la escena. El timeline es la única fuente de verdad del timing:
+  // cuando termina, se quita el overlay (nada de setTimeout desacoplado).
   useEffect(() => {
-    AOS.init({
-      duration: 900,
-      once: false,
-      easing: "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-      offset: 120,
-    });
+    const overlay = loaderOverlayRef.current;
+    const logo = loaderLogoRef.current;
+    const glow = loaderGlowRef.current;
+    if (!overlay || !logo || !glow) return;
 
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 4200);
-    return () => clearTimeout(timer);
+    const clip = { r: 150 };
+    overlay.style.clipPath = `circle(${clip.r}% at 50% 50%)`;
+
+    const tl = gsap.timeline({ onComplete: () => setLoading(false) });
+    tl.fromTo(glow, { scale: 0.3, opacity: 0 }, { scale: 1, opacity: 0.55, duration: 0.7, ease: "power2.out" })
+      .fromTo(
+        logo,
+        { scale: 0.2, opacity: 0, rotate: -18 },
+        { scale: 1, opacity: 1, rotate: 0, duration: 0.8, ease: "back.out(1.9)" },
+        "-=0.5"
+      )
+      .to(logo, { y: -8, duration: 0.6, ease: "sine.inOut", yoyo: true, repeat: 1 })
+      .to(logo, { scale: 1.5, opacity: 0, duration: 0.55, ease: "power2.in" }, "wipe")
+      .to(glow, { opacity: 0, scale: 1.6, duration: 0.55, ease: "power2.in" }, "wipe")
+      .to(
+        clip,
+        {
+          r: 0,
+          duration: 1,
+          ease: "power3.inOut",
+          onUpdate: () => {
+            overlay.style.clipPath = `circle(${clip.r}% at 50% 50%)`;
+          },
+        },
+        "wipe"
+      );
+
+    return () => tl.kill();
   }, []);
 
   // Slider automático configurado a 6 segundos (6000 ms)
@@ -246,92 +341,200 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const heroHeight = heroRef.current?.offsetHeight || 800;
-      const progress = Math.min(window.scrollY / heroHeight, 1);
-      setScrollProgress(progress);
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
     if (location.state?.scrollTo) {
       const targetId = location.state.scrollTo;
-      setTimeout(() => {
+      const t = setTimeout(() => {
         const elem = document.getElementById(targetId);
         if (elem) {
-          elem.scrollIntoView({ behavior: "smooth", block: "start" });
+          gsap.to(window, { duration: 1.1, ease: "power2.inOut", scrollTo: { y: elem, offsetY: 90 } });
         }
       }, 300);
+      return () => clearTimeout(t);
     }
   }, [location]);
 
+  // Navbar: entra deslizándose desde arriba apenas monta la página
+  useEffect(() => {
+    gsap.fromTo(
+      navRef.current,
+      { y: -90, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.8, ease: "back.out(1.6)", delay: 0.1 }
+    );
+  }, []);
+
+  // Hero: logo + título se revelan palabra por palabra justo cuando termina el loader
+  useEffect(() => {
+    if (loading) return;
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ defaults: { ease: "back.out(1.7)" } });
+      tl.fromTo(".ptk-hero-logo", { scale: 0, opacity: 0, rotate: -15 }, { scale: 1, opacity: 1, rotate: 0, duration: 0.9 })
+        .fromTo(
+          ".ptk-word",
+          { y: 60, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.7, stagger: 0.06, ease: "power3.out" },
+          "-=0.45"
+        )
+        .add(() => {
+          gsap.to(titleRef.current, { y: -8, duration: 1.8, ease: "sine.inOut", yoyo: true, repeat: -1 });
+        });
+    }, heroRef);
+    return () => ctx.revert();
+  }, [loading]);
+
+  // Resto de la página: parallax y revelados al hacer scroll
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Barra de progreso fija arriba: se llena de 0 a 100% con todo el documento
+      gsap.fromTo(
+        progressBarRef.current,
+        { scaleX: 0 },
+        {
+          scaleX: 1,
+          ease: "none",
+          scrollTrigger: { start: 0, end: "max", scrub: 0.3 },
+        }
+      );
+
+      // Parallax suave del fondo del hero al hacer scroll
+      gsap.to(bgLayersRef.current, {
+        yPercent: 18,
+        ease: "none",
+        scrollTrigger: { trigger: heroRef.current, start: "top top", end: "bottom top", scrub: true },
+      });
+
+      gsap.fromTo(
+        ".ptk-que-es-inner",
+        { x: -60 },
+        {
+          x: 60,
+          ease: "none",
+          scrollTrigger: { trigger: heroRef.current, start: "top top", end: "bottom top", scrub: true },
+        }
+      );
+
+      gsap.utils.toArray(".ptk-reveal").forEach((el) => {
+        gsap.fromTo(
+          el,
+          { opacity: 0, y: 70 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.9,
+            ease: "power3.out",
+            scrollTrigger: { trigger: el, start: "top 88%", toggleActions: "play none none reverse" },
+          }
+        );
+      });
+
+      gsap.fromTo(
+        ".ptk-badge",
+        { opacity: 0, y: -40, rotate: -10, scale: 0.7 },
+        {
+          opacity: 1,
+          y: 0,
+          rotate: -1,
+          scale: 1,
+          duration: 0.7,
+          ease: "back.out(2)",
+          scrollTrigger: { trigger: ".ptk-badge", start: "top 88%", toggleActions: "play none none reverse" },
+        }
+      );
+
+      gsap.fromTo(
+        ".personaje-card",
+        { opacity: 0, y: 90, scale: 0.8 },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.8,
+          ease: "back.out(1.6)",
+          stagger: 0.18,
+          scrollTrigger: { trigger: "#personajes", start: "top 75%" },
+        }
+      );
+
+      gsap.utils.toArray(".ptk-origen-col").forEach((el, i) => {
+        gsap.fromTo(
+          el,
+          { opacity: 0, x: i === 0 ? -80 : 80 },
+          {
+            opacity: 1,
+            x: 0,
+            duration: 0.9,
+            ease: "power3.out",
+            scrollTrigger: { trigger: el, start: "top 85%", toggleActions: "play none none reverse" },
+          }
+        );
+      });
+
+      gsap.fromTo(
+        ".ptk-equipo-badge",
+        { opacity: 0, scale: 0.5, y: -30 },
+        {
+          opacity: 1,
+          scale: 1,
+          y: 0,
+          duration: 0.6,
+          ease: "back.out(2)",
+          scrollTrigger: { trigger: ".ptk-equipo-badge", start: "top 85%" },
+        }
+      );
+
+      gsap.fromTo(
+        ".piktara-card",
+        { opacity: 0, y: 90, scale: 0.85 },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.8,
+          ease: "back.out(1.6)",
+          stagger: 0.2,
+          scrollTrigger: { trigger: ".ptk-equipo-grid", start: "top 78%" },
+        }
+      );
+
+      gsap.fromTo(
+        ".ptk-footer-content",
+        { opacity: 0, y: 50 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power3.out",
+          scrollTrigger: { trigger: "footer", start: "top 92%" },
+        }
+      );
+    }, rootRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <div style={{ background: palette.crema, minHeight: "100vh", fontFamily: fBody, color: palette.borde, overflowX: "hidden" }}>
+    <div ref={rootRef} style={{ background: palette.crema, minHeight: "100vh", fontFamily: fBody, color: palette.borde, overflowX: "hidden" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Quicksand:wght@500;600;700&display=swap');
 
-        @keyframes spiralAndLogoIntro {
-          0% { transform: scale(0.1) rotate(0deg); opacity: 0; }
-          40% { transform: scale(1.5) rotate(1080deg); opacity: 1; }
-          60% { transform: scale(1.2) rotate(1440deg); opacity: 1; }
-          80% { transform: scale(3.2) rotate(1800deg); opacity: 1; }
-          100% { transform: scale(4.5) rotate(2160deg); opacity: 0; }
+        .ptk-reveal, .ptk-badge, .personaje-card, .ptk-origen-col, .ptk-equipo-badge, .piktara-card, .ptk-footer-content {
+          opacity: 0;
+          will-change: transform, opacity;
         }
 
-        @keyframes logoPopReveal {
-          0% { transform: scale(0.2) rotate(-10deg); opacity: 0; }
-          50% { transform: scale(0.2) rotate(-10deg); opacity: 0; }
-          65% { transform: scale(1.15) rotate(3deg); opacity: 1; }
-          78% { transform: scale(0.95) rotate(-2deg); opacity: 1; }
-          90% { transform: scale(1.05) rotate(0deg); opacity: 1; }
-          100% { transform: scale(1.3) rotate(0deg); opacity: 0; }
-        }
-
-        @keyframes spiralFadeOutBg {
-          0% { background-color: ${palette.morado}; }
-          88% { background-color: ${palette.morado}; }
-          100% { background-color: transparent; visibility: hidden; }
-        }
-
-        @keyframes heroEntrance {
-          0% { opacity: 0; transform: translateY(40px) scale(0.9); }
-          100% { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        @keyframes headerDrop {
-          from { transform: translateY(-100%); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
-        }
-
-        @keyframes modalPop {
-          0% { transform: scale(0.5) rotate(-4deg); opacity: 0; }
-          70% { transform: scale(1.05) rotate(1deg); opacity: 1; }
-          100% { transform: scale(1) rotate(-0.5deg); opacity: 1; }
-        }
-
-        @keyframes textBounceAndGlow {
-          0%, 100% { transform: translateY(0) scale(1); }
-          50% { transform: translateY(-8px) scale(1.02); }
-        }
+        .ptk-word { display: inline-block; will-change: transform, opacity; }
 
         .home-navlink { transition: transform 0.15s ease, color 0.15s ease; }
         .home-navlink:hover { transform: scale(1.08) rotate(-1deg); color: ${palette.morado} !important; }
 
-        .personaje-card { transition: transform 0.25s ease; cursor: pointer; }
-        .personaje-card:hover { transform: translateY(-12px) scale(1.05) rotate(0deg) !important; }
+        .personaje-card { cursor: pointer; transform-style: preserve-3d; }
 
         .piktara-card {
           background: #ffffff;
           border: 4px solid ${palette.borde};
           border-radius: 28px;
           box-shadow: 0 8px 0 ${palette.borde};
-          transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
-        }
-        .piktara-card:hover {
-          transform: translateY(-8px) scale(1.02);
-          box-shadow: 0 14px 0 ${palette.borde};
+          cursor: default;
+          transform-style: preserve-3d;
         }
 
         .social-icon-btn {
@@ -355,8 +558,23 @@ export default function Home() {
         }
       `}</style>
 
+      {/* Barra de progreso de lectura, fija arriba de todo */}
+      <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "5px", zIndex: 10000, background: "rgba(58, 35, 18, 0.15)" }}>
+        <div
+          ref={progressBarRef}
+          style={{
+            height: "100%",
+            width: "100%",
+            background: `linear-gradient(90deg, ${palette.amarillo}, ${palette.morado})`,
+            transformOrigin: "left center",
+            transform: "scaleX(0)",
+          }}
+        />
+      </div>
+
       {loading && (
         <div
+          ref={loaderOverlayRef}
           style={{
             position: "fixed",
             top: 0,
@@ -368,51 +586,42 @@ export default function Home() {
             justifyContent: "center",
             zIndex: 9999,
             overflow: "hidden",
-            animation: "spiralFadeOutBg 4.2s ease-in-out forwards",
+            background: palette.morado,
           }}
         >
           <div
+            ref={loaderGlowRef}
             style={{
               position: "absolute",
-              width: "220px",
-              height: "220px",
+              width: "440px",
+              height: "440px",
               borderRadius: "50%",
-              background: `conic-gradient(${palette.morado} 0deg 180deg, ${palette.amarillo} 180deg 360deg)`,
-              border: `6px solid ${palette.borde}`,
-              boxShadow: `0 0 0 3000px ${palette.morado}`,
-              animation: "spiralAndLogoIntro 4s cubic-bezier(0.77, 0, 0.175, 1) forwards",
+              background: `radial-gradient(circle, ${palette.amarillo} 0%, rgba(255,195,0,0) 70%)`,
+              opacity: 0,
             }}
           />
-          <div
+          <img
+            ref={loaderLogoRef}
+            src="./MANOLOGO.svg"
+            alt="Piktara Logo"
             style={{
-              position: "absolute",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              animation: "logoPopReveal 4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
-              zIndex: 10000,
+              position: "relative",
+              width: "260px",
+              height: "auto",
+              opacity: 0,
+              filter: `drop-shadow(0 8px 0px ${palette.borde}) drop-shadow(0 15px 25px rgba(58, 35, 18, 0.5))`,
             }}
-          >
-            <img
-              src="./MANOLOGO.svg"
-              alt="Piktara Logo"
-              style={{
-                width: "280px",
-                height: "auto",
-                filter: `drop-shadow(0 8px 0px ${palette.borde}) drop-shadow(0 15px 25px rgba(58, 35, 18, 0.5))`,
-              }}
-            />
-          </div>
+          />
         </div>
       )}
 
       {/* NAVBAR */}
       <nav
+        ref={navRef}
         className="navbar navbar-expand-lg px-4 px-md-5"
         style={{
           background: palette.amarillo,
           borderBottom: `6px solid ${palette.morado}`,
-          animation: "headerDrop 0.6s cubic-bezier(.34,1.56,.64,1) both",
           position: "sticky",
           top: 0,
           zIndex: 30,
@@ -451,10 +660,10 @@ export default function Home() {
       </nav>
 
       {/* HERO SECTION CON SLIDER DE IMÁGENES Y ANIMACIÓN DE ESCALA (1.5) */}
-      <div 
+      <div
         ref={heroRef}
-        className="position-relative overflow-hidden d-flex align-items-center justify-content-center w-100" 
-        style={{ 
+        className="position-relative overflow-hidden d-flex align-items-center justify-content-center w-100"
+        style={{
           minHeight: "100vh",
           paddingTop: "8rem",
           paddingBottom: "8rem",
@@ -465,6 +674,7 @@ export default function Home() {
         {backgroundImages.map((bgImg, index) => (
           <div
             key={index}
+            ref={(el) => (bgLayersRef.current[index] = el)}
             style={{
               position: "absolute",
               top: 0,
@@ -488,46 +698,44 @@ export default function Home() {
 
         <div className="container text-center position-relative py-5" style={{ zIndex: 3 }}>
           <div className="mx-auto px-3" style={{ maxWidth: "1150px" }}>
-            
-            <div 
-              style={{ 
-                animation: "heroEntrance 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 4.1s both" 
-              }}
-            >
-              <div className="mb-4">
-                <img
-                  src="./MANOLOGO.svg"
-                  alt="Isotipo Mano"
-                  style={{
-                    height: "210px",
-                    objectFit: "contain",
-                    filter: `drop-shadow(0 8px 0 ${palette.borde})`,
-                  }}
-                />
-              </div>
-
-              <h1
+            <div className="mb-4">
+              <img
+                className="ptk-hero-logo"
+                src="./MANOLOGO.svg"
+                alt="Isotipo Mano"
                 style={{
-                  fontFamily: fDisplay,
-                  fontSize: "clamp(3.2rem, 6.8vw, 5.8rem)",
-                  fontWeight: 800,
-                  color: palette.amarillo,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.04em",
-                  lineHeight: 1.12,
-                  margin: 0,
-                  textShadow: `5px 5px 0 ${palette.borde}, -4px -4px 0 ${palette.borde}, 4px -4px 0 ${palette.borde}, -4px 4px 0 ${palette.borde}, 0 10px 25px rgba(0,0,0,0.8)`,
-                  animation: "textBounceAndGlow 3.5s ease-in-out infinite",
+                  height: "210px",
+                  objectFit: "contain",
+                  filter: `drop-shadow(0 8px 0 ${palette.borde})`,
                 }}
-              >
-                ¡Atraviesa el portal del tiempo y descubre la aventura!
-              </h1>
+              />
             </div>
 
+            <h1
+              ref={titleRef}
+              style={{
+                fontFamily: fDisplay,
+                fontSize: "clamp(3.2rem, 6.8vw, 5.8rem)",
+                fontWeight: 800,
+                color: palette.amarillo,
+                textTransform: "uppercase",
+                letterSpacing: "0.04em",
+                lineHeight: 1.12,
+                margin: 0,
+                textShadow: `5px 5px 0 ${palette.borde}, -4px -4px 0 ${palette.borde}, 4px -4px 0 ${palette.borde}, -4px 4px 0 ${palette.borde}, 0 10px 25px rgba(0,0,0,0.8)`,
+              }}
+            >
+              {HERO_TITLE.split(" ").map((word, i, arr) => (
+                <span key={i} className="ptk-word">
+                  {word}
+                  {i < arr.length - 1 ? " " : ""}
+                </span>
+              ))}
+            </h1>
           </div>
         </div>
 
-        <div 
+        <div
           style={{
             position: "absolute",
             bottom: 0,
@@ -542,25 +750,16 @@ export default function Home() {
       </div>
 
       {/* SECCIÓN: ¿QUÉ ES? */}
-      <section 
-        id="que-es" 
-        className="py-5 overflow-hidden" 
+      <section
+        id="que-es"
+        className="py-5 overflow-hidden"
         style={{ background: palette.morado, position: "relative", borderBottom: `6px solid ${palette.borde}` }}
       >
-        <div 
-          className="container py-4 text-center"
-          data-aos="zoom-in-up"
-          data-aos-duration="1000"
-          style={{
-            transform: `translateX(${(scrollProgress - 0.5) * 110}px)`,
-            transition: "transform 0.05s ease-out"
-          }}
-        >
+        <div className="container py-4 text-center ptk-que-es-inner">
           <div className="row justify-content-center">
             <div className="col-md-9">
               <div
-                data-aos="flip-down"
-                data-aos-delay="200"
+                className="ptk-badge"
                 style={{
                   display: "inline-block",
                   background: palette.amarillo,
@@ -568,7 +767,6 @@ export default function Home() {
                   borderRadius: "24px",
                   padding: "10px 32px",
                   marginBottom: "1.5rem",
-                  transform: "rotate(-1deg)",
                   boxShadow: `0 6px 0 ${palette.borde}`,
                 }}
               >
@@ -585,9 +783,8 @@ export default function Home() {
                   ¿Qué es un cómic digital interactivo?
                 </h2>
               </div>
-              <p 
-                data-aos="fade-up" 
-                data-aos-delay="400"
+              <p
+                className="ptk-reveal"
                 style={{ fontFamily: fBody, fontSize: "1.15rem", lineHeight: 1.8, color: palette.crema, fontWeight: 600 }}
               >
                 Un cómic digital interactivo es una nueva forma de contar historias que combina ilustraciones,
@@ -602,7 +799,7 @@ export default function Home() {
 
       {/* SECCIÓN: PERSONAJES */}
       <section id="personajes" className="py-5 overflow-hidden" style={{ background: palette.crema }}>
-        <div className="text-center mb-5" data-aos="fade-down" data-aos-duration="800">
+        <div className="text-center mb-5 ptk-reveal">
           <h2
             style={{
               display: "inline-block",
@@ -625,10 +822,9 @@ export default function Home() {
               <div
                 key={i}
                 className="col-6 col-md-4 text-center personaje-card"
-                data-aos={i === 0 ? "fade-right" : i === 1 ? "zoom-in" : "fade-left"}
-                data-aos-delay={i * 200}
                 style={{ transform: `rotate(${p.rot})` }}
                 onClick={() => setPersonajeActivo(p)}
+                {...personajeTilt}
               >
                 <div
                   className="card h-100"
@@ -679,9 +875,7 @@ export default function Home() {
       <div className="py-5 px-3 overflow-hidden" style={{ background: palette.crema, borderBottom: `5px solid ${palette.borde}` }}>
         <div className="container text-center py-3 position-relative" style={{ maxWidth: "850px" }}>
           <div
-            className="p-4 p-md-5 position-relative"
-            data-aos="flip-up"
-            data-aos-duration="1000"
+            className="p-4 p-md-5 position-relative ptk-reveal"
             style={{
               background: "#ffffff",
               borderRadius: "36px",
@@ -689,7 +883,7 @@ export default function Home() {
               boxShadow: `0 10px 0 ${palette.borde}`,
             }}
           >
-            <div className="mb-4" data-aos="zoom-in" data-aos-delay="300">
+            <div className="mb-4">
               <img
                 src="/MANOLOGO.svg"
                 alt="Isotipo Mano"
@@ -702,8 +896,6 @@ export default function Home() {
             </div>
 
             <h2
-              data-aos="fade-down"
-              data-aos-delay="400"
               style={{
                 fontFamily: fDisplay,
                 fontSize: "2.5rem",
@@ -717,9 +909,7 @@ export default function Home() {
               BIENVENIDOS A PIKTARA
             </h2>
 
-            <p 
-              data-aos="fade-up" 
-              data-aos-delay="500"
+            <p
               style={{ fontFamily: fBody, fontSize: "1.05rem", lineHeight: 1.8, color: palette.borde, fontWeight: 600, margin: 0 }}
             >
               Piktara es una marca creativa que une arte, historia y narrativa digital. Su esencia nace de la
@@ -735,8 +925,6 @@ export default function Home() {
         <div className="container">
           <div
             className="row align-items-center g-4 p-4 p-md-5"
-            data-aos="fade-right"
-            data-aos-duration="900"
             style={{
               background: "#ffffff",
               borderRadius: "32px",
@@ -745,12 +933,12 @@ export default function Home() {
               position: "relative",
             }}
           >
-            <div className="col-md-5 text-center text-md-start" data-aos="zoom-in" data-aos-delay="200">
+            <div className="col-md-5 text-center text-md-start ptk-origen-col">
               <h2 style={{ fontFamily: fDisplay, fontSize: "1.8rem", fontWeight: 800, color: palette.morado, lineHeight: 1.3, margin: 0 }}>
                 ¿Cómo surge el nombre PIKTARA?
               </h2>
             </div>
-            <div className="col-md-7" data-aos="fade-left" data-aos-delay="300">
+            <div className="col-md-7 ptk-origen-col">
               <p style={{ fontFamily: fBody, fontSize: "1rem", lineHeight: 1.8, color: palette.borde, fontWeight: 600, margin: 0 }}>
                 Surge de la conexión con la historia antigua:
                 <br />
@@ -769,8 +957,9 @@ export default function Home() {
       {/* SECCIÓN EQUIPO */}
       <section className="py-5 px-3 overflow-hidden" style={{ background: palette.amarillo, borderTop: `5px solid ${palette.borde}`, borderBottom: `6px solid ${palette.borde}` }}>
         <div className="container">
-          <div className="text-center mb-5" data-aos="zoom-in-down" data-aos-duration="800">
+          <div className="text-center mb-5">
             <span
+              className="ptk-equipo-badge"
               style={{
                 fontFamily: fDisplay,
                 fontSize: "2rem",
@@ -788,17 +977,14 @@ export default function Home() {
             </span>
           </div>
 
-          <div className="row justify-content-center g-4">
+          <div className="row justify-content-center g-4 ptk-equipo-grid">
             {equipo.map((miembro, i) => (
-              <div 
-                key={i} 
-                className="col-12 col-md-4 d-flex" 
-                data-aos="fade-up" 
-                data-aos-delay={i * 250}
-                data-aos-duration="900"
-              >
-                <div className="piktara-card text-center p-4 w-100 d-flex flex-column align-items-center position-relative">
-                  <div className="mb-3 w-100" style={{ height: "200px" }} data-aos="zoom-in" data-aos-delay={i * 250 + 150}>
+              <div key={i} className="col-12 col-md-4 d-flex">
+                <div
+                  className="piktara-card text-center p-4 w-100 d-flex flex-column align-items-center position-relative"
+                  {...equipoTilt}
+                >
+                  <div className="mb-3 w-100" style={{ height: "200px" }}>
                     <img
                       src={miembro.img}
                       alt={miembro.nombre}
@@ -833,7 +1019,7 @@ export default function Home() {
           borderTop: `6px solid ${palette.morado}`,
         }}
       >
-        <div className="container" data-aos="fade-up" data-aos-duration="800">
+        <div className="container ptk-footer-content">
           <div className="row justify-content-between align-items-center gy-4">
             <div className="col-md-3 text-center text-md-start">
               <img

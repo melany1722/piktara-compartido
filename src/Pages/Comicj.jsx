@@ -15,7 +15,7 @@ const palette = {
   fondoEscena: "#FFE8B8",
 };
 
-const relojImg = "/lottie/images/img_0.png";
+const relojImg = "/RELOJ.svg";
 
 const Cloud = ({ top, left, size, delay, duration }) => (
   <div

@@ -15,7 +15,7 @@ const palette = {
   fondoEscena: "#D9C7FF",
 };
 
-const relojImg = "/lottie/images/img_0.png";
+const relojImg = "/RELOJ.svg";
 
 const WashiTape = ({ top, left, right, rotate, color }) => (
   <div
