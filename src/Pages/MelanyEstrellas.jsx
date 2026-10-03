@@ -15,6 +15,11 @@ const palette = {
   fondoEscena: "#D9C7FF",
 };
 
+// Cadena de escenas: 1 Comicj · 2 MelanyEstrellas · 3 Comic · 4 comic4 ...
+const ESCENA_ANTERIOR = "/comic/1";
+const ESCENA_SIGUIENTE = "/comic/3";
+
+const LOTTIE_JSON = "/lottiem/fondomela.json"; // debe estar en public/lottiem/fondomela.json
 const relojImg = "/RELOJ.svg";
 
 const WashiTape = ({ top, left, right, rotate, color }) => (
@@ -36,6 +41,21 @@ const WashiTape = ({ top, left, right, rotate, color }) => (
   />
 );
 
+const navBtnBase = {
+  position: "absolute",
+  top: "50%",
+  transform: "translateY(-50%)",
+  width: "52px",
+  height: "52px",
+  borderRadius: "50%",
+  border: `4px solid ${palette.borde}`,
+  fontSize: "1.8rem",
+  fontFamily: fDisplay,
+  fontWeight: 800,
+  zIndex: 60,
+  boxShadow: `0 5px 0 ${palette.borde}`,
+};
+
 const MelanyEstrellas = () => {
   const lottieContainer = useRef(null);
   const animRef = useRef(null);
@@ -51,7 +71,7 @@ const MelanyEstrellas = () => {
       renderer: "svg",
       loop: false,
       autoplay: false,
-      path: "/lottiem/fondomela.json",
+      path: LOTTIE_JSON,
       rendererSettings: {
         preserveAspectRatio: "xMidYMid meet",
       },
@@ -325,48 +345,26 @@ const MelanyEstrellas = () => {
             )}
 
             <Link
-              to="/comicj"
+              to={ESCENA_ANTERIOR}
               className="comic-nav-btn d-flex align-items-center justify-content-center text-decoration-none"
               style={{
-                position: "absolute",
-                top: "50%",
+                ...navBtnBase,
                 left: "14px",
-                transform: "translateY(-50%)",
-                width: "52px",
-                height: "52px",
-                borderRadius: "50%",
-                border: `4px solid ${palette.borde}`,
                 background: palette.amarillo,
                 color: palette.borde,
-                fontSize: "1.8rem",
-                fontFamily: fDisplay,
-                fontWeight: 800,
-                zIndex: 60,
-                boxShadow: `0 5px 0 ${palette.borde}`,
               }}
             >
               &lt;
             </Link>
 
             <Link
-              to="/comic"
+              to={ESCENA_SIGUIENTE}
               className="comic-nav-btn d-flex align-items-center justify-content-center text-decoration-none"
               style={{
-                position: "absolute",
-                top: "50%",
+                ...navBtnBase,
                 right: "14px",
-                transform: "translateY(-50%)",
-                width: "52px",
-                height: "52px",
-                borderRadius: "50%",
-                border: `4px solid ${palette.borde}`,
                 background: palette.rosa,
                 color: "#fff",
-                fontSize: "1.8rem",
-                fontFamily: fDisplay,
-                fontWeight: 800,
-                zIndex: 60,
-                boxShadow: `0 5px 0 ${palette.borde}`,
               }}
             >
               &gt;

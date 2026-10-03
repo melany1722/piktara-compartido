@@ -1,6 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from "react-router-dom";
-import lottie from "lottie-web";
 import "../Comic.css";
 
 const fDisplay = "'Baloo 2', 'Comic Sans MS', sans-serif";
@@ -14,6 +13,9 @@ const palette = {
   rosa: "#FF597B",
   fondoEscena: "#FFE8B8",
 };
+
+// Cadena de escenas: 1 Comicj · 2 MelanyEstrellas · 3 Comic · 4 comic4 ...
+const ESCENA_SIGUIENTE = "/comic/2";
 
 const relojImg = "/RELOJ.svg";
 
@@ -59,44 +61,31 @@ const WashiTape = ({ top, left, right, rotate, color, delay }) => (
   />
 );
 
-const Comicj = () => {
-  const lottieContainer = useRef(null);
-  const animRef = useRef(null);
+const navBtnBase = {
+  position: "absolute",
+  top: "50%",
+  transform: "translateY(-50%)",
+  width: "52px",
+  height: "52px",
+  borderRadius: "50%",
+  border: `4px solid ${palette.borde}`,
+  fontSize: "1.8rem",
+  fontFamily: fDisplay,
+  fontWeight: 800,
+  zIndex: 60,
+  boxShadow: `0 5px 0 ${palette.borde}`,
+};
 
+const Comicj = () => {
   const [score, setScore] = useState(() => Number(localStorage.getItem("piktaraScore")) || 0);
   const [relojEncontrado, setRelojEncontrado] = useState(() => localStorage.getItem("relojComicj") === "true");
   const [pulse, setPulse] = useState(false);
-  const [reproducido, setReproducido] = useState(false);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setReady(true), 30);
     return () => clearTimeout(t);
   }, []);
-
-  useEffect(() => {
-    const anim = lottie.loadAnimation({
-      container: lottieContainer.current,
-      renderer: "svg",
-      loop: true,
-      autoplay: false,
-      path: "/lottiej/animacionj.json",
-      rendererSettings: {
-        preserveAspectRatio: "xMidYMid meet",
-      },
-    });
-
-    animRef.current = anim;
-
-    return () => anim.destroy();
-  }, []);
-
-  const handlePlayClick = () => {
-    if (animRef.current) {
-      animRef.current.play();
-      setReproducido(true);
-    }
-  };
 
   const handleRelojClick = (e) => {
     e.stopPropagation();
@@ -141,10 +130,6 @@ const Comicj = () => {
           0%, 100% { transform: rotate(-12deg) scale(1); }
           50% { transform: rotate(-2deg) scale(1.08); }
         }
-        @keyframes playBounce {
-          0%, 100% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 8px 0 ${palette.borde}; }
-          50% { transform: translate(-50%, -54%) scale(1.08); box-shadow: 0 14px 0 ${palette.borde}; }
-        }
         @keyframes headerDrop {
           from { transform: translateY(-100%); opacity: 0; }
           to { transform: translateY(0); opacity: 1; }
@@ -152,6 +137,10 @@ const Comicj = () => {
         @keyframes sceneEnter {
           0% { opacity: 0; transform: scale(0.85) translateY(20px); }
           100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @keyframes tapeDrop {
+          0% { opacity: 0; transform: translateY(-20px) rotate(0deg); }
+          100% { opacity: 1; }
         }
 
         .comic-nav-btn {
@@ -289,6 +278,7 @@ const Comicj = () => {
             Aventura 1
           </div>
 
+          {/* ESCENA: aquí va el contenido nuevo de la escena 3 */}
           <div
             style={{
               position: "relative",
@@ -300,53 +290,10 @@ const Comicj = () => {
               backgroundColor: palette.fondoEscena,
             }}
           >
-            <div ref={lottieContainer} style={{ width: "100%", height: "100%" }} />
-
-            {!reproducido && (
-              <div
-                onClick={handlePlayClick}
-                style={{
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  padding: "16px 36px",
-                  borderRadius: "50px",
-                  background: palette.amarillo,
-                  border: `4px solid ${palette.borde}`,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                  fontFamily: fDisplay,
-                  fontSize: "1.3rem",
-                  fontWeight: 800,
-                  color: palette.borde,
-                  cursor: "pointer",
-                  zIndex: 10,
-                  animation: "playBounce 1.8s ease-in-out infinite",
-                  boxShadow: `0 8px 0 ${palette.borde}`,
-                  letterSpacing: "0.05em",
-                  textTransform: "uppercase",
-                }}
-                role="button"
-              >
-                <div
-                  style={{
-                    width: 0,
-                    height: 0,
-                    borderTop: "9px solid transparent",
-                    borderBottom: "9px solid transparent",
-                    borderLeft: `15px solid ${palette.borde}`,
-                  }}
-                />
-                Reproducir
-              </div>
-            )}
-
             {!relojEncontrado && (
               <img
                 src={relojImg}
-                alt=""
+                alt="Reloj"
                 onClick={handleRelojClick}
                 style={{
                   position: "absolute",
@@ -354,7 +301,6 @@ const Comicj = () => {
                   right: "14%",
                   width: "26px",
                   cursor: "pointer",
-                  opacity: 1,
                   filter: `drop-shadow(0 0 8px ${palette.amarillo})`,
                   transform: "rotate(-12deg)",
                   animation: "wiggleSticker 1.6s ease-in-out infinite",
@@ -362,30 +308,19 @@ const Comicj = () => {
                   borderRadius: "50%",
                   background: palette.crema,
                   padding: "4px",
-                  border: `2px dashed ${palette.borde}`
+                  border: `2px dashed ${palette.borde}`,
                 }}
               />
             )}
 
             <Link
-              to="/melany"
+              to={ESCENA_SIGUIENTE}
               className="comic-nav-btn d-flex align-items-center justify-content-center text-decoration-none"
               style={{
-                position: "absolute",
-                top: "50%",
+                ...navBtnBase,
                 right: "14px",
-                transform: "translateY(-50%)",
-                width: "52px",
-                height: "52px",
-                borderRadius: "50%",
-                border: `4px solid ${palette.borde}`,
                 background: palette.rosa,
                 color: "#fff",
-                fontSize: "1.8rem",
-                fontFamily: fDisplay,
-                fontWeight: 800,
-                zIndex: 60,
-                boxShadow: `0 5px 0 ${palette.borde}`,
               }}
             >
               &gt;

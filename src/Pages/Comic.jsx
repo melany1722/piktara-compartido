@@ -15,6 +15,11 @@ const palette = {
   fondoEscena: "#BFF0D9",
 };
 
+// Cadena de escenas: 1 Comicj · 2 MelanyEstrellas · 3 Comic · 4 comic4 ...
+const ESCENA_ANTERIOR = "/comic/2";
+const ESCENA_SIGUIENTE = "/comic/4";
+
+const LOTTIE_JSON = "/lottie/gifalien.json"; // debe estar en public/lottie/gifalien.json
 const relojImg = "/RELOJ.svg";
 
 const WashiTape = ({ top, left, right, rotate, color }) => (
@@ -36,6 +41,21 @@ const WashiTape = ({ top, left, right, rotate, color }) => (
   />
 );
 
+const navBtnBase = {
+  position: "absolute",
+  top: "50%",
+  transform: "translateY(-50%)",
+  width: "52px",
+  height: "52px",
+  borderRadius: "50%",
+  border: `4px solid ${palette.borde}`,
+  fontSize: "1.8rem",
+  fontFamily: fDisplay,
+  fontWeight: 800,
+  zIndex: 60,
+  boxShadow: `0 5px 0 ${palette.borde}`,
+};
+
 const Comic = () => {
   const lottieContainer = useRef(null);
   const animRef = useRef(null);
@@ -45,26 +65,37 @@ const Comic = () => {
   const [pulse, setPulse] = useState(false);
   const [reproducido, setReproducido] = useState(false);
 
+  // Carga segura: si el JSON no existe, no se rompe la escena, solo avisa en consola
   useEffect(() => {
-    const anim = lottie.loadAnimation({
-      container: lottieContainer.current,
-      renderer: "svg",
-      loop: false,
-      autoplay: false,
-      path: "/lottie/gifalien.json",
-      rendererSettings: {
-        preserveAspectRatio: "xMidYMid meet",
-      },
-    });
+    let cancelado = false;
+    let anim = null;
 
-    animRef.current = anim;
-
-    anim.addEventListener('complete', () => {
-      setReproducido(false);
-    });
+    fetch(LOTTIE_JSON)
+      .then((r) => {
+        if (!r.ok) throw new Error(`No se encontró ${LOTTIE_JSON}`);
+        return r.json();
+      })
+      .then((data) => {
+        if (cancelado || !lottieContainer.current) return;
+        anim = lottie.loadAnimation({
+          container: lottieContainer.current,
+          renderer: "svg",
+          loop: false,
+          autoplay: false,
+          animationData: data,
+          rendererSettings: { preserveAspectRatio: "xMidYMid meet" },
+        });
+        anim.addEventListener("complete", () => setReproducido(false));
+        animRef.current = anim;
+      })
+      .catch((err) => {
+        console.error("Lottie escena 3:", err.message, "→ revisa public/lottie/gifalien.json");
+      });
 
     return () => {
-      anim.destroy();
+      cancelado = true;
+      if (anim) anim.destroy();
+      animRef.current = null;
     };
   }, []);
 
@@ -325,48 +356,26 @@ const Comic = () => {
             )}
 
             <Link
-              to="/melany"
+              to={ESCENA_ANTERIOR}
               className="comic-nav-btn d-flex align-items-center justify-content-center text-decoration-none"
               style={{
-                position: "absolute",
-                top: "50%",
+                ...navBtnBase,
                 left: "14px",
-                transform: "translateY(-50%)",
-                width: "52px",
-                height: "52px",
-                borderRadius: "50%",
-                border: `4px solid ${palette.borde}`,
                 background: palette.amarillo,
                 color: palette.borde,
-                fontSize: "1.8rem",
-                fontFamily: fDisplay,
-                fontWeight: 800,
-                zIndex: 60,
-                boxShadow: `0 5px 0 ${palette.borde}`,
               }}
             >
               &lt;
             </Link>
 
             <Link
-              to="/comic/4"
+              to={ESCENA_SIGUIENTE}
               className="comic-nav-btn d-flex align-items-center justify-content-center text-decoration-none"
               style={{
-                position: "absolute",
-                top: "50%",
+                ...navBtnBase,
                 right: "14px",
-                transform: "translateY(-50%)",
-                width: "52px",
-                height: "52px",
-                borderRadius: "50%",
-                border: `4px solid ${palette.borde}`,
                 background: palette.rosa,
                 color: "#fff",
-                fontSize: "1.8rem",
-                fontFamily: fDisplay,
-                fontWeight: 800,
-                zIndex: 60,
-                boxShadow: `0 5px 0 ${palette.borde}`,
               }}
             >
               &gt;
