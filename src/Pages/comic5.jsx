@@ -4,6 +4,8 @@ import gsap from "gsap";
 import { Draggable } from "gsap/Draggable";
 import lottie from "lottie-web";
 import "../Comic.css";
+import Contador from "../Components/Contador";
+import RelojEscondido from "../Components/RelojEscondido";
 
 gsap.registerPlugin(Draggable);
 
@@ -36,7 +38,8 @@ const WashiTape = ({ top, left, right, rotate, color }) => (
   />
 );
 
-const relojImg = "/RELOJ.svg";
+// Clave del reloj escondido de esta escena en el contador (una por escena: relojEscena1 … relojEscena8)
+const CLAVE_RELOJ = "relojEscena5";
 
 // =====================================================================
 //  PUZZLE DEL RELOJ
@@ -109,6 +112,51 @@ const ANTORCHAS = [
   { x: 25.7, y: 40.9, ancho: 2.3 }, // antorcha izquierda
   { x: 74.5, y: 41.4, ancho: 2.3 }, // antorcha derecha
 ];
+
+// =====================================================================
+//  NINOVE (animación Lottie con sus imágenes)
+//  IMPORTANTE: la carpeta lottie-fondo5 va en public/ SIN renombrar nada:
+//    public/lottie-fondo5/Ninove escena 5.json
+//    public/lottie-fondo5/img_0 (2).png
+//    public/lottie-fondo5/img_1 (2).png
+//    public/lottie-fondo5/img_2 (4).png
+//    public/lottie-fondo5/img_3 (1).png
+//  El código corrige solo las rutas de las imágenes dentro del JSON.
+// =====================================================================
+const NINOVE_CARPETA = "/lottie-fondo5/";
+const NINOVE_JSON = "Ninove escena 5.json";
+// img_N que usa el JSON → nombre real del archivo
+const NINOVE_IMAGENES = {
+  0: "img_0 (2).png",
+  1: "img_1 (2).png",
+  2: "img_2 (4).png",
+  3: "img_3 (1).png",
+};
+// x, y = punto donde se apoyan los pies (en % de la escena a 16:9)
+// ancho, alto = tamaño (en % de la escena). CALIBRAR según dónde la quieras.
+const NINOVE_POS = { x: 67.6, y: 79, ancho: 14, alto: 46 };
+const NINOVE_IGNORAR = [0]; // img_0 de Ninove es un fondo, no se usa para recortar
+
+// =====================================================================
+//  ADAD (misma escena, del lado opuesto). La carpeta lottie-adad está dentro de lottie-fondo5:
+//    public/lottie-fondo5/lottie-adad/Adad escena 5.json
+//    public/lottie-fondo5/lottie-adad/img_0.png ... img_4.png
+// =====================================================================
+const ADAD_CARPETA = "/lottie-fondo5/lottie-adad/";
+const ADAD_JSON = "Adad escena 5.json";
+// null = usa los nombres de imagen tal como vienen escritos dentro del JSON de Adad
+// (por ejemplo "img_1 (1).png"); solo se corrige la carpeta.
+const ADAD_IMAGENES = null;
+// Mismo tamaño que Ninove; x espejado (100 − 67.6). Calibrar si no cae sobre el piso.
+const ADAD_POS = { x: 32.4, y: 79, ancho: 14, alto: 46 };
+const ADAD_IGNORAR = []; // en Adad todas las imágenes son del personaje
+// El JSON de Adad pide img_5, img_6 e img_7, que no están en la carpeta.
+// Son el cuerpo y las sandalias repetidos, así que se usan los archivos que sí existen.
+const ADAD_ALIAS = {
+  "img_5.png": ["img_1.png", "img_1 (1).png"], // cuerpo
+  "img_6.png": ["img_2.png", "img_2 (1).png"], // sandalia
+  "img_7.png": ["img_3.png", "img_3 (1).png"], // sandalia
+};
 
 // Si algo falla con las llamas, NO se cae la escena ni la navegación
 class BarreraErrores extends React.Component {
@@ -240,6 +288,268 @@ const Llama = ({ left, top, ancho }) => {
   );
 };
 
+// Ninove: animación Lottie en bucle, con las rutas de sus imágenes corregidas al cargar
+const Personaje = ({ left, top, ancho, alto, carpeta, json, imagenes, ignorar = [], alias = {} }) => {
+  const cajaRef = useRef(null);
+
+  useEffect(() => {
+    let cancelado = false;
+    let anim = null;
+
+    fetch(carpeta + encodeURIComponent(json))
+      .then((r) => {
+        if (!r.ok) throw new Error(`No se encontró ${json}`);
+        return r.json();
+      })
+      .then((data) => {
+        if (cancelado || !cajaRef.current) return;
+        // Corrige las rutas de las imágenes (espacios y paréntesis incluidos)
+        (data.assets || []).forEach((a) => {
+          if (!a.p || a.e === 1) return; // e === 1: imagen embebida, no se toca
+          const n = (a.p.match(/img_(\d+)/) || [])[1];
+          const real = imagenes ? imagenes[n] : decodeURIComponent(a.p);
+          if (real) {
+            a.u = carpeta;
+            a.p = encodeURIComponent(real);
+          }
+        });
+        // Diagnóstico: muestra qué ruta pide cada imagen (útil si alguna sale rota)
+        console.log(
+          `Personaje (${json}) imágenes:`,
+          (data.assets || []).map((a) => ({ id: a.id, u: a.u, p: a.p, embebida: a.e === 1 }))
+        );
+        anim = lottie.loadAnimation({
+          container: cajaRef.current,
+          renderer: "svg",
+          loop: true,
+          autoplay: true,
+          animationData: data,
+          rendererSettings: { preserveAspectRatio: "xMidYMax meet" },
+        });
+
+        // El lienzo de la animación suele ser mucho más grande que el personaje.
+        // Aquí se recorta (viewBox) a la zona que ocupa Ninove en varios fotogramas,
+        // así "ancho" y "alto" de NINOVE_POS controlan el tamaño real del personaje.
+        const ajustarAlPersonaje = () => {
+          try {
+            const svg = cajaRef.current && cajaRef.current.querySelector("svg");
+            if (!svg || !anim) return;
+            const href = (im) =>
+              im.getAttribute("href") ||
+              im.getAttributeNS("http://www.w3.org/1999/xlink", "href") ||
+              "";
+            const imgs = Array.from(svg.querySelectorAll("image")).filter((im) => {
+              const n = (decodeURIComponent(href(im)).match(/img_(\d+)/) || [])[1];
+              return !ignorar.includes(Number(n)); // ignorar = imágenes que no son del personaje (fondos)
+            });
+            const ctm = svg.getScreenCTM();
+            if (!imgs.length || !ctm) return;
+            const inv = ctm.inverse();
+            let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
+            const total = Math.max(1, Math.floor(anim.totalFrames));
+            [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9].forEach((f) => {
+              anim.goToAndStop(Math.floor(f * total), true);
+              imgs.forEach((im) => {
+                const r = im.getBoundingClientRect();
+                if (!r.width || !r.height) return;
+                const a = new DOMPoint(r.left, r.top).matrixTransform(inv);
+                const b = new DOMPoint(r.right, r.bottom).matrixTransform(inv);
+                x1 = Math.min(x1, a.x); y1 = Math.min(y1, a.y);
+                x2 = Math.max(x2, b.x); y2 = Math.max(y2, b.y);
+              });
+            });
+            anim.goToAndPlay(0, true);
+            if (!isFinite(x1) || x2 - x1 < 1 || y2 - y1 < 1) return;
+            const mx = (x2 - x1) * 0.12;     // margen a los lados para el vaivén de la animación
+            const myArriba = (y2 - y1) * 0.3; // margen arriba: que NO se corte la cabeza
+            const myAbajo = (y2 - y1) * 0.02; // casi nada abajo: los pies quedan en el borde inferior
+            svg.setAttribute(
+              "viewBox",
+              `${x1 - mx} ${y1 - myArriba} ${x2 - x1 + mx * 2} ${y2 - y1 + myArriba + myAbajo}`
+            );
+            console.log("Ninove recortada a:", { x1, y1, x2, y2 });
+          } catch (e) {
+            console.warn("Ninove: no se pudo recortar al personaje", e);
+          }
+        };
+        // Si una imagen no carga, prueba variantes del nombre (img_1.png, img_1 (1).png, ...)
+        // y usa la primera que exista en la carpeta.
+        const XLINK = "http://www.w3.org/1999/xlink";
+        const repararImagenes = () => {
+          const svg = cajaRef.current && cajaRef.current.querySelector("svg");
+          if (!svg) return;
+          svg.querySelectorAll("image").forEach((im) => {
+            const actual = im.getAttribute("href") || im.getAttributeNS(XLINK, "href") || "";
+            if (!actual || actual.startsWith("data:")) return;
+            const archivo = actual.split("/").pop();
+            const carp = actual.slice(0, actual.length - archivo.length);
+            const decod = decodeURIComponent(archivo);
+            const base = decod.replace(/ \(\d+\)(?=\.png$)/i, "");
+            const todos = [
+              decod,
+              base,
+              ...[1, 2, 3, 4].map((k) => base.replace(/\.png$/i, ` (${k}).png`)),
+              ...(alias[decod] || []), // archivos que sirven en lugar de uno que no existe
+            ];
+            const nombres = todos.filter((n, i) => todos.indexOf(n) === i);
+            const probar = (i) => {
+              if (i >= nombres.length) {
+                console.error("Personaje: no se encontró ninguna variante de", decod, "en", carp);
+                return;
+              }
+              const url = carp + encodeURIComponent(nombres[i]);
+              const prueba = new Image();
+              prueba.onload = () => {
+                im.setAttribute("href", url);
+                im.setAttributeNS(XLINK, "href", url);
+                if (i > 0) console.log("Personaje: usando", nombres[i], "en lugar de", decod);
+              };
+              prueba.onerror = () => probar(i + 1);
+              prueba.src = url;
+            };
+            probar(0);
+          });
+        };
+
+        anim.addEventListener("DOMLoaded", () => {
+          repararImagenes();
+          ajustarAlPersonaje();
+        });
+      })
+      .catch((err) => console.error("Personaje:", err.message, "→ revisa public" + carpeta));
+
+    return () => {
+      cancelado = true;
+      try {
+        if (anim) anim.destroy();
+      } catch (e) {
+        console.warn("Ninove: no se pudo destruir la animación", e);
+      }
+    };
+  }, []);
+
+  return (
+    <div
+      ref={cajaRef}
+      style={{
+        position: "absolute",
+        left,
+        top: top - alto,       // (left, top) es el punto de los pies; el cuadro crece hacia arriba
+        width: ancho,
+        height: alto,
+        marginLeft: -ancho / 2,
+        zIndex: 25,
+        pointerEvents: "none",
+      }}
+    />
+  );
+};
+
+// =====================================================================
+//  TABLILLA (animación Lottie) encima de la mesa del centro.
+//  IMPORTANTE: copia tabilla.json a  public/lottie-fondo5/tabilla.json
+//  (sus imágenes vienen incrustadas en el mismo archivo, no necesita más).
+//
+//  x = centro de la tablilla · y = base, donde apoya sobre la mesa · ancho = tamaño
+//  (en % de la escena a 16:9). CALIBRAR si no queda justo sobre la mesa.
+//  Se reproduce una vez al entrar a la escena y se queda quieta en su último fotograma.
+//
+//  Ajuste: más pequeña (ancho 7) y con la base más arriba (y 76) para que quede
+//  apoyada sobre la parte café de la mesa y no parada contra la pared.
+//   - ancho: súbelo/bájalo para agrandar/achicar (el alto se ajusta solo)
+//   - y: número mayor = más abajo, menor = más arriba
+//   - x: número menor = más a la izquierda, mayor = más a la derecha
+// =====================================================================
+const TABLILLA_JSON = "/lottie-fondo5/tabilla.json";
+const TABLILLA_RATIO = 368 / 404; // alto / ancho de la tablilla final (image_0 del JSON)
+const TABLILLA_POS = { x: 50.2, y: 78, ancho: 9 };
+
+const Tablilla = ({ left, top, ancho }) => {
+  const cajaRef = useRef(null);
+  const alto = ancho * TABLILLA_RATIO;
+
+  useEffect(() => {
+    let cancelado = false;
+    let anim = null;
+
+    fetch(TABLILLA_JSON)
+      .then((r) => {
+        if (!r.ok) throw new Error(`No se encontró ${TABLILLA_JSON}`);
+        return r.json();
+      })
+      .then((data) => {
+        if (cancelado || !cajaRef.current) return;
+        anim = lottie.loadAnimation({
+          container: cajaRef.current,
+          renderer: "svg",
+          loop: false,
+          autoplay: false,
+          animationData: data,
+          rendererSettings: { preserveAspectRatio: "xMidYMax meet" },
+        });
+
+        anim.addEventListener("DOMLoaded", () => {
+          try {
+            const svg = cajaRef.current && cajaRef.current.querySelector("svg");
+            if (svg) {
+              // Se recorta al tamaño de la tablilla FINAL (último fotograma), así "ancho" manda
+              anim.goToAndStop(Math.max(0, Math.floor(anim.totalFrames) - 1), true);
+              const ctm = svg.getScreenCTM();
+              const imgs = Array.from(svg.querySelectorAll("image"));
+              if (ctm && imgs.length) {
+                const inv = ctm.inverse();
+                let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
+                imgs.forEach((im) => {
+                  const r = im.getBoundingClientRect();
+                  if (!r.width || !r.height) return; // capas ocultas en este fotograma
+                  const a = new DOMPoint(r.left, r.top).matrixTransform(inv);
+                  const b = new DOMPoint(r.right, r.bottom).matrixTransform(inv);
+                  x1 = Math.min(x1, a.x); y1 = Math.min(y1, a.y);
+                  x2 = Math.max(x2, b.x); y2 = Math.max(y2, b.y);
+                });
+                if (isFinite(x1) && x2 - x1 > 1 && y2 - y1 > 1) {
+                  svg.setAttribute("viewBox", `${x1} ${y1} ${x2 - x1} ${y2 - y1}`);
+                  console.log("Tablilla recortada a:", { x1, y1, x2, y2 });
+                }
+              }
+              svg.style.overflow = "visible"; // el primer dibujo de la animación es más ancho; que no se corte
+            }
+          } catch (e) {
+            console.warn("Tablilla: no se pudo recortar", e);
+          }
+          if (!cancelado && anim) anim.goToAndPlay(0, true); // se reproduce una vez y queda en el último fotograma
+        });
+      })
+      .catch((err) => console.error("Tablilla:", err.message, "→ copia tabilla.json a public/lottie-fondo5/"));
+
+    return () => {
+      cancelado = true;
+      try {
+        if (anim) anim.destroy();
+      } catch (e) {
+        console.warn("Tablilla: no se pudo destruir la animación", e);
+      }
+    };
+  }, []);
+
+  return (
+    <div
+      ref={cajaRef}
+      style={{
+        position: "absolute",
+        left,
+        top: top - alto, // (left, top) es el punto de apoyo; el cuadro crece hacia arriba
+        width: ancho,
+        height: alto,
+        marginLeft: -ancho / 2,
+        zIndex: 24,
+        pointerEvents: "none",
+        filter: "drop-shadow(0 4px 4px rgba(0,0,0,0.35))",
+      }}
+    />
+  );
+};
+
 // La escena es una imagen con background-size: cover, así que al cambiar la forma de la
 // ventana se recorta distinto. Esta función convierte las coordenadas calibradas (en % de
 // la escena a 16:9) a píxeles reales, para que antorchas y tablero sigan pegados al dibujo.
@@ -265,15 +575,9 @@ const crearMapa = (cw, ch, A) => {
 };
 
 const Comic5 = () => {
-  const [score, setScore] = useState(() => Number(localStorage.getItem("piktaraScore")) || 0);
-  const [relojEncontrado, setRelojEncontrado] = useState(() => localStorage.getItem("relojComic5") === "true");
-  const [pulse, setPulse] = useState(false);
   const [modalReloj, setModalReloj] = useState(false); // alerta de "reloj armado"
   const timers = useRef([]);
   const confetiCapa = useRef(null);
-
-  const scoreRef = useRef(null);
-  const flyingRef = useRef(null);
 
   // ---------- Puzzle ----------
   const escenaRef = useRef(null);
@@ -328,7 +632,10 @@ const Comic5 = () => {
   // medidas del tablero y del reloj (en píxeles)
   const [m, setM] = useState(null);
   const medidasRef = useRef(null);
-  medidasRef.current = m;
+  // se actualiza después de cada dibujo (no durante el render)
+  useEffect(() => {
+    medidasRef.current = m;
+  }, [m]);
 
   // piezas ya encajadas: el puzzle NO se guarda, siempre arranca desde cero
   // (al salir de la escena o volver a entrar se puede repetir)
@@ -562,54 +869,6 @@ const Comic5 = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [m]);
 
-  // ---------- Reloj escondido (punto de progreso) ----------
-  const handleRelojClick = (e) => {
-    e.stopPropagation();
-    if (relojEncontrado) return;
-
-    const relojRect = e.currentTarget.getBoundingClientRect();
-    const scoreRect = scoreRef.current.getBoundingClientRect();
-    const flyEl = flyingRef.current;
-
-    setRelojEncontrado(true);
-
-    gsap.set(flyEl, {
-      opacity: 1,
-      x: relojRect.left + relojRect.width / 2,
-      y: relojRect.top + relojRect.height / 2,
-      scale: 1,
-      rotate: -12,
-    });
-
-    const destinoX = scoreRect.left + scoreRect.width / 2;
-    const destinoY = scoreRect.top + scoreRect.height / 2;
-
-    gsap.to(flyEl, {
-      x: destinoX,
-      y: destinoY,
-      scale: 0.25,
-      rotate: 360,
-      duration: 0.75,
-      ease: "power2.inOut",
-      onComplete: () => {
-        gsap.set(flyEl, { opacity: 0 });
-
-        const nuevoScore = score + 1;
-        setScore(nuevoScore);
-        localStorage.setItem("piktaraScore", nuevoScore);
-        localStorage.setItem("relojComic5", "true");
-
-        setPulse(true);
-        gsap.fromTo(
-          scoreRef.current,
-          { scale: 1 },
-          { scale: 1.4, duration: 0.18, ease: "power2.out", yoyo: true, repeat: 1 }
-        );
-        setTimeout(() => setPulse(false), 450);
-      },
-    });
-  };
-
   // Posición del reloj armado / sombra guía (px dentro del tablero)
   const relojPos = m
     ? {
@@ -633,16 +892,6 @@ const Comic5 = () => {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Quicksand:wght@500;600;700&display=swap');
 
-        @keyframes wiggleSticker {
-          0%, 100% { transform: rotate(-12deg) scale(1); }
-          50% { transform: rotate(-2deg) scale(1.08); }
-        }
-        @keyframes scorePop {
-          0% { transform: scale(1); }
-          40% { transform: scale(1.35) rotate(6deg); }
-          70% { transform: scale(0.9) rotate(-4deg); }
-          100% { transform: scale(1); }
-        }
         @keyframes relojArmadoPop {
           0% { transform: scale(1); }
           45% { transform: scale(1.07); }
@@ -794,24 +1043,6 @@ const Comic5 = () => {
         </div>
       )}
 
-      {/* Reloj volador: se anima desde su posicion original hasta el marcador de progreso */}
-      <img
-        ref={flyingRef}
-        src={relojImg}
-        alt=""
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "26px",
-          opacity: 0,
-          pointerEvents: "none",
-          zIndex: 9999,
-          transform: "translate(-50%, -50%)",
-          filter: `drop-shadow(0 0 6px ${palette.amarillo})`,
-        }}
-      />
-
       <nav
         className="navbar navbar-expand-lg px-4 px-md-5"
         style={{
@@ -830,29 +1061,9 @@ const Comic5 = () => {
           />
         </Link>
 
-        <div
-          ref={scoreRef}
-          className="ms-auto me-3 d-flex align-items-center"
-          style={{
-            fontFamily: fDisplay,
-            background: palette.crema,
-            color: palette.morado,
-            padding: "6px 20px",
-            borderRadius: "16px",
-            border: `3.5px solid ${palette.borde}`,
-            boxShadow: `0 4px 0 ${palette.borde}`,
-            fontSize: "1rem",
-            fontWeight: 800,
-            animation: pulse ? "scorePop 0.45s ease" : "none",
-          }}
-        >
-          <span style={{ marginRight: "8px", fontWeight: 700, fontSize: "0.85rem", textTransform: "uppercase" }}>Progreso:</span>
-          {score}
-        </div>
-
         <Link
           to="/nuestro-comic"
-          className="comic-back-btn d-flex align-items-center text-decoration-none"
+          className="ms-auto comic-back-btn d-flex align-items-center text-decoration-none"
           style={{
             fontFamily: fDisplay,
             fontSize: "0.95rem",
@@ -897,6 +1108,7 @@ const Comic5 = () => {
         >
           <WashiTape top="-14px" left="-18px" rotate={-18} color={palette.amarillo} />
           <WashiTape top="-14px" right="-18px" rotate={18} color={palette.rosa} />
+          <Contador />
 
           <div
             style={{
@@ -1058,7 +1270,7 @@ const Comic5 = () => {
                 ))}
             </div>
 
-            {/* Antorchas pequeñas: clic para encender la llama */}
+            {/* Antorchas pequeñas (clic para encender la llama) y Ninove */}
             <BarreraErrores>
               {mapa &&
                 ANTORCHAS.map((a, i) => {
@@ -1067,26 +1279,58 @@ const Comic5 = () => {
                 })}
             </BarreraErrores>
 
-            {!relojEncontrado && (
-              <img
-                src={relojImg}
-                alt=""
-                onClick={handleRelojClick}
-                style={{
-                  position: "absolute",
-                  top: "12%",
-                  right: "15%",
-                  width: "26px",
-                  cursor: "pointer",
-                  opacity: 0.95,
-                  filter: `drop-shadow(0 0 6px ${palette.amarillo})`,
-                  transform: "rotate(-12deg)",
-                  animation: "wiggleSticker 1.6s ease-in-out infinite",
-                  zIndex: 500,
-                  borderRadius: "50%",
-                }}
-              />
-            )}
+            {/* Ninove: va en su propia barrera para que, si falla, no afecte a las antorchas */}
+            <BarreraErrores>
+              {mapa &&
+                (() => {
+                  const p = mapa.punto(NINOVE_POS.x, NINOVE_POS.y);
+                  return (
+                    <Personaje
+                      left={p.x}
+                      top={p.y}
+                      ancho={mapa.ancho(NINOVE_POS.ancho)}
+                      alto={mapa.alto(NINOVE_POS.alto)}
+                      carpeta={NINOVE_CARPETA}
+                      json={NINOVE_JSON}
+                      imagenes={NINOVE_IMAGENES}
+                      ignorar={NINOVE_IGNORAR}
+                    />
+                  );
+                })()}
+            </BarreraErrores>
+
+            {/* Adad: al otro lado, también en su propia barrera */}
+            <BarreraErrores>
+              {mapa &&
+                (() => {
+                  const p = mapa.punto(ADAD_POS.x, ADAD_POS.y);
+                  return (
+                    <Personaje
+                      left={p.x}
+                      top={p.y}
+                      ancho={mapa.ancho(ADAD_POS.ancho)}
+                      alto={mapa.alto(ADAD_POS.alto)}
+                      carpeta={ADAD_CARPETA}
+                      json={ADAD_JSON}
+                      imagenes={ADAD_IMAGENES}
+                      ignorar={ADAD_IGNORAR}
+                      alias={ADAD_ALIAS}
+                    />
+                  );
+                })()}
+            </BarreraErrores>
+
+            {/* Tablilla encima de la mesa del centro */}
+            <BarreraErrores>
+              {mapa &&
+                (() => {
+                  const p = mapa.punto(TABLILLA_POS.x, TABLILLA_POS.y);
+                  return <Tablilla left={p.x} top={p.y} ancho={mapa.ancho(TABLILLA_POS.ancho)} />;
+                })()}
+            </BarreraErrores>
+
+            {/* Reloj escondido: UN clic y se suma al instante */}
+            <RelojEscondido clave={CLAVE_RELOJ} left="85%" top="13%" size={34} zIndex={500} />
 
             <Link
               to="/comic/4"

@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from "react-router-dom";
 import "../Comic.css";
+import Contador from "../Components/Contador";
+import RelojEscondido from "../Components/RelojEscondido";
 
 const fDisplay = "'Baloo 2', 'Comic Sans MS', sans-serif";
 
@@ -32,23 +34,10 @@ const WashiTape = ({ top, left, right, rotate, color }) => (
   />
 );
 
-const relojImg = "/RELOJ.svg";
+// Clave del reloj escondido de esta escena en el contador (una por escena: relojEscena1 … relojEscena8)
+const CLAVE_RELOJ = "relojEscena7";
 
 const Comic7 = () => {
-  const [score, setScore] = useState(() => Number(localStorage.getItem("piktaraScore")) || 0);
-  const [relojEncontrado, setRelojEncontrado] = useState(() => localStorage.getItem("relojComic7") === "true");
-
-  const handleRelojClick = (e) => {
-    e.stopPropagation();
-    if (!relojEncontrado) {
-      const nuevoScore = score + 1;
-      setScore(nuevoScore);
-      localStorage.setItem("piktaraScore", nuevoScore);
-      localStorage.setItem("relojComic7", "true");
-      setRelojEncontrado(true);
-    }
-  };
-
   return (
     <div
       className="w-100"
@@ -67,10 +56,6 @@ const Comic7 = () => {
         @keyframes dashPulse {
           0%, 100% { opacity: 0.5; }
           50% { opacity: 1; }
-        }
-        @keyframes wiggleSticker {
-          0%, 100% { transform: rotate(-12deg) scale(1); }
-          50% { transform: rotate(-2deg) scale(1.08); }
         }
 
         .comic-nav-btn {
@@ -103,27 +88,9 @@ const Comic7 = () => {
           />
         </Link>
 
-        <div
-          className="ms-auto me-3 d-flex align-items-center"
-          style={{
-            fontFamily: fDisplay,
-            background: palette.crema,
-            color: palette.morado,
-            padding: "6px 20px",
-            borderRadius: "16px",
-            border: `3.5px solid ${palette.borde}`,
-            boxShadow: `0 4px 0 ${palette.borde}`,
-            fontSize: "1rem",
-            fontWeight: 800,
-          }}
-        >
-          <span style={{ marginRight: "8px", fontWeight: 700, fontSize: "0.85rem", textTransform: "uppercase" }}>Progreso:</span>
-          {score}
-        </div>
-
         <Link
           to="/nuestro-comic"
-          className="comic-back-btn d-flex align-items-center text-decoration-none"
+          className="ms-auto comic-back-btn d-flex align-items-center text-decoration-none"
           style={{
             fontFamily: fDisplay,
             fontSize: "0.95rem",
@@ -168,6 +135,7 @@ const Comic7 = () => {
         >
           <WashiTape top="-14px" left="-18px" rotate={-18} color={palette.amarillo} />
           <WashiTape top="-14px" right="-18px" rotate={18} color={palette.rosa} />
+          <Contador />
 
           <div
             style={{
@@ -236,26 +204,8 @@ const Comic7 = () => {
               Escena en construccion
             </div>
 
-            {!relojEncontrado && (
-              <img
-                src={relojImg}
-                alt=""
-                onClick={handleRelojClick}
-                style={{
-                  position: "absolute",
-                  bottom: "22%",
-                  right: "16%",
-                  width: "28px",
-                  cursor: "pointer",
-                  opacity: 0.95,
-                  filter: `drop-shadow(0 0 6px ${palette.amarillo})`,
-                  transform: "rotate(-12deg)",
-                  animation: "wiggleSticker 1.6s ease-in-out infinite",
-                  zIndex: 100,
-                  borderRadius: "50%",
-                }}
-              />
-            )}
+            {/* Reloj escondido: UN clic y se suma al instante */}
+            <RelojEscondido clave={CLAVE_RELOJ} left="84%" top="78%" size={36} />
 
             <Link
               to="/comic/6"
@@ -304,6 +254,7 @@ const Comic7 = () => {
             >
               &gt;
             </Link>
+
           </div>
         </div>
       </div>

@@ -60,6 +60,97 @@ export default function Trailer() {
           to { transform: translateY(0); opacity: 1; }
         }
 
+        /* ===== BOTÓN "INICIO": GLOBO DE DIÁLOGO ===== */
+        .ptk-bubble {
+          --ptk-bg: ${palette.crema};
+          position: relative;
+          display: inline-block;
+          background: var(--ptk-bg);
+          color: ${palette.morado} !important;
+          font-family: ${fDisplay};
+          font-size: 1.6rem;
+          font-weight: 800;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          text-decoration: none;
+          border: 5px solid ${palette.borde};
+          border-radius: 30px;
+          padding: 14px 44px;
+          box-shadow: 0 7px 0 ${palette.borde}, 0 0 0 6px ${palette.morado};
+          animation: ptk-bubble-bounce 1.8s ease-in-out infinite;
+          transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        /* Cola del globo: borde (::before) + relleno (::after) */
+        .ptk-bubble::before,
+        .ptk-bubble::after {
+          content: "";
+          position: absolute;
+          left: 26px;
+          border-style: solid;
+          border-color: transparent;
+        }
+        .ptk-bubble::before {
+          bottom: -22px;
+          border-width: 18px 12px 0 12px;
+          border-top-color: ${palette.borde};
+        }
+        .ptk-bubble::after {
+          bottom: -14px;
+          left: 29px;
+          border-width: 14px 9px 0 9px;
+          border-top-color: var(--ptk-bg);
+          transition: border-top-color 0.2s ease;
+        }
+
+        /* Etiqueta tipo sticker */
+        .ptk-bubble-tag {
+          position: absolute;
+          top: -22px;
+          right: -30px;
+          background: ${palette.morado};
+          color: #ffffff;
+          font-size: 0.85rem;
+          letter-spacing: 0.05em;
+          padding: 4px 14px;
+          border: 3px solid ${palette.borde};
+          border-radius: 999px;
+          transform: rotate(12deg);
+          box-shadow: 0 3px 0 ${palette.borde};
+          animation: ptk-tag-pop 1.8s ease-in-out infinite;
+        }
+
+        .ptk-bubble:hover {
+          --ptk-bg: ${palette.morado};
+          color: ${palette.amarillo} !important;
+          animation: none;
+          transform: translateY(-5px) rotate(-2deg) scale(1.08);
+          box-shadow: 0 12px 0 ${palette.borde}, 0 0 0 6px ${palette.morado};
+          transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+                      background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .ptk-bubble:active {
+          transform: translateY(2px) scale(0.97);
+          box-shadow: 0 2px 0 ${palette.borde}, 0 0 0 6px ${palette.morado};
+        }
+
+        @keyframes ptk-bubble-bounce {
+          0%, 100% { transform: translateY(0) rotate(-1deg); }
+          50%      { transform: translateY(-6px) rotate(1deg); }
+        }
+
+        @keyframes ptk-tag-pop {
+          0%, 100% { transform: rotate(12deg) scale(1); }
+          50%      { transform: rotate(8deg) scale(1.12); }
+        }
+
+        /* En pantallas pequeñas el globo se achica para no chocar con el logo */
+        @media (max-width: 575px) {
+          .ptk-bubble { font-size: 1.15rem; padding: 10px 26px; }
+          .ptk-bubble-tag { font-size: 0.7rem; right: -22px; top: -18px; }
+        }
+
         .comic-box {
           background: #fff;
           border-radius: 32px;
@@ -147,7 +238,10 @@ export default function Trailer() {
           position: "sticky",
           top: 0,
           zIndex: 30,
-          minHeight: "85px",
+          minHeight: "125px",
+          paddingTop: "28px",
+          paddingBottom: "30px",
+          overflow: "visible",
           animation: "headerDrop 0.6s cubic-bezier(.34,1.56,.64,1) both",
         }}
       >
@@ -156,24 +250,16 @@ export default function Trailer() {
             <img
               src="/LOGO COMPLETO PIKTARA.svg"
               alt="Piktara"
-              style={{ height: "55px", filter: `drop-shadow(0 3px 0 ${palette.borde})` }}
+              style={{ height: "70px", filter: `drop-shadow(0 3px 0 ${palette.borde})` }}
             />
           </Link>
 
-          {/* TÍTULO CENTRAL ABSOLUTO EN NAVBAR */}
-          <div className="position-absolute start-50 translate-middle-x d-none d-lg-block">
-            <span
-              style={{
-                fontFamily: fDisplay,
-                fontSize: "1.35rem",
-                letterSpacing: "0.06em",
-                color: palette.borde,
-                fontWeight: 800,
-                textTransform: "uppercase",
-              }}
-            >
-              NUESTRO CÓMIC
-            </span>
+          {/* BOTÓN CENTRAL: INICIO (globo de cómic animado) */}
+          <div className="position-absolute start-50 translate-middle-x">
+            <Link to="/" className="ptk-bubble">
+              Inicio
+              <span className="ptk-bubble-tag">¡HOLA!</span>
+            </Link>
           </div>
         </div>
       </nav>
@@ -218,7 +304,7 @@ export default function Trailer() {
             <div style={{ borderRadius: "20px", overflow: "hidden", background: "#000", position: "relative" }}>
               {reproducir ? (
                 <iframe
-                  src="https://drive.google.com/file/d/1bFgoFVKzRfJ86PlpzLKVyumReU_XxMeN/preview"
+                  src=".//teaserr.mp4"
                   style={{ width: "100%", height: "520px", border: "none", display: "block" }}
                   allow="autoplay"
                   allowFullScreen

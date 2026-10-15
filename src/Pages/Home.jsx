@@ -526,6 +526,69 @@ export default function Home() {
         .home-navlink { transition: transform 0.15s ease, color 0.15s ease; }
         .home-navlink:hover { transform: scale(1.08) rotate(-1deg); color: ${palette.morado} !important; }
 
+        /* ===== BOTÓN "NUESTRO CÓMIC": GLOBO DE DIÁLOGO ===== */
+        .ptk-bubble {
+          --ptk-bg: ${palette.crema};
+          position: relative;
+          display: inline-block;
+          background: var(--ptk-bg);
+          color: ${palette.morado} !important;
+          font-family: ${fDisplay};
+          font-size: 1.6rem;
+          font-weight: 800;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          border: 5px solid ${palette.borde};
+          border-radius: 30px;
+          padding: 14px 44px !important;
+          margin-bottom: 20px;
+          box-shadow: 0 7px 0 ${palette.borde}, 0 0 0 6px ${palette.morado};
+          animation: ptk-bubble-bounce 1.8s ease-in-out infinite;
+          transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        /* Cola del globo: borde (::before) + relleno (::after) */
+        .ptk-bubble::before,
+        .ptk-bubble::after {
+          content: "";
+          position: absolute;
+          left: 26px;
+          border-style: solid;
+          border-color: transparent;
+        }
+        .ptk-bubble::before {
+          bottom: -22px;
+          border-width: 18px 12px 0 12px;
+          border-top-color: ${palette.borde};
+        }
+        .ptk-bubble::after {
+          bottom: -14px;
+          left: 29px;
+          border-width: 14px 9px 0 9px;
+          border-top-color: var(--ptk-bg);
+          transition: border-top-color 0.2s ease;
+        }
+
+        .ptk-bubble:hover {
+          --ptk-bg: ${palette.morado};
+          color: ${palette.amarillo} !important;
+          animation: none;
+          transform: translateY(-5px) rotate(-2deg) scale(1.08);
+          box-shadow: 0 12px 0 ${palette.borde}, 0 0 0 6px ${palette.morado};
+          transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+                      background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .ptk-bubble:active {
+          transform: translateY(2px) scale(0.97);
+          box-shadow: 0 2px 0 ${palette.borde}, 0 0 0 6px ${palette.morado};
+        }
+
+        @keyframes ptk-bubble-bounce {
+          0%, 100% { transform: translateY(0) rotate(-1deg); }
+          50%      { transform: translateY(-6px) rotate(1deg); }
+        }
+
         .personaje-card { cursor: pointer; transform-style: preserve-3d; }
 
         .piktara-card {
@@ -625,13 +688,17 @@ export default function Home() {
           position: "sticky",
           top: 0,
           zIndex: 30,
+          minHeight: "125px",
+          paddingTop: "28px",
+          paddingBottom: "30px",
+          overflow: "visible",
         }}
       >
         <Link to="/" className="navbar-brand me-5">
           <img
             src="./MANOLOGO.svg"
             alt="Piktara"
-            style={{ height: "55px", filter: `drop-shadow(0 3px 0 ${palette.borde})` }}
+            style={{ height: "70px", filter: `drop-shadow(0 3px 0 ${palette.borde})` }}
           />
         </Link>
         <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuHome">
@@ -640,18 +707,7 @@ export default function Home() {
         <div className="collapse navbar-collapse justify-content-center" id="menuHome">
           <ul className="navbar-nav mx-auto">
             <li className="nav-item">
-              <Link
-                to="/nuestro-comic"
-                className="home-navlink nav-link"
-                style={{
-                  fontFamily: fDisplay,
-                  fontSize: "1.05rem",
-                  letterSpacing: "0.04em",
-                  color: palette.borde,
-                  fontWeight: 800,
-                  textTransform: "uppercase",
-                }}
-              >
+              <Link to="/nuestro-comic" className="ptk-bubble nav-link">
                 Nuestro Cómic
               </Link>
             </li>
@@ -728,7 +784,7 @@ export default function Home() {
               {HERO_TITLE.split(" ").map((word, i, arr) => (
                 <span key={i} className="ptk-word">
                   {word}
-                  {i < arr.length - 1 ? " " : ""}
+                  {i < arr.length - 1 ? " " : ""}
                 </span>
               ))}
             </h1>
@@ -1087,7 +1143,7 @@ export default function Home() {
                 </a>
 
                 <a
-                  href="https://www.instagram.com/piktara.2026/"
+                  href="https://www.instagram.com/piktaraoficial/"
                   target="_blank"
                   rel="noreferrer"
                   className="social-icon-btn"
