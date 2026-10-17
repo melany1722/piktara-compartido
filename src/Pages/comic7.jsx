@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import "../Comic.css";
 import Contador from "../Components/Contador";
 import RelojEscondido from "../Components/RelojEscondido";
+import LottieEscena from "../Components/LottieEscena";
 
 const fDisplay = "'Baloo 2', 'Comic Sans MS', sans-serif";
 
@@ -52,11 +53,6 @@ const Comic7 = () => {
     >
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Quicksand:wght@500;600;700&display=swap');
-
-        @keyframes dashPulse {
-          0%, 100% { opacity: 0.5; }
-          50% { opacity: 1; }
-        }
 
         .comic-nav-btn {
           transition: transform 0.15s ease;
@@ -170,39 +166,18 @@ const Comic7 = () => {
               overflow: "hidden",
               border: `3px solid ${palette.borde}`,
               backgroundColor: palette.fondoEscena,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexDirection: "column",
-              gap: "18px",
             }}
           >
-            <div
-              style={{
-                width: "110px",
-                height: "110px",
-                borderRadius: "50%",
-                border: `5px dashed ${palette.borde}`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                animation: "dashPulse 2s ease-in-out infinite",
-              }}
-            >
-              <div style={{ width: "44px", height: "44px", borderRadius: "10px", border: `4px solid ${palette.borde}` }} />
-            </div>
-            <div
-              style={{
-                fontFamily: fDisplay,
-                fontWeight: 800,
-                fontSize: "1.15rem",
-                color: palette.borde,
-                textTransform: "uppercase",
-                letterSpacing: "0.04em",
-              }}
-            >
-              Escena en construccion
-            </div>
+            {/* Fondo de la escena 7: llena todo el marco.
+                El JSON y las imágenes (img_0 a img_12) están juntos en public/lottie-fondo7/.
+                El nombre del archivo tiene un espacio, por eso va como Fondo%207.json */}
+            <LottieEscena
+              src="/lottie-fondo7/Fondo%207.json"
+              base="/lottie-fondo7/"
+              ajuste="xMidYMid slice"
+              alClick
+              style={{ position: "absolute", inset: 0, zIndex: 1 }}
+            />
 
             {/* Reloj escondido: UN clic y se suma al instante */}
             <RelojEscondido clave={CLAVE_RELOJ} left="84%" top="78%" size={36} />
@@ -254,7 +229,6 @@ const Comic7 = () => {
             >
               &gt;
             </Link>
-
           </div>
         </div>
       </div>
