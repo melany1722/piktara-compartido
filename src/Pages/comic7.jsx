@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from "react-router-dom";
+import lottie from "lottie-web";
 import "../Comic.css";
 import Contador from "../Components/Contador";
 import RelojEscondido from "../Components/RelojEscondido";
@@ -15,6 +16,191 @@ const palette = {
   rosa: "#FF597B",
   fondoEscena: "#D4F7DC",
 };
+
+// =====================================================================
+//  PERSONAJES DE LA ESCENA 7 (Adad leyendo y Ninove parpadeando)
+//  Cada uno: JSON + imágenes (img_0 a img_3) juntos en su carpeta.
+//  Los dos JSON miden 1920x1080 (igual que el fondo) y se colocan por sus PIES.
+//
+//  x, y   = dónde quedan SUS PIES (en % de la escena; x: más alto = más a la derecha,
+//           y: más alto = más abajo)
+//  escala = tamaño (1 = el original del JSON, que es muy grande)
+//
+//  Adad y Ninove vienen dibujados a distinto tamaño (el dibujo de Adad es ~20% más alto),
+//  por eso la escala de Ninove es mayor: así se ven del mismo tamaño en pantalla.
+// =====================================================================
+// Ninove está un poco MÁS ATRÁS que Adad (más arriba y un pelín más pequeña) para dar profundidad.
+const ADAD = { x: 49, y: 86, escala: 0.43 };
+const NINOVE = { x: 60, y: 82.5, escala: 0.5 };
+
+const ADAD_JSON = "/lottie-fondo7/adad/Adad_leyendo.json";
+const NINOVE_JSON = "/lottie-fondo7/ninove/Ninove_parpadeo.json";
+
+// Dónde están los pies de cada uno dentro de su JSON original (1920x1080). No lo cambies.
+const ADAD_PIES = { x: 49.7, y: 81.4 };
+const NINOVE_PIES = { x: 50, y: 76.6 };
+
+// Fotogramas que se reproducen al hacer clic. Los JSON tienen mucho tiempo quieto al principio
+// (Adad ~2,5 s, Ninove ~3 s), y por eso parecía que el clic no hacía nada.
+// Se reproduce solo la parte donde pasa algo: [fotograma inicial, fotograma final].
+const ADAD_SEGMENTO = [74, 178];   // Adad mueve la cabeza leyendo
+const NINOVE_SEGMENTO = [88, 112]; // Ninove parpadea una vez
+
+// false = Ninove parpadea solo cuando le haces clic. true = parpadea sola, sin parar.
+const NINOVE_EN_BUCLE = false;
+
+// ---------------------------------------------------------------------
+//  OPACIDAD: los personajes siguen la animación del fondo ("Escena 7 dia", 455 fotogramas)
+//    fotogramas 0 a 236  → el fondo de DÍA se va volviendo transparente (100% → 0%)
+//    fotograma 214       → aparece el fondo de NOCHE por debajo
+//    fotogramas 214 a 232 → aparece la luna
+//  Los personajes hacen lo mismo: se desvanecen con el día y reaparecen con la noche.
+//  Cuando el fondo vuelve al inicio (al terminar), ellos vuelven a verse al 100%.
+// ---------------------------------------------------------------------
+const FONDO_NOMBRE = "Escena 7 dia"; // nombre ("nm") del JSON del fondo
+const DIA_TRANSPARENTE = 236;         // fotograma en que el fondo de día llega a 0%
+const NOCHE_APARECE = 214;            // fotograma en que aparece la noche
+const NOCHE_COMPLETA = 232;           // fotograma en que los personajes ya se ven al 100%
+
+const opacidadPersonajes = (f) => {
+  if (f <= NOCHE_APARECE) return Math.max(0, 1 - f / DIA_TRANSPARENTE);
+  if (f < NOCHE_COMPLETA) {
+    const base = Math.max(0, 1 - NOCHE_APARECE / DIA_TRANSPARENTE);
+    return base + ((1 - base) * (f - NOCHE_APARECE)) / (NOCHE_COMPLETA - NOCHE_APARECE);
+  }
+  return 1;
+};
+
+// MODO AJUSTAR: pon true para ARRASTRAR al personaje con el mouse y cambiar su tamaño con la rueda.
+// Abajo a la derecha sale un panel con la línea para pegar arriba. Luego vuelve a false.
+const AJUSTAR_ADAD = false;
+const AJUSTAR_NINOVE = false;
+
+// ---------------------------------------------------------------------
+//  Carga un personaje Lottie. Se anima SOLO al hacerle clic, vuelve a su
+//  primera pose al terminar (no desaparece) y se puede repetir.
+// ---------------------------------------------------------------------
+const usePersonajeLottie = ({ json, nombre, segmento, enBucle = false, bloqueado = false }) => {
+  const ref = useRef(null);
+  const animRef = useRef(null);
+  const corriendoRef = useRef(false);
+
+  useEffect(() => {
+    let cancelado = false;
+    let anim = null;
+    const carpeta = json.slice(0, json.lastIndexOf("/") + 1); // las imágenes están junto al JSON
+
+    (async () => {
+      try {
+        const r = await fetch(json);
+        if (!r.ok) throw new Error(`No se encontró ${json}`);
+        const data = await r.json();
+        if (cancelado || !ref.current) return;
+
+        (data.assets || []).forEach((a) => {
+          if (!a.p) return;
+          a.u = "";
+          a.p = encodeURIComponent(a.p);
+          const img = new Image();
+          img.onerror = () => console.warn(`${nombre}: falta la imagen ${carpeta}${a.p}`);
+          img.src = carpeta + a.p;
+        });
+
+        anim = lottie.loadAnimation({
+          container: ref.current,
+          renderer: "svg",
+          loop: enBucle,
+          autoplay: enBucle,
+          animationData: data,
+          assetsPath: carpeta,
+          rendererSettings: { preserveAspectRatio: "xMidYMid slice" },
+        });
+
+        anim.addEventListener("complete", () => {
+          corriendoRef.current = false;
+          // vuelve a la primera pose (un instante después: si no, lottie se queda
+          // en un fotograma vacío y el personaje desaparece)
+          setTimeout(() => {
+            if (!anim) return;
+            anim.resetSegments(true); // vuelve a considerar la animación completa
+            anim.goToAndStop(0, true);
+          }, 0);
+        });
+
+        if (!enBucle) anim.goToAndStop(0, true);
+        animRef.current = anim;
+      } catch (err) {
+        console.warn(`${nombre}:`, err.message, "→ revisa la carpeta del JSON y sus imágenes");
+      }
+    })();
+
+    return () => {
+      cancelado = true;
+      if (anim) anim.destroy();
+      animRef.current = null;
+      corriendoRef.current = false;
+    };
+  }, [json, nombre, enBucle]);
+
+  const alHacerClic = () => {
+    if (bloqueado || enBucle) return;
+    const a = animRef.current;
+    if (!a || corriendoRef.current) return;
+    corriendoRef.current = true;
+    if (segmento) a.playSegments(segmento, true);
+    else a.goToAndPlay(0, true);
+  };
+
+  return { ref, alHacerClic };
+};
+
+// ---------------------------------------------------------------------
+//  Modo ajustar: arrastrar (mueve los pies) y rueda (tamaño)
+// ---------------------------------------------------------------------
+const useAjuste = (inicial, activo, escenaRef) => {
+  const [v, setV] = useState(inicial);
+  const dragRef = useRef(null);
+
+  const handlers = {
+    onPointerDown: (e) => {
+      if (!activo) return;
+      e.preventDefault();
+      e.currentTarget.setPointerCapture(e.pointerId);
+      dragRef.current = { cx: e.clientX, cy: e.clientY, x: v.x, y: v.y };
+    },
+    onPointerMove: (e) => {
+      const d = dragRef.current;
+      if (!d || !escenaRef.current) return;
+      const r = escenaRef.current.getBoundingClientRect();
+      const dx = ((e.clientX - d.cx) / r.width) * 100;
+      const dy = ((e.clientY - d.cy) / r.height) * 100;
+      setV((n) => ({ ...n, x: +(d.x + dx).toFixed(1), y: +(d.y + dy).toFixed(1) }));
+    },
+    onPointerUp: () => {
+      dragRef.current = null;
+    },
+    onWheel: (e) => {
+      if (!activo) return;
+      const paso = e.deltaY < 0 ? 0.02 : -0.02;
+      setV((n) => ({ ...n, escala: +Math.max(0.1, n.escala + paso).toFixed(2) }));
+    },
+  };
+
+  return [v, handlers];
+};
+
+// estilo de la capa de un personaje: mismo encuadre 1920x1080, movida y reducida desde sus pies
+const estiloPersonaje = (v, pies, z) => ({
+  position: "absolute",
+  inset: 0,
+  width: "100%",
+  height: "100%",
+  zIndex: z,
+  pointerEvents: "none",
+  transformOrigin: `${pies.x}% ${pies.y}%`,
+  transform: `translate(${v.x - pies.x}%, ${v.y - pies.y}%) scale(${v.escala})`,
+  touchAction: "none",
+});
 
 const WashiTape = ({ top, left, right, rotate, color }) => (
   <div
@@ -39,6 +225,74 @@ const WashiTape = ({ top, left, right, rotate, color }) => (
 const CLAVE_RELOJ = "relojEscena7";
 
 const Comic7 = () => {
+  const escenaRef = useRef(null); // el recuadro de la escena (para medir el arrastre)
+
+  const adadLottie = usePersonajeLottie({
+    json: ADAD_JSON,
+    nombre: "Adad",
+    segmento: ADAD_SEGMENTO,
+    bloqueado: AJUSTAR_ADAD,
+  });
+  const ninoveLottie = usePersonajeLottie({
+    json: NINOVE_JSON,
+    nombre: "Ninove",
+    segmento: NINOVE_SEGMENTO,
+    enBucle: NINOVE_EN_BUCLE,
+    bloqueado: AJUSTAR_NINOVE,
+  });
+
+  const [adad, adadHandlers] = useAjuste(ADAD, AJUSTAR_ADAD, escenaRef);
+  const [ninove, ninoveHandlers] = useAjuste(NINOVE, AJUSTAR_NINOVE, escenaRef);
+
+  // Sigue el fotograma del fondo (lo crea LottieEscena) y ajusta la opacidad de los personajes
+  useEffect(() => {
+    let anim = null;
+    let intentos = 0;
+
+    const aplicar = () => {
+      if (!anim) return;
+      const o = String(opacidadPersonajes(anim.currentFrame + (anim.firstFrame || 0)));
+      [adadLottie.ref.current, ninoveLottie.ref.current].forEach((el) => {
+        if (el) el.style.opacity = o;
+      });
+    };
+
+    const buscar = () => {
+      const todas = lottie.getRegisteredAnimations ? lottie.getRegisteredAnimations() : [];
+      const fondo = todas.find((a) => a.animationData && a.animationData.nm === FONDO_NOMBRE);
+      if (fondo) {
+        anim = fondo;
+        anim.addEventListener("enterFrame", aplicar);
+        aplicar();
+        clearInterval(intervalo);
+      } else if (++intentos > 50) {
+        clearInterval(intervalo);
+        console.warn(`No se encontró la animación del fondo "${FONDO_NOMBRE}" para sincronizar la opacidad`);
+      }
+    };
+
+    // el fondo se carga un instante después (fetch), por eso se busca hasta que aparezca
+    const intervalo = setInterval(buscar, 200);
+    buscar();
+
+    return () => {
+      clearInterval(intervalo);
+      if (anim) anim.removeEventListener("enterFrame", aplicar);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const textoAdad = `const ADAD = { x: ${adad.x}, y: ${adad.y}, escala: ${adad.escala} };`;
+  const textoNinove = `const NINOVE = { x: ${ninove.x}, y: ${ninove.y}, escala: ${ninove.escala} };`;
+  const textoPanel = [AJUSTAR_ADAD && textoAdad, AJUSTAR_NINOVE && textoNinove]
+    .filter(Boolean)
+    .join("\n");
+
+  const copiarValores = () => {
+    console.log(textoPanel);
+    if (navigator.clipboard) navigator.clipboard.writeText(textoPanel).catch(() => {});
+  };
+
   return (
     <div
       className="w-100"
@@ -53,6 +307,12 @@ const Comic7 = () => {
     >
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Quicksand:wght@500;600;700&display=swap');
+
+        /* los personajes llenan el recuadro (mismo encuadre 1920x1080 que el fondo) */
+        .personaje-lottie svg { width: 100% !important; height: 100% !important; display: block; }
+
+        /* solo las imágenes del personaje reciben el clic (el resto de la capa deja pasar el mouse) */
+        .personaje-lottie svg image { pointer-events: auto; cursor: pointer; }
 
         .comic-nav-btn {
           transition: transform 0.15s ease;
@@ -158,6 +418,7 @@ const Comic7 = () => {
           </div>
 
           <div
+            ref={escenaRef}
             style={{
               position: "relative",
               width: "100%",
@@ -178,6 +439,62 @@ const Comic7 = () => {
               alClick
               style={{ position: "absolute", inset: 0, zIndex: 1 }}
             />
+
+            {/* Adad leyendo: lee una vez al hacerle clic y vuelve a su pose inicial */}
+            <div
+              ref={adadLottie.ref}
+              className="personaje-lottie"
+              onClick={adadLottie.alHacerClic}
+              {...adadHandlers}
+              style={estiloPersonaje(adad, ADAD_PIES, 3)}
+            />
+
+            {/* Ninove parpadeando: parpadea una vez al hacerle clic y vuelve a su pose inicial */}
+            <div
+              ref={ninoveLottie.ref}
+              className="personaje-lottie"
+              onClick={ninoveLottie.alHacerClic}
+              {...ninoveHandlers}
+              style={estiloPersonaje(ninove, NINOVE_PIES, 2)}
+            />
+
+            {/* Panel del modo ajustar */}
+            {(AJUSTAR_ADAD || AJUSTAR_NINOVE) && (
+              <div
+                style={{
+                  position: "absolute",
+                  right: "12px",
+                  bottom: "12px",
+                  zIndex: 200,
+                  background: "rgba(255,255,255,0.95)",
+                  border: `3px solid ${palette.borde}`,
+                  borderRadius: "12px",
+                  padding: "10px 14px",
+                  fontFamily: "monospace",
+                  fontSize: "0.8rem",
+                  color: palette.borde,
+                }}
+              >
+                <div style={{ fontWeight: 800, marginBottom: "4px" }}>
+                  Arrastra = mover · Rueda = tamaño
+                </div>
+                <pre style={{ margin: 0 }}>{textoPanel}</pre>
+                <button
+                  onClick={copiarValores}
+                  style={{
+                    marginTop: "6px",
+                    cursor: "pointer",
+                    fontWeight: 800,
+                    border: `2px solid ${palette.borde}`,
+                    borderRadius: "8px",
+                    background: palette.amarillo,
+                    padding: "3px 10px",
+                  }}
+                >
+                  Copiar valores
+                </button>
+              </div>
+            )}
 
             {/* Reloj escondido: UN clic y se suma al instante */}
             <RelojEscondido clave={CLAVE_RELOJ} left="84%" top="78%" size={36} />
