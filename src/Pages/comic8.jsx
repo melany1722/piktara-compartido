@@ -5,6 +5,7 @@ import lottie from "lottie-web";
 import "../Comic.css";
 import Contador from "../Components/Contador";
 import RelojEscondido from "../Components/RelojEscondido";
+import FinalComic from "../Components/FinalComic";
 
 const fDisplay = "'Baloo 2', 'Comic Sans MS', sans-serif";
 
@@ -110,6 +111,29 @@ const BANDERA_MARGEN = 16;                          // margen que dejamos alrede
 const BANDERAS = [
   { cx: 611, bajar: 0, ancho: 200 },   // bandera izquierda
   { cx: 1357, bajar: 0, ancho: 200 },  // bandera derecha
+];
+
+// =====================================================================
+//  PERSONAJES: Adad (ada360.json) a la izquierda y la niña (ninovlado.json) a la derecha.
+//  Quedan quietos de espaldas, uno en cada extremo de la estela (sin tapar los jeroglíficos).
+//  Cada uno se gira SOLO cuando le haces clic a él (una vez) y vuelve a quedar quieto.
+//  IMPORTANTE: los dos JSON van sueltos en la carpeta public:
+//    public/ada360.json
+//    public/ninovlado.json
+//
+//  x, y   = centro del personaje y apoyo de sus pies (píxeles de la imagen de fondo 1923x1096)
+//  escala = tamaño del personaje (sube o baja este número para agrandar o achicar)
+//  cx, pies = punto del lienzo del JSON (800 x 1080) donde está el centro y los pies (no tocar)
+//  La estela va de x = 846 a x = 1110. Para mover a un personaje, cambia solo su "x":
+//  más bajo = más a la izquierda, más alto = más a la derecha.
+// =====================================================================
+const PERSONAJE_LIENZO_W = 800;
+const PERSONAJE_LIENZO_H = 1080;
+const ESCALA_PERSONAJES = 0.36; // un solo número para los dos: sube para agrandar, baja para achicar
+
+const PERSONAJES = [
+  { src: "/ada360.json",    x: 750,  y: 981, escala: ESCALA_PERSONAJES, cx: 402, pies: 851 }, // extremo izquierdo de la estela
+  { src: "/ninovlado.json", x: 1206, y: 981, escala: ESCALA_PERSONAJES * 1.12, cx: 378, pies: 744 }, // extremo derecho de la estela
 ];
 
 // Si algo falla con las llamas, NO se cae la escena ni la navegación
@@ -354,6 +378,96 @@ const Bandera = ({ left, top, ancho }) => {
   );
 };
 
+// Cada JSON de personaje se descarga una sola vez y se reutiliza
+const personajeCache = {};
+const cargarPersonaje = (src) => {
+  if (!personajeCache[src]) {
+    personajeCache[src] = fetch(src)
+      .then((r) => {
+        if (!r.ok) throw new Error(`No se encontró ${src}`);
+        return r.json();
+      })
+      .catch((err) => {
+        delete personajeCache[src];
+        console.error("Personaje:", err.message, "→ copia el JSON a la carpeta public");
+        return null;
+      });
+  }
+  return personajeCache[src];
+};
+
+// left = centro horizontal, top = donde apoyan los pies (ya en píxeles de pantalla)
+// escala = píxeles de pantalla por cada píxel del lienzo del JSON
+// cx, pies = centro y pies del personaje dentro del lienzo del JSON
+// Cada personaje se anima solo cuando le haces clic a él.
+const Personaje = ({ src, left, top, escala, cx, pies }) => {
+  const cajaRef = useRef(null);
+  const animRef = useRef(null);
+  const sonando = useRef(false);
+
+  // Carga el personaje: queda quieto (de espaldas) en su primer fotograma hasta que le des clic
+  useEffect(() => {
+    let cancelado = false;
+    cargarPersonaje(src).then((data) => {
+      if (cancelado || !data || !cajaRef.current) return;
+      const anim = lottie.loadAnimation({
+        container: cajaRef.current,
+        renderer: "svg",
+        loop: false,
+        autoplay: false,
+        animationData: JSON.parse(JSON.stringify(data)), // las imágenes ya vienen dentro del JSON
+        rendererSettings: { preserveAspectRatio: "xMidYMid meet" },
+      });
+      anim.addEventListener("complete", () => {
+        anim.goToAndStop(0, true); // vuelve a quedar quieto
+        sonando.current = false;
+      });
+      anim.goToAndStop(0, true);
+      animRef.current = anim;
+    });
+    return () => {
+      cancelado = true;
+      try {
+        if (animRef.current) animRef.current.destroy();
+      } catch (e) {
+        console.warn("Personaje: no se pudo destruir la animación", e);
+      }
+      animRef.current = null;
+      sonando.current = false;
+    };
+  }, [src]);
+
+  // Hace la animación una vez (si ya la está haciendo, no se reinicia)
+  const reproducir = () => {
+    if (!animRef.current || sonando.current) return;
+    sonando.current = true;
+    animRef.current.goToAndPlay(0, true);
+    gsap.fromTo(
+      cajaRef.current,
+      { scaleY: 1, transformOrigin: "50% 100%" },
+      { scaleY: 1.04, duration: 0.15, yoyo: true, repeat: 1, ease: "power2.out" }
+    );
+  };
+
+  return (
+    <div
+      ref={cajaRef}
+      className="personaje-lottie"
+      onClick={reproducir}
+      role="button"
+      aria-label="Personaje"
+      style={{
+        position: "absolute",
+        left: left - cx * escala,
+        top: top - pies * escala,
+        width: PERSONAJE_LIENZO_W * escala,
+        height: PERSONAJE_LIENZO_H * escala,
+        zIndex: 18,
+      }}
+    />
+  );
+};
+
 const WashiTape = ({ top, left, right, rotate, color }) => (
   <div
     style={{
@@ -455,6 +569,9 @@ const Comic8 = () => {
 
         .llama-lottie svg { pointer-events: none !important; }
         .llama-lottie svg path { pointer-events: visiblePainted; cursor: pointer; }
+
+        .personaje-lottie svg { pointer-events: none !important; }
+        .personaje-lottie svg image { pointer-events: all; cursor: pointer; }
 
         @keyframes ventanaFinEntra {
           0% { transform: scale(0.6); opacity: 0; }
@@ -694,6 +811,22 @@ const Comic8 = () => {
                 ))}
             </BarreraErrores>
 
+            {/* Personajes a cada extremo de la estela: clic en cada uno para que se gire */}
+            <BarreraErrores>
+              {geo &&
+                PERSONAJES.map((p, i) => (
+                  <Personaje
+                    key={i}
+                    src={p.src}
+                    left={geo.ox + p.x * geo.s}
+                    top={geo.oy + p.y * geo.s}
+                    escala={p.escala * geo.s}
+                    cx={p.cx}
+                    pies={p.pies}
+                  />
+                ))}
+            </BarreraErrores>
+
             {/* Reloj escondido: UN clic y se suma al instante (cuenta en el Contador general) */}
             <RelojEscondido clave={CLAVE_RELOJ} left="70%" top="31%" size={30} />
 
@@ -862,6 +995,12 @@ const Comic8 = () => {
           </div>
         </div>
       </div>
+
+      {/* Final del cómic: aparece al tener los 8 relojes (espera a que se cierre la ventana de la estela) */}
+      <FinalComic
+        urlSiguiente="https://tu-otro-proyecto.com" // 👈 pon aquí la URL real
+        bloqueado={todas && !cerrarFin}
+      />
     </div>
   );
 };

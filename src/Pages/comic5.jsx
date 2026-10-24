@@ -6,6 +6,7 @@ import lottie from "lottie-web";
 import "../Comic.css";
 import Contador from "../Components/Contador";
 import RelojEscondido from "../Components/RelojEscondido";
+import AyudaEscenas from "../Components/AyudaEscenas";
 
 gsap.registerPlugin(Draggable);
 
@@ -96,12 +97,23 @@ const PIEZAS = [
 //  clic directamente sobre el fuego (Lottie).
 //  IMPORTANTE:
 //   1) instala la librería:  npm install lottie-web
-//   2) copia flamaj.json a  public/lottie/flamaj.json
+//   2) el archivo fire.json va en  public/lottie-fondo5/fire.json
+//      (si el fuego trajera imágenes aparte, deben estar en esa misma carpeta)
 // =====================================================================
-const LLAMA_JSON = "/lottie/flamaj.json";
-// La animación se recorta al espacio que realmente ocupa la llama (x, y, ancho, alto del lienzo original)
-const LLAMA_RECORTE = "66 63 227 335";
-const LLAMA_RATIO = 335 / 227;   // alto / ancho de la llama ya recortada
+const LLAMA_CARPETA = "/lottie-fondo5/";
+const LLAMA_JSON = LLAMA_CARPETA + "fire.json";
+
+// La animación se recorta SOLA al espacio que ocupa el fuego, así que "ancho" de ANTORCHAS
+// controla el tamaño real de la llama. Si quisieras forzar un recorte a mano, escribe aquí
+// "x y ancho alto" del lienzo del JSON (por ejemplo "100 50 300 400"). null = automático.
+const LLAMA_RECORTE = null;
+const LLAMA_RATIO = 1.5;         // alto / ancho provisional (se corrige solo al cargar fire.json)
+const LLAMA_FRAME_REPOSO = 0;    // fotograma en el que queda quieta la llama (cámbialo si el 0 se ve vacío o muy chico)
+const LLAMA_ESCALA = 1.3;        // multiplica el tamaño de TODAS las llamas (1.3 = 30% más grandes)
+// Hunde la base de la llama dentro del cuenco de la antorcha, para que no parezca flotando.
+// Es una fracción del alto de la llama: 0 = la base toca justo el punto x, y; 0.1 = baja un 10%;
+// sube el número si todavía se ve un hueco, bájalo si la llama se mete demasiado en el cuenco.
+const LLAMA_HUNDIR = 0.1;
 const VECES_POR_CLIC = 3;        // cuántas veces se repite la animación después de cada clic
 
 // Una línea por antorcha:
@@ -186,7 +198,7 @@ const cargarLlama = () => {
       })
       .catch((err) => {
         llamaPromesa = null;
-        console.error("Llama:", err.message, "→ copia flamaj.json a public/lottie/");
+        console.error("Llama:", err.message, "→ copia fire.json a public/lottie-fondo5/");
         return null;
       });
   }
@@ -195,32 +207,100 @@ const cargarLlama = () => {
 
 const Llama = ({ left, top, ancho }) => {
   const [animando, setAnimando] = useState(false);
+  const [ratio, setRatio] = useState(LLAMA_RATIO); // alto / ancho de la llama ya recortada
   const wrapRef = useRef(null);
   const cajaRef = useRef(null);
   const animRef = useRef(null);
   const vueltas = useRef(0);
 
-  // Carga la llama: queda quieta en su primer fotograma hasta que le des clic
+  // Carga la llama: queda quieta en su fotograma de reposo hasta que le des clic
   useEffect(() => {
     let cancelado = false;
+
+    // Recorta el lienzo del JSON al espacio que realmente ocupa el fuego
+    // (mide el dibujo en varios fotogramas y se queda con la unión de todos)
+    const recortar = (anim, copia) => {
+      try {
+        const svg = cajaRef.current && cajaRef.current.querySelector("svg");
+        if (!svg) return;
+
+        if (LLAMA_RECORTE) {
+          svg.setAttribute("viewBox", LLAMA_RECORTE);
+          const [, , w, h] = LLAMA_RECORTE.split(/\s+/).map(Number);
+          if (w > 0 && h > 0) setRatio(h / w);
+          return;
+        }
+
+        const ctm = svg.getScreenCTM();
+        if (!ctm) return;
+        const inv = ctm.inverse();
+        let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
+        const total = Math.max(1, Math.floor(anim.totalFrames));
+        const muestras = 20;
+
+        for (let k = 0; k <= muestras; k++) {
+          anim.goToAndStop(Math.floor((k / muestras) * (total - 1)), true);
+          svg.querySelectorAll("path, image").forEach((el) => {
+            if (el.closest("defs, clipPath, mask")) return; // formas auxiliares, no se ven
+            const r = el.getBoundingClientRect();
+            if (!r.width || !r.height) return; // capas ocultas en este fotograma
+            const a = new DOMPoint(r.left, r.top).matrixTransform(inv);
+            const b = new DOMPoint(r.right, r.bottom).matrixTransform(inv);
+            x1 = Math.min(x1, a.x); y1 = Math.min(y1, a.y);
+            x2 = Math.max(x2, b.x); y2 = Math.max(y2, b.y);
+          });
+        }
+
+        anim.goToAndStop(LLAMA_FRAME_REPOSO, true);
+        if (!isFinite(x1) || x2 - x1 < 1 || y2 - y1 < 1) return; // se queda con el lienzo completo
+
+        const mx = (x2 - x1) * 0.04;      // un pequeño margen a los lados
+        const myArriba = (y2 - y1) * 0.04; // y arriba; abajo no: la base queda sobre la antorcha
+        const vx = x1 - mx;
+        const vy = y1 - myArriba;
+        const vw = x2 - x1 + mx * 2;
+        const vh = y2 - y1 + myArriba;
+        svg.setAttribute("viewBox", `${vx} ${vy} ${vw} ${vh}`);
+        setRatio(vh / vw);
+      } catch (e) {
+        console.warn("Llama: no se pudo recortar al fuego", e);
+      }
+    };
+
     cargarLlama().then((data) => {
       if (cancelado || !data || !cajaRef.current) return;
+      const copia = JSON.parse(JSON.stringify(data));
+
+      // Si el fuego usara imágenes sueltas, se buscan junto al JSON (las embebidas no se tocan)
+      (copia.assets || []).forEach((a) => {
+        if (a.p && !a.layers && a.e !== 1 && !String(a.p).startsWith("data:")) {
+          a.u = LLAMA_CARPETA;
+        }
+      });
+
+      // Mientras no se recorta, usa la proporción del lienzo completo del JSON
+      if (copia.w && copia.h) setRatio(copia.h / copia.w);
+
       const anim = lottie.loadAnimation({
         container: cajaRef.current,
         renderer: "svg",
         loop: true,
         autoplay: false,
-        animationData: JSON.parse(JSON.stringify(data)),
-        rendererSettings: { preserveAspectRatio: "xMidYMax meet", viewBoxSize: LLAMA_RECORTE },
+        animationData: copia,
+        rendererSettings: { preserveAspectRatio: "xMidYMax meet" },
       });
       anim.addEventListener("loopComplete", () => {
         vueltas.current += 1;
         if (vueltas.current >= VECES_POR_CLIC) {
-          anim.goToAndStop(0, true); // vuelve a la pose quieta
+          anim.goToAndStop(LLAMA_FRAME_REPOSO, true); // vuelve a la pose quieta
           setAnimando(false);
         }
       });
-      anim.goToAndStop(0, true);
+      anim.addEventListener("DOMLoaded", () => {
+        recortar(anim, copia);
+        anim.goToAndStop(LLAMA_FRAME_REPOSO, true);
+      });
+      anim.goToAndStop(LLAMA_FRAME_REPOSO, true);
       animRef.current = anim;
     });
     return () => {
@@ -253,7 +333,7 @@ const Llama = ({ left, top, ancho }) => {
       style={{
         position: "absolute",
         left: left,
-        top: top,
+        top: top + ancho * ratio * LLAMA_HUNDIR, // baja la base de la llama hacia el cuenco
         width: ancho,
         marginLeft: -ancho / 2,
         height: 0,
@@ -266,7 +346,7 @@ const Llama = ({ left, top, ancho }) => {
           left: 0,
           bottom: 0,
           width: "100%",
-          aspectRatio: `1 / ${LLAMA_RATIO}`,
+          aspectRatio: `1 / ${ratio}`,
         }}
       >
         {/* Solo el dibujo del fuego recibe el clic (ver .llama-lottie en los estilos) */}
@@ -903,6 +983,7 @@ const Comic5 = () => {
         }
         .llama-lottie svg { pointer-events: none !important; }
         .llama-lottie svg path { pointer-events: visiblePainted; cursor: pointer; }
+        .llama-lottie svg image { pointer-events: auto; cursor: pointer; }
         @keyframes fondoEntra {
           from { opacity: 0; }
           to { opacity: 1; }
@@ -1270,12 +1351,19 @@ const Comic5 = () => {
                 ))}
             </div>
 
-            {/* Antorchas pequeñas (clic para encender la llama) y Ninove */}
+            {/* Antorchas pequeñas (clic para encender la llama de fire.json) */}
             <BarreraErrores>
               {mapa &&
                 ANTORCHAS.map((a, i) => {
                   const p = mapa.punto(a.x, a.y);
-                  return <Llama key={i} left={p.x} top={p.y} ancho={mapa.ancho(a.ancho)} />;
+                  return (
+                    <Llama
+                      key={i}
+                      left={p.x}
+                      top={p.y}
+                      ancho={mapa.ancho(a.ancho * LLAMA_ESCALA)}
+                    />
+                  );
                 })}
             </BarreraErrores>
 
@@ -1331,6 +1419,9 @@ const Comic5 = () => {
 
             {/* Reloj escondido: UN clic y se suma al instante */}
             <RelojEscondido clave={CLAVE_RELOJ} left="85%" top="13%" size={34} zIndex={500} />
+
+            {/* Panel de ayuda lateral: cómo se juega en las escenas 1 a 8 */}
+            <AyudaEscenas escenaActual={5} />
 
             <Link
               to="/comic/4"

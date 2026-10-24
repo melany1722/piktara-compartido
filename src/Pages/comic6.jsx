@@ -4,6 +4,7 @@ import "../Comic.css";
 import Contador from "../Components/Contador";
 import RelojEscondido from "../Components/RelojEscondido";
 import LottieEscena from "../Components/LottieEscena";
+import AyudaEscenas from "../Components/AyudaEscenas";
 
 const fDisplay = "'Baloo 2', 'Comic Sans MS', sans-serif";
 
@@ -305,6 +306,9 @@ const Comic6 = () => {
 
             {/* Reloj escondido: UN clic y se suma al instante */}
             <RelojEscondido clave={CLAVE_RELOJ} left="31%" top="21%" size={32} />
+
+            {/* Panel de ayuda lateral: cómo se juega en las escenas 1 a 8 */}
+            <AyudaEscenas escenaActual={6} />
 
             <Link
               to="/comic/5"

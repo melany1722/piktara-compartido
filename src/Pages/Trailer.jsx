@@ -354,8 +354,8 @@ export default function Trailer() {
                 }}
               >
                 <img 
-                  src="/comic_p.jpg" 
-                  alt="El Reloj de las Arenas" 
+                  src="/portadapiktara.jpg" 
+                  alt="Portada de El Reloj de las Arenas" 
                   style={{ width: "100%", maxWidth: "220px", borderRadius: "12px", display: "block" }} 
                 />
               </div>
@@ -420,11 +420,11 @@ export default function Trailer() {
                 Siguenos
               </p>
               <div className="d-flex gap-4 justify-content-center justify-content-md-end">
-                <a href="https://www.facebook.com/share/1CUVKmwfeK/" target="_blank" rel="noreferrer" className="btn-icon-circle" title="Facebook">
-                  <i className="bi bi-facebook" style={{ fontSize: "1.4rem" }} />
+                <a href="https://www.tiktok.com/@piktaraoficial" target="_blank" rel="noreferrer" className="btn-icon-circle" title="TikTok">
+                  <i className="bi bi-tiktok" style={{ fontSize: "1.4rem" }} />
                 </a>
 
-                <a href="https://www.instagram.com/____sanchez_10" target="_blank" rel="noreferrer" className="btn-icon-circle" title="Instagram">
+                <a href="https://www.instagram.com/piktaraoficial/" target="_blank" rel="noreferrer" className="btn-icon-circle" title="Instagram">
                   <i className="bi bi-instagram" style={{ fontSize: "1.4rem" }} />
                 </a>
 

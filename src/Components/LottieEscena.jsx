@@ -11,7 +11,15 @@ import lottie from "lottie-web";
 // reposo:    frame en el que queda quieta antes del clic (por defecto, igual a inicio)
 // final:     frame en el que queda quieta al terminar (por defecto, igual a reposo)
 // disparo:   número; cada vez que sube, la animación se reproduce (para activarla desde otro elemento)
+// acciones:  para JSON que traen varias animaciones seguidas. Puede ser:
+//              - un número N: divide los frames del JSON en N partes iguales
+//              - una lista [[inicio, fin], [inicio, fin], ...] con los frames exactos de cada una
+//              - "marcadores": usa los marcadores (markers) que tenga el JSON como acciones
+// accion:    índice (empieza en 0) de cuál de las acciones se muestra; se repite en bucle
+//            y cambia sola cuando este número cambia (solo se ve una a la vez)
+// depurar:   true = escribe en la consola (F12) los frames de cada acción que se reproduce
 // alIniciar: función que se ejecuta cuando esta animación arranca por un clic propio
+// alTerminar: función que se ejecuta cuando la animación llega a su final (solo con alClick)
 // escalas:   { NombreDeCapa: porcentaje } para agrandar capas (ej. { Arbol1: 120 })
 // desplazar: { NombreDeCapa: [x, y] } para mover capas con posición fija
 //            (en unidades del lienzo del JSON; y positivo = hacia abajo)
@@ -27,7 +35,11 @@ const LottieEscena = ({
   reposo,
   final,
   disparo = 0,
+  acciones,
+  accion = 0,
+  depurar = false,
   alIniciar,
+  alTerminar,
   escalas,
   desplazar,
   style,
@@ -38,6 +50,63 @@ const LottieEscena = ({
   const corriendo = useRef(false);
   const escalasKey = JSON.stringify(escalas || {});
   const desplazarKey = JSON.stringify(desplazar || {});
+
+  // Modo por acciones: el JSON trae varias animaciones y se muestra una a la vez
+  const porAcciones = acciones !== undefined;
+  const accionesKey = JSON.stringify(acciones ?? null);
+
+  // Guarda siempre la versión más reciente de alTerminar sin recargar la animación
+  const alTerminarRef = useRef(alTerminar);
+  alTerminarRef.current = alTerminar;
+
+  // Guarda la acción actual para usarla cuando termine de cargar
+  const accionRef = useRef(accion);
+  accionRef.current = accion;
+
+  // Lista de rangos [inicio, fin] de cada acción
+  const obtenerRangos = (anim) => {
+    const total = anim.totalFrames;
+
+    if (Array.isArray(acciones)) return acciones;
+
+    if (acciones === "marcadores") {
+      return (anim.markers || [])
+        .map((m) => [m.time, m.duration > 0 ? m.time + m.duration : total])
+        .filter((r) => r[1] > r[0]);
+    }
+
+    const n = Math.max(1, Number(acciones) || 1);
+    const tam = total / n;
+    return Array.from({ length: n }, (_, i) => [
+      Math.round(i * tam),
+      i === n - 1 ? total : Math.round((i + 1) * tam),
+    ]);
+  };
+
+  // Reproduce en bucle solo los frames de la acción pedida
+  const reproducirAccion = () => {
+    const anim = animRef.current;
+    if (!anim || acciones === undefined) return;
+
+    const rangos = obtenerRangos(anim);
+    if (!rangos.length) {
+      console.warn("[LottieEscena] No hay acciones para", src, "(¿el JSON no tiene marcadores?)");
+      return;
+    }
+
+    const i = Math.min(Math.max(accionRef.current, 0), rangos.length - 1);
+    const rango = rangos[i];
+
+    if (depurar) {
+      console.info(
+        `[LottieEscena] ${src} → total ${anim.totalFrames} frames, acción ${i + 1}/${rangos.length}: frames ${rango[0]} a ${rango[1]}`
+      );
+    }
+
+    anim.resetSegments(true);
+    anim.loop = true;
+    anim.playSegments(rango, true);
+  };
 
   useEffect(() => {
     let anim;
@@ -80,20 +149,25 @@ const LottieEscena = ({
         anim = lottie.loadAnimation({
           container: ref.current,
           renderer: "svg",
-          loop: alClick ? false : loop,
-          autoplay: !alClick,
+          loop: porAcciones ? true : alClick ? false : loop,
+          autoplay: !alClick && !porAcciones,
           animationData: data,
           rendererSettings: { preserveAspectRatio: ajuste },
         });
 
         animRef.current = anim;
 
-        if (alClick) {
+        if (porAcciones) {
+          // Cuando el JSON está listo, arranca la acción que toca
+          anim.addEventListener("DOMLoaded", reproducirAccion);
+          if (anim.isLoaded) reproducirAccion();
+        } else if (alClick) {
           anim.goToAndStop(frameReposo, true);
 
           anim.addEventListener("complete", () => {
             anim.goToAndStop(frameFinal, true);
             corriendo.current = false;
+            alTerminarRef.current?.();
           });
         }
       })
@@ -105,6 +179,7 @@ const LottieEscena = ({
       anim?.destroy();
       animRef.current = null;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     src,
     base,
@@ -112,6 +187,8 @@ const LottieEscena = ({
     loop,
     ajuste,
     alClick,
+    porAcciones,
+    accionesKey,
     inicio,
     fin,
     reposo,
@@ -120,10 +197,16 @@ const LottieEscena = ({
     desplazarKey,
   ]);
 
+  // Cuando cambia la acción, salta a esa animación
+  useEffect(() => {
+    if (porAcciones) reproducirAccion();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accion]);
+
   // Arranca la animación. Devuelve true si realmente arrancó.
   const iniciar = () => {
     const anim = animRef.current;
-    if (!alClick || !anim || corriendo.current) return false;
+    if (porAcciones || !alClick || !anim || corriendo.current) return false;
     corriendo.current = true;
     anim.playSegments([inicio, fin ?? anim.totalFrames], true);
     return true;
@@ -143,7 +226,7 @@ const LottieEscena = ({
     <div
       ref={ref}
       onClick={manejarClick}
-      style={{ cursor: alClick ? "pointer" : "default", ...style }}
+      style={{ cursor: alClick && !porAcciones ? "pointer" : "default", ...style }}
       className={className}
     />
   );

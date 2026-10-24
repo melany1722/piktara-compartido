@@ -3,6 +3,9 @@ import { Link } from "react-router-dom";
 import lottie from "lottie-web";
 import "../Comic.css";
 import Contador, { recogerReloj } from "../Components/Contador";
+import AyudaEscenas from "../Components/AyudaEscenas";
+import AudioEscena from "../Components/AudioEscena";
+
 
 const fDisplay = "'Baloo 2', 'Comic Sans MS', sans-serif";
 
@@ -19,6 +22,9 @@ const palette = {
 // Cadena de escenas: 1 Comicj · 2 MelanyEstrellas · 3 Comic · 4 comic4 ...
 const ESCENA_ANTERIOR = "/comic/1";
 const ESCENA_SIGUIENTE = "/comic/3";
+
+// Clave del reloj escondido de esta escena en el contador (una por escena: relojEscena1 … relojEscena8)
+const CLAVE_RELOJ = "relojEscena2";
 
 // =====================================================================
 //  FONDO (animación Lottie de Egipto: nubes, agua, pirámides, columnas)
@@ -199,7 +205,9 @@ const MelanyEstrellas = () => {
   const arbustoCorriendoRef = useRef([]); // true mientras un arbusto se está animando
   const arrastreRef = useRef(null);
 
-  const [relojEncontrado, setRelojEncontrado] = useState(() => localStorage.getItem("relojMelany") === "true");
+  // El reloj NO se guarda como "ya recogido" para mostrarse: aparece siempre que se carga la escena.
+  // (El punto solo se suma la primera vez; eso lo controla el Contador con la clave relojEscena2.)
+  const [relojEncontrado, setRelojEncontrado] = useState(false);
   const [lista, setLista] = useState(false);          // el fondo cargó bien
   const [reproducido, setReproducido] = useState(false);
   const [ninove, setNinove] = useState(NINOVE);
@@ -484,8 +492,8 @@ const MelanyEstrellas = () => {
     e.stopPropagation();
     if (relojEncontrado) return;
     setRelojEncontrado(true);
-    // el reloj vuela al contador y suma 1 punto (solo la primera vez)
-    recogerReloj("relojMelany", e.currentTarget);
+    // el reloj vuela al contador y suma 1 punto (solo la primera vez que se encuentra)
+    recogerReloj(CLAVE_RELOJ, e.currentTarget);
   };
 
   // capa de fondo: llena todo el recuadro
@@ -903,13 +911,15 @@ const MelanyEstrellas = () => {
                   pointerEvents: "auto",
                   filter: `drop-shadow(0 0 8px ${palette.amarillo})`,
                   animation: "wiggleSticker 1.6s ease-in-out infinite",
-                  background: palette.crema,
-                  padding: "4px",
-                  borderRadius: "50%",
-                  border: `2px dashed ${palette.borde}`,
                 }}
               />
             )}
+
+            {/* Música de la escena 2: suena con el primer clic; botón 🔊/🔇 abajo a la izquierda */}
+            <AudioEscena escena={2} />
+
+            {/* Panel de ayuda lateral: cómo se juega en las escenas 1 a 8 */}
+            <AyudaEscenas escenaActual={2} />
 
             <Link
               to={ESCENA_ANTERIOR}

@@ -5,6 +5,7 @@ import "../Comic.css";
 import Contador from "../Components/Contador";
 import RelojEscondido from "../Components/RelojEscondido";
 import LottieEscena from "../Components/LottieEscena";
+import AyudaEscenas from "../Components/AyudaEscenas";
 
 const fDisplay = "'Baloo 2', 'Comic Sans MS', sans-serif";
 
@@ -29,9 +30,10 @@ const palette = {
 //  Adad y Ninove vienen dibujados a distinto tamaño (el dibujo de Adad es ~20% más alto),
 //  por eso la escala de Ninove es mayor: así se ven del mismo tamaño en pantalla.
 // =====================================================================
-// Ninove está un poco MÁS ATRÁS que Adad (más arriba y un pelín más pequeña) para dar profundidad.
-const ADAD = { x: 49, y: 86, escala: 0.43 };
-const NINOVE = { x: 60, y: 82.5, escala: 0.5 };
+// Ninove ocupa el lugar donde estaba Adad (centro de la escena, junto al canal).
+// Adad pasa a la esquina inferior derecha, sobre la arena libre a la derecha de la vasija.
+const ADAD = { x: 94, y: 93, escala: 0.38 };
+const NINOVE = { x: 49, y: 86, escala: 0.56 };
 
 const ADAD_JSON = "/lottie-fondo7/adad/Adad_leyendo.json";
 const NINOVE_JSON = "/lottie-fondo7/ninove/Ninove_parpadeo.json";
@@ -440,7 +442,8 @@ const Comic7 = () => {
               style={{ position: "absolute", inset: 0, zIndex: 1 }}
             />
 
-            {/* Adad leyendo: lee una vez al hacerle clic y vuelve a su pose inicial */}
+            {/* Adad leyendo: en la esquina inferior derecha.
+                Lee una vez al hacerle clic y vuelve a su pose inicial */}
             <div
               ref={adadLottie.ref}
               className="personaje-lottie"
@@ -449,7 +452,8 @@ const Comic7 = () => {
               style={estiloPersonaje(adad, ADAD_PIES, 3)}
             />
 
-            {/* Ninove parpadeando: parpadea una vez al hacerle clic y vuelve a su pose inicial */}
+            {/* Ninove parpadeando: donde estaba Adad.
+                Parpadea una vez al hacerle clic y vuelve a su pose inicial */}
             <div
               ref={ninoveLottie.ref}
               className="personaje-lottie"
@@ -498,6 +502,9 @@ const Comic7 = () => {
 
             {/* Reloj escondido: UN clic y se suma al instante */}
             <RelojEscondido clave={CLAVE_RELOJ} left="84%" top="78%" size={36} />
+
+            {/* Panel de ayuda lateral: cómo se juega en las escenas 1 a 8 */}
+            <AyudaEscenas escenaActual={7} />
 
             <Link
               to="/comic/6"

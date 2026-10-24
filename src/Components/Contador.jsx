@@ -8,11 +8,18 @@ import gsap from "gsap";
 //  Uso en cada escena:
 //    import Contador, { recogerReloj } from "../Components/Contador";
 //    <Contador />                                   → dentro del recuadro de la escena
-//    recogerReloj("relojComic", e.currentTarget);   → al hacer clic en el reloj
+//    recogerReloj("relojEscena3", e.currentTarget); → al hacer clic en el reloj
 //
-//  - El reloj vuela hasta el contador y, al llegar, suma 1 punto.
-//  - Cada reloj solo suma UNA vez (la clave identifica de qué escena es).
-//  - El total se guarda en localStorage ("piktaraScore").
+//  Cómo funciona ahora:
+//   - Hay 8 relojes, uno por escena, con las claves relojEscena1 … relojEscena8.
+//   - Los relojes REAPARECEN cada vez que se carga la escena (eso lo hace
+//     RelojEscondido, que ya no mira localStorage para decidir si se muestra).
+//   - Al hacer clic, el reloj vuela hasta el contador. El punto se suma solo la
+//     PRIMERA vez que se encuentra ese reloj, así el contador nunca pasa de 8
+//     aunque recarguen la escena y lo vuelvan a tocar.
+//   - El puntaje se calcula contando cuántas de las 8 claves están en "true",
+//     por eso no se puede desajustar (ya no existe un número "piktaraScore" aparte).
+//   - reiniciarProgreso() pone todo en cero. Llamarla al empezar el cómic de nuevo.
 // =====================================================================
 
 const fDisplay = "'Baloo 2', 'Comic Sans MS', sans-serif";
@@ -22,19 +29,57 @@ const palette = {
   borde: "#3A2312",
 };
 
-const CLAVE_PUNTOS = "piktaraScore";
+export const TOTAL_RELOJES = 8;
+const CLAVES_RELOJES = Array.from({ length: TOTAL_RELOJES }, (_, i) => `relojEscena${i + 1}`);
+
 const EVENTO = "piktara-score";
 const ID_CONTADOR = "contador-progreso";
 
-const leerPuntos = () => Number(localStorage.getItem(CLAVE_PUNTOS)) || 0;
+// Valor viejo de versiones anteriores: ya no se usa, se limpia para que no estorbe
+try {
+  localStorage.removeItem("piktaraScore");
+} catch (e) {
+  /* sin localStorage: no pasa nada */
+}
 
-// Suma 1 punto solo si ese reloj no se había encontrado antes
+// Cuenta cuántos de los 8 relojes ya se encontraron
+const leerPuntos = () => CLAVES_RELOJES.filter((k) => localStorage.getItem(k) === "true").length;
+
+// Aviso que se dispara cada vez que cambia el progreso (lo escucha BloqueoEscenas)
+export const EVENTO_PROGRESO = EVENTO;
+
+// ¿Ya se encontró el reloj de la escena n? (n = 1 … 8)
+export const relojEncontrado = (n) => localStorage.getItem(`relojEscena${n}`) === "true";
+
+// Número de la primera escena cuyo reloj todavía no se ha encontrado (9 si ya están los 8).
+// Se puede entrar a las escenas 1 … esa escena; las siguientes están bloqueadas.
+export const primeraEscenaPendiente = () => {
+  for (let n = 1; n <= TOTAL_RELOJES; n++) {
+    if (!relojEncontrado(n)) return n;
+  }
+  return TOTAL_RELOJES + 1;
+};
+
+// Marca ese reloj como encontrado (solo suma si no se había encontrado antes)
 export const sumarPunto = (claveReloj) => {
+  if (!CLAVES_RELOJES.includes(claveReloj)) {
+    console.warn(
+      `Contador: la clave "${claveReloj}" no es una de ${CLAVES_RELOJES[0]} … ${CLAVES_RELOJES[TOTAL_RELOJES - 1]}, no suma.`
+    );
+    return false;
+  }
   if (localStorage.getItem(claveReloj) === "true") return false;
   localStorage.setItem(claveReloj, "true");
-  localStorage.setItem(CLAVE_PUNTOS, String(leerPuntos() + 1));
   window.dispatchEvent(new Event(EVENTO));
   return true;
+};
+
+// Pone el progreso en cero: borra TODAS las claves de relojes encontrados
+export const reiniciarProgreso = () => {
+  Object.keys(localStorage)
+    .filter((k) => k === "piktaraScore" || k.startsWith("reloj"))
+    .forEach((k) => localStorage.removeItem(k));
+  window.dispatchEvent(new Event(EVENTO));
 };
 
 // El reloj vuela desde donde está hasta el contador y, al llegar, suma el punto
@@ -133,7 +178,7 @@ const Contador = () => {
         <span style={{ marginRight: "8px", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase" }}>
           Progreso:
         </span>
-        {puntos}
+        {puntos} / {TOTAL_RELOJES}
       </div>
     </>
   );

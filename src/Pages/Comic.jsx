@@ -5,6 +5,8 @@ import gsap from "gsap";
 import "../Comic.css";
 import Contador from "../Components/Contador";
 import RelojEscondido from "../Components/RelojEscondido";
+import AyudaEscenas from "../Components/AyudaEscenas";
+import AudioEscena from "../Components/AudioEscena";
 
 const fDisplay = "'Baloo 2', 'Comic Sans MS', sans-serif";
 
@@ -968,6 +970,12 @@ const Comic = () => {
 
             {/* Resumen de la civilización (2do clic) */}
             {civAbierta && <Resumen civ={civAbierta} onCerrar={() => setCivAbierta(null)} />}
+
+            {/* Música de la escena 3: suena con el primer clic; botón 🔊/🔇 abajo a la izquierda */}
+            <AudioEscena escena={3} />
+
+            {/* Panel de ayuda lateral: cómo se juega en las escenas 1 a 8 */}
+            <AyudaEscenas escenaActual={3} />
 
             <Link
               to={ESCENA_ANTERIOR}
